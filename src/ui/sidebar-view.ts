@@ -1,5 +1,6 @@
-import { ItemView, type HoverPopover, type WorkspaceLeaf } from 'obsidian';
+import { ItemView, Keymap, type HoverPopover, type WorkspaceLeaf } from 'obsidian';
 
+import { openPeriodicNote } from '../edits/note-creator.ts';
 import type { HorizonContext } from './context.ts';
 import { MonthGrid } from './month-grid.ts';
 
@@ -32,6 +33,12 @@ export class HorizonSidebarView extends ItemView {
     this.contentEl.addClass('horizon-sidebar');
     this.grid = this.addChild(
       new MonthGrid(this.ctx, this.contentEl.createDiv(), {
+        onDayClick: (key, event) => {
+          void openPeriodicNote(this.ctx, 'daily', key, Keymap.isModEvent(event));
+        },
+        onWeekClick: (mondayKey, event) => {
+          void openPeriodicNote(this.ctx, 'weekly', mondayKey, Keymap.isModEvent(event));
+        },
         onDayHover: (key, cellEl, event) => {
           if (!this.ctx.periodic.noteFor('daily', key)) return;
           this.app.workspace.trigger('hover-link', {
