@@ -1,1 +1,195 @@
 /* Horizon — calendar plugin. All colors and sizes come from Obsidian CSS variables. */
+
+/* ============================== Calendar shell ============================== */
+
+.horizon-sidebar {
+  padding: var(--size-4-2) var(--size-4-2) var(--size-4-4);
+}
+
+.horizon-cal {
+  --horizon-cell-gap: 2px;
+  user-select: none;
+}
+
+.horizon-cal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4-2);
+  padding: var(--size-4-1) var(--size-4-1) var(--size-4-2);
+}
+
+.horizon-cal__title {
+  font-size: var(--font-ui-medium);
+  font-weight: var(--font-semibold);
+  color: var(--text-normal);
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.horizon-cal__nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.horizon-cal__nav-btn {
+  --icon-size: var(--icon-s);
+  padding: var(--size-2-2);
+}
+
+/* ============================== Month grid ============================== */
+
+.horizon-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--horizon-cell-gap);
+  align-items: stretch;
+}
+
+.horizon-cal__grid--weeks {
+  grid-template-columns: minmax(0, 0.6fr) repeat(7, minmax(0, 1fr));
+}
+
+.horizon-cal__dow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--size-2-1);
+  font-size: calc(var(--font-ui-smaller) * 0.9);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.horizon-cal__dow--week {
+  color: transparent; /* keeps the column aligned without visual noise */
+}
+
+.horizon-cal__weeknum {
+  display: flex;
+  /* Top-aligned with a line box matching the day-number circle, so the week
+     number sits on the same visual line as the day numbers. */
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--size-2-1);
+  line-height: 2em;
+  font-size: calc(var(--font-ui-smaller) * 0.9);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: color 80ms ease, background-color 80ms ease;
+}
+
+.horizon-cal__weeknum:hover {
+  color: var(--text-accent);
+  background-color: var(--background-modifier-hover);
+}
+
+.horizon-cal__weeknum--has-note {
+  color: var(--text-muted);
+  font-weight: var(--font-semibold);
+}
+
+/* ============================== Day cell (mini) ============================== */
+
+.horizon-cell--mini {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding-top: var(--size-2-1);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: background-color 80ms ease;
+}
+
+.horizon-cell--mini:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.horizon-cell--mini:focus-visible {
+  box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+  outline: none;
+}
+
+.horizon-cell__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75em;
+  height: 1.75em;
+  border-radius: 50%;
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-normal);
+  line-height: 1;
+}
+
+.horizon-cell--other-month .horizon-cell__num {
+  color: var(--text-faint);
+}
+
+.horizon-cell--has-note .horizon-cell__num {
+  font-weight: var(--font-semibold);
+}
+
+.horizon-cell--today .horizon-cell__num {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: var(--font-semibold);
+}
+
+.horizon-cell--active:not(.horizon-cell--today) .horizon-cell__num {
+  box-shadow: inset 0 0 0 1.5px var(--interactive-accent);
+}
+
+/* ============================== Dots ============================== */
+
+.horizon-cell__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 2px;
+  min-height: 4px;
+}
+
+.horizon-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.horizon-dot--note {
+  background-color: var(--interactive-accent);
+}
+
+.horizon-dot--due {
+  background-color: var(--color-orange);
+}
+
+.horizon-dot--overdue {
+  background-color: var(--color-red);
+}
+
+.horizon-dot--scheduled {
+  background-color: var(--color-cyan);
+}
+
+.horizon-dot--done {
+  background-color: var(--color-green);
+}
+
+.horizon-dot--notes {
+  background-color: var(--text-faint);
+}
