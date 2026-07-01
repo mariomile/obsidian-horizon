@@ -40,6 +40,154 @@ function miniDots(ctx: HorizonContext, key: DayKey, bucket: DayBucket | null, to
   return dots;
 }
 
+export interface ChipSpec {
+  cls: string;
+  label: string;
+  path: string;
+  line: number;
+  kind: 'due' | 'scheduled' | 'done' | 'note';
+  dayKey: DayKey;
+  done: boolean;
+  recurring: boolean;
+}
+
+/** Chips for the full-density cell, in display order: due, scheduled, notes, done. */
+export function chipsForDay(
+  ctx: HorizonContext,
+  key: DayKey,
+  today: DayKey,
+): ChipSpec[] {
+  const bucket = ctx.dayIndex.getBucket(key);
+  if (!bucket) return [];
+  const { settings } = ctx;
+  const chips: ChipSpec[] = [];
+  if (settings.showDue) {
+    for (const task of bucket.due) {
+      if (task.done) continue;
+      const overdue = compareDayKeys(key, today) < 0;
+      chips.push({
+        cls: `horizon-chip--due${overdue ? ' horizon-chip--overdue' : ''}`,
+        label: task.description,
+        path: task.path,
+        line: task.line,
+        kind: 'due',
+        dayKey: key,
+        done: false,
+        recurring: task.recurring,
+      });
+    }
+  }
+  if (settings.showScheduled) {
+    for (const task of bucket.scheduled) {
+      if (task.done) continue;
+      chips.push({
+        cls: 'horizon-chip--scheduled',
+        label: task.description,
+        path: task.path,
+        line: task.line,
+        kind: 'scheduled',
+        dayKey: key,
+        done: false,
+        recurring: task.recurring,
+      });
+    }
+  }
+  if (settings.showNotes) {
+    for (const note of bucket.notes) {
+      chips.push({
+        cls: 'horizon-chip--note',
+        label: note.title,
+        path: note.path,
+        line: -1,
+        kind: 'note',
+        dayKey: key,
+        done: false,
+        recurring: false,
+      });
+    }
+  }
+  if (settings.showDone) {
+    for (const task of bucket.done) {
+      chips.push({
+        cls: 'horizon-chip--done',
+        label: task.description,
+        path: task.path,
+        line: task.line,
+        kind: 'done',
+        dayKey: key,
+        done: true,
+        recurring: task.recurring,
+      });
+    }
+  }
+  return chips;
+}
+
+export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
+  const el = parent.createDiv({ cls: `horizon-chip ${chip.cls}` });
+  el.dataset.path = chip.path;
+  el.dataset.kind = chip.kind;
+  el.dataset.key = chip.dayKey;
+  if (chip.line >= 0) el.dataset.line = String(chip.line);
+  el.tabIndex = 0;
+  el.setAttribute('role', 'button');
+  el.createSpan({ cls: 'horizon-chip__marker' });
+  el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
+  if (chip.recurring) el.createSpan({ cls: 'horizon-chip__badge', text: '🔁' });
+  el.setAttribute('aria-label', chip.label);
+  return el;
+}
+
+export interface FullDayCellCallbacks {
+  onOverflow: (key: DayKey) => void;
+}
+
+const MAX_CHIPS_PER_CELL = 4;
+
+/** Render one full-density day cell (month grid of the tab view). */
+export function renderFullDayCell(
+  ctx: HorizonContext,
+  parent: HTMLElement,
+  key: DayKey,
+  options: DayCellOptions,
+  callbacks: FullDayCellCallbacks,
+): HTMLElement {
+  const ymd = parseDayKey(key);
+  const cell = parent.createDiv({ cls: 'horizon-cell horizon-cell--full' });
+  cell.dataset.key = key;
+  if (!ymd) return cell;
+
+  if (ymd.m !== options.displayedMonth.m) cell.addClass('horizon-cell--other-month');
+  if (key === options.today) cell.addClass('horizon-cell--today');
+  if (ctx.periodic.noteFor('daily', key)) cell.addClass('horizon-cell--has-note');
+
+  const head = cell.createDiv({ cls: 'horizon-cell__head' });
+  const num = head.createSpan({ cls: 'horizon-cell__num', text: String(ymd.d) });
+  num.dataset.key = key;
+  num.tabIndex = 0;
+  num.setAttribute('role', 'button');
+  num.setAttribute('aria-label', `Nota del ${key}`);
+
+  const chips = chipsForDay(ctx, key, options.today);
+  const chipsEl = cell.createDiv({ cls: 'horizon-cell__chips' });
+  const visible = chips.length > MAX_CHIPS_PER_CELL ? chips.slice(0, MAX_CHIPS_PER_CELL - 1) : chips;
+  for (const chip of visible) renderChip(chipsEl, chip);
+  const hidden = chips.length - visible.length;
+  if (hidden > 0) {
+    const more = chipsEl.createDiv({
+      cls: 'horizon-chip horizon-chip--more',
+      text: `+${hidden} altri`,
+    });
+    more.tabIndex = 0;
+    more.setAttribute('role', 'button');
+    more.addEventListener('click', (event) => {
+      event.stopPropagation();
+      callbacks.onOverflow(key);
+    });
+  }
+  return cell;
+}
+
 /** Render one mini day cell into `parent`. Interaction is delegated at grid level via data-key. */
 export function renderMiniDayCell(
   ctx: HorizonContext,

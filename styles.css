@@ -193,3 +193,282 @@
 .horizon-dot--notes {
   background-color: var(--text-faint);
 }
+
+/* ============================== Full calendar view ============================== */
+
+.horizon-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+
+.horizon-view__header {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-3);
+  padding: var(--size-4-2) var(--size-4-4);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+  flex-shrink: 0;
+}
+
+.horizon-view__title {
+  font-size: var(--font-ui-large);
+  font-weight: var(--font-bold);
+  color: var(--text-normal);
+  text-transform: capitalize;
+  min-width: 12ch;
+}
+
+.horizon-view__modes {
+  display: flex;
+  gap: 2px;
+  margin-inline: auto;
+  padding: 2px;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+}
+
+.horizon-view__mode-btn {
+  padding: var(--size-2-2) var(--size-4-3);
+  border: none;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  transition: color 80ms ease, background-color 80ms ease;
+}
+
+.horizon-view__mode-btn:hover {
+  color: var(--text-normal);
+}
+
+.horizon-view__mode-btn--active {
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-weight: var(--font-medium);
+  box-shadow: var(--shadow-s);
+}
+
+.horizon-view__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+}
+
+.horizon-view__nav-btn {
+  --icon-size: var(--icon-s);
+}
+
+.horizon-view__today-btn {
+  padding: var(--size-2-2) var(--size-4-2);
+  font-size: var(--font-ui-small);
+  border-radius: var(--radius-s);
+  background-color: transparent;
+  box-shadow: none;
+  border: var(--border-width) solid var(--background-modifier-border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 80ms ease, border-color 80ms ease;
+}
+
+.horizon-view__today-btn:hover {
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border-hover);
+}
+
+.horizon-view__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--size-4-2) var(--size-4-4) var(--size-4-4);
+}
+
+.horizon-view__body > div {
+  height: 100%;
+}
+
+.horizon-view__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-faint);
+}
+
+/* ============================== Month mode (full) ============================== */
+
+.horizon-month {
+  height: 100%;
+}
+
+.horizon-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: auto repeat(6, minmax(0, 1fr));
+  gap: var(--size-2-1);
+  height: 100%;
+}
+
+.horizon-month__grid--weeks {
+  grid-template-columns: 2.5ch repeat(7, minmax(0, 1fr));
+}
+
+.horizon-month__dow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--size-2-1) var(--size-2-2);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.horizon-month__weeknum {
+  padding-top: var(--size-2-2);
+  line-height: 1.6em;
+}
+
+/* ============================== Day cell (full) ============================== */
+
+.horizon-cell--full {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2-1);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--size-2-2);
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  transition: background-color 80ms ease;
+  overflow: hidden;
+}
+
+.horizon-cell--full:hover {
+  background-color: var(--background-secondary-alt);
+}
+
+.horizon-cell--full.horizon-cell--other-month {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 var(--border-width) var(--background-modifier-border);
+}
+
+.horizon-cell--full.horizon-cell--today {
+  box-shadow: inset 0 0 0 1.5px var(--interactive-accent);
+}
+
+.horizon-cell--full .horizon-cell__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.horizon-cell--full .horizon-cell__num {
+  width: 1.6em;
+  height: 1.6em;
+  cursor: pointer;
+}
+
+.horizon-cell--full .horizon-cell__num:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.horizon-cell--full.horizon-cell--has-note .horizon-cell__num {
+  color: var(--text-accent);
+}
+
+.horizon-cell--full.horizon-cell--today .horizon-cell__num {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.horizon-cell__chips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ============================== Chips ============================== */
+
+.horizon-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+  padding: 1px var(--size-2-2);
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  cursor: pointer;
+  min-width: 0;
+  transition: background-color 80ms ease, color 80ms ease;
+}
+
+.horizon-chip:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.horizon-chip__marker {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.horizon-chip--due .horizon-chip__marker {
+  background-color: var(--color-orange);
+}
+
+.horizon-chip--overdue .horizon-chip__marker {
+  background-color: var(--color-red);
+}
+
+.horizon-chip--overdue .horizon-chip__label {
+  color: var(--color-red);
+}
+
+.horizon-chip--scheduled .horizon-chip__marker {
+  background-color: var(--color-cyan);
+}
+
+.horizon-chip--done .horizon-chip__marker {
+  background-color: var(--color-green);
+}
+
+.horizon-chip--done .horizon-chip__label {
+  text-decoration: line-through;
+  color: var(--text-faint);
+}
+
+.horizon-chip--note .horizon-chip__marker {
+  background-color: var(--text-faint);
+  border-radius: 1px;
+}
+
+.horizon-chip__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.horizon-chip__badge {
+  font-size: 0.75em;
+  flex-shrink: 0;
+}
+
+.horizon-chip--more {
+  color: var(--text-faint);
+  font-weight: var(--font-medium);
+}
+
+.horizon-chip--more:hover {
+  color: var(--text-accent);
+}

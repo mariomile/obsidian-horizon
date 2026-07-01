@@ -1,0 +1,176 @@
+import { Component } from 'obsidian';
+
+import { addDays, addMonths, dayKey, isoWeek, monthGrid, parseDayKey, todayKey } from '../dates.ts';
+import type { DayKey } from '../types.ts';
+import type { HorizonContext } from './context.ts';
+import { renderFullDayCell } from './day-cell.ts';
+
+export interface FullMonthCallbacks {
+  onDayNumberClick: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
+  onWeekClick: (mondayKey: DayKey, event: MouseEvent) => void;
+  onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
+  onOverflow: (key: DayKey) => void;
+  onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
+}
+
+/** Month mode of the full calendar tab: 7-column grid with content chips. */
+export class FullMonth extends Component {
+  private readonly ctx: HorizonContext;
+  private readonly containerEl: HTMLElement;
+  private readonly callbacks: FullMonthCallbacks;
+  private displayed: { y: number; m: number };
+
+  constructor(ctx: HorizonContext, containerEl: HTMLElement, callbacks: FullMonthCallbacks) {
+    super();
+    this.ctx = ctx;
+    this.containerEl = containerEl;
+    this.callbacks = callbacks;
+    const active = parseDayKey(ctx.uiState.activeDate) ?? parseDayKey(todayKey());
+    this.displayed = active ? { y: active.y, m: active.m } : { y: 2026, m: 1 };
+  }
+
+  onload(): void {
+    this.register(this.ctx.dayIndex.subscribe(() => this.render()));
+    this.containerEl.addClass('horizon-month');
+    this.containerEl.addEventListener('click', this.handleClick);
+    this.containerEl.addEventListener('keydown', this.handleKeydown);
+    this.containerEl.addEventListener('mouseover', this.handleHover);
+    this.register(() => {
+      this.containerEl.removeEventListener('click', this.handleClick);
+      this.containerEl.removeEventListener('keydown', this.handleKeydown);
+      this.containerEl.removeEventListener('mouseover', this.handleHover);
+      this.containerEl.empty();
+      this.containerEl.removeClass('horizon-month');
+    });
+    this.render();
+  }
+
+  title(): string {
+    const first = dayKey(this.displayed.y, this.displayed.m, 1);
+    return this.ctx.moment(first, 'YYYY-MM-DD', true).format('MMMM YYYY');
+  }
+
+  step(direction: 1 | -1): void {
+    const next = parseDayKey(addMonths(dayKey(this.displayed.y, this.displayed.m, 1), direction));
+    if (!next) return;
+    this.displayed = { y: next.y, m: next.m };
+    this.render();
+  }
+
+  goToday(): void {
+    const today = parseDayKey(todayKey());
+    if (!today) return;
+    this.displayed = { y: today.y, m: today.m };
+    this.ctx.uiState.setActiveDate(todayKey());
+    this.render();
+  }
+
+  showDate(key: DayKey): void {
+    const ymd = parseDayKey(key);
+    if (!ymd) return;
+    this.displayed = { y: ymd.y, m: ymd.m };
+    this.render();
+  }
+
+  render(): void {
+    const el = this.containerEl;
+    el.empty();
+    const today = todayKey();
+    const showWeeks = this.ctx.settings.showWeekNumbers;
+    const grid = el.createDiv({
+      cls: `horizon-month__grid${showWeeks ? ' horizon-month__grid--weeks' : ''}`,
+    });
+
+    const cells = monthGrid(this.displayed.y, this.displayed.m);
+    const monday = cells[0] ?? dayKey(this.displayed.y, this.displayed.m, 1);
+    if (showWeeks) grid.createSpan({ cls: 'horizon-month__dow' });
+    for (let i = 0; i < 7; i++) {
+      grid.createSpan({
+        cls: 'horizon-month__dow',
+        text: this.ctx.moment(addDays(monday, i), 'YYYY-MM-DD', true).format('ddd'),
+      });
+    }
+
+    for (let week = 0; week < 6; week++) {
+      const weekStart = cells[week * 7];
+      if (weekStart === undefined) break;
+      if (showWeeks) {
+        const info = isoWeek(weekStart);
+        const weekEl = grid.createSpan({ cls: 'horizon-cal__weeknum horizon-month__weeknum', text: String(info.week) });
+        weekEl.dataset.week = weekStart;
+        weekEl.tabIndex = 0;
+        weekEl.setAttribute('role', 'button');
+        weekEl.setAttribute('aria-label', `Nota settimanale W${info.week}`);
+        if (this.ctx.periodic.noteFor('weekly', weekStart)) {
+          weekEl.addClass('horizon-cal__weeknum--has-note');
+        }
+      }
+      for (let i = 0; i < 7; i++) {
+        const key = cells[week * 7 + i];
+        if (key === undefined) continue;
+        renderFullDayCell(
+          this.ctx,
+          grid,
+          key,
+          { displayedMonth: this.displayed, today },
+          { onOverflow: (k) => this.callbacks.onOverflow(k) },
+        );
+      }
+    }
+  }
+
+  private readonly handleClick = (event: MouseEvent): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const weekEl = target.closest<HTMLElement>('.horizon-cal__weeknum');
+    if (weekEl?.dataset.week) {
+      this.callbacks.onWeekClick(weekEl.dataset.week, event);
+      return;
+    }
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (chipEl?.dataset.path) {
+      this.callbacks.onChipClick(chipEl, event);
+      return;
+    }
+    const numEl = target.closest<HTMLElement>('.horizon-cell__num');
+    if (numEl?.dataset.key) {
+      this.ctx.uiState.setActiveDate(numEl.dataset.key);
+      this.callbacks.onDayNumberClick(numEl.dataset.key, event);
+      return;
+    }
+    const cellEl = target.closest<HTMLElement>('.horizon-cell');
+    if (cellEl?.dataset.key) {
+      this.ctx.uiState.setActiveDate(cellEl.dataset.key);
+      this.callbacks.onDayNumberClick(cellEl.dataset.key, event);
+    }
+  };
+
+  private readonly handleKeydown = (event: KeyboardEvent): void => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (chipEl?.dataset.path && target === chipEl) {
+      event.preventDefault();
+      this.callbacks.onChipClick(chipEl, event);
+      return;
+    }
+    const numEl = target.closest<HTMLElement>('.horizon-cell__num');
+    if (numEl?.dataset.key && target === numEl) {
+      event.preventDefault();
+      this.callbacks.onDayNumberClick(numEl.dataset.key, event);
+    }
+  };
+
+  private readonly handleHover = (event: MouseEvent): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (chipEl) return; // chips have their own identity; no day preview on top
+    const cellEl = target.closest<HTMLElement>('.horizon-cell');
+    if (!cellEl?.dataset.key) return;
+    const related = event.relatedTarget;
+    if (related instanceof Node && cellEl.contains(related)) return;
+    this.callbacks.onDayHover(cellEl.dataset.key, cellEl, event);
+  };
+}

@@ -8,6 +8,7 @@ import { HorizonSettingTab } from './settings-tab.ts';
 import { DEFAULT_SETTINGS, parseSettings } from './settings.ts';
 import type { HorizonSettings } from './settings.ts';
 import { UiState } from './state.ts';
+import { CALENDAR_VIEW_TYPE, HorizonCalendarView } from './ui/calendar-view.ts';
 import type { HorizonContext } from './ui/context.ts';
 import { HorizonSidebarView, SIDEBAR_VIEW_TYPE } from './ui/sidebar-view.ts';
 
@@ -41,7 +42,18 @@ export default class HorizonPlugin extends Plugin {
 
     const ctx = this.context();
     this.registerView(SIDEBAR_VIEW_TYPE, (leaf) => new HorizonSidebarView(leaf, ctx));
+    this.registerView(CALENDAR_VIEW_TYPE, (leaf) => new HorizonCalendarView(leaf, ctx));
 
+    this.addRibbonIcon('calendar-days', 'Apri Horizon', () => {
+      void this.activateCalendar();
+    });
+    this.addCommand({
+      id: 'open-calendar',
+      name: 'Apri il calendario',
+      callback: () => {
+        void this.activateCalendar();
+      },
+    });
     this.addCommand({
       id: 'open-sidebar',
       name: 'Apri il calendario in sidebar',
@@ -60,6 +72,14 @@ export default class HorizonPlugin extends Plugin {
 
   onunload(): void {
     this.app.workspace.detachLeavesOfType(SIDEBAR_VIEW_TYPE);
+    this.app.workspace.detachLeavesOfType(CALENDAR_VIEW_TYPE);
+  }
+
+  private async activateCalendar(): Promise<void> {
+    const existing = this.app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE)[0];
+    const leaf = existing ?? this.app.workspace.getLeaf('tab');
+    await leaf.setViewState({ type: CALENDAR_VIEW_TYPE, active: true });
+    await this.app.workspace.revealLeaf(leaf);
   }
 
   context(): HorizonContext {
