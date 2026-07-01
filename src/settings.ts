@@ -1,0 +1,110 @@
+import type { CalendarMode, Period, PeriodConfig } from './types.ts';
+
+export interface HorizonSettings {
+  periods: Record<Period, PeriodConfig>;
+  agendaHorizonDays: number;
+  showWeekNumbers: boolean;
+  showDue: boolean;
+  showScheduled: boolean;
+  showDone: boolean;
+  showNotes: boolean;
+  confirmBeforeCreate: boolean;
+  lastMode: CalendarMode;
+}
+
+export const DEFAULT_SETTINGS: HorizonSettings = {
+  periods: {
+    daily: {
+      enabled: true,
+      folder: 'Journal/Daily',
+      format: 'DD-MM-YYYY',
+      template: '_system/templates/Daily-Note',
+    },
+    weekly: {
+      enabled: true,
+      folder: 'Journal/Weekly',
+      format: 'GGGG-[W]WW',
+      template: '_system/templates/Weekly-Note',
+    },
+    monthly: {
+      enabled: false,
+      folder: 'Journal/Monthly',
+      format: 'YYYY-MM',
+      template: '_system/templates/Monthly-Note',
+    },
+    yearly: {
+      enabled: false,
+      folder: 'Journal/Yearly',
+      format: 'YYYY',
+      template: '_system/templates/Yearly-Note',
+    },
+  },
+  agendaHorizonDays: 14,
+  showWeekNumbers: true,
+  showDue: true,
+  showScheduled: true,
+  showDone: true,
+  showNotes: true,
+  confirmBeforeCreate: true,
+  lastMode: 'month',
+};
+
+export const PERIODS: Period[] = ['daily', 'weekly', 'monthly', 'yearly'];
+
+const MODES: CalendarMode[] = ['month', 'week', 'agenda'];
+
+export function parseSettings(data: unknown): HorizonSettings {
+  if (!isRecord(data)) return structuredClone(DEFAULT_SETTINGS);
+  const periods = isRecord(data.periods) ? data.periods : {};
+  return {
+    periods: {
+      daily: parsePeriod(periods.daily, DEFAULT_SETTINGS.periods.daily),
+      weekly: parsePeriod(periods.weekly, DEFAULT_SETTINGS.periods.weekly),
+      monthly: parsePeriod(periods.monthly, DEFAULT_SETTINGS.periods.monthly),
+      yearly: parsePeriod(periods.yearly, DEFAULT_SETTINGS.periods.yearly),
+    },
+    agendaHorizonDays: numberValue(data.agendaHorizonDays, DEFAULT_SETTINGS.agendaHorizonDays),
+    showWeekNumbers: booleanValue(data.showWeekNumbers, DEFAULT_SETTINGS.showWeekNumbers),
+    showDue: booleanValue(data.showDue, DEFAULT_SETTINGS.showDue),
+    showScheduled: booleanValue(data.showScheduled, DEFAULT_SETTINGS.showScheduled),
+    showDone: booleanValue(data.showDone, DEFAULT_SETTINGS.showDone),
+    showNotes: booleanValue(data.showNotes, DEFAULT_SETTINGS.showNotes),
+    confirmBeforeCreate: booleanValue(
+      data.confirmBeforeCreate,
+      DEFAULT_SETTINGS.confirmBeforeCreate,
+    ),
+    lastMode: modeValue(data.lastMode, DEFAULT_SETTINGS.lastMode),
+  };
+}
+
+function parsePeriod(value: unknown, fallback: PeriodConfig): PeriodConfig {
+  if (!isRecord(value)) return { ...fallback };
+  return {
+    enabled: booleanValue(value.enabled, fallback.enabled),
+    folder: stringValue(value.folder, fallback.folder),
+    format: stringValue(value.format, fallback.format),
+    template: stringValue(value.template, fallback.template),
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function numberValue(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function booleanValue(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback;
+}
+
+function stringValue(value: unknown, fallback: string): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function modeValue(value: unknown, fallback: CalendarMode): CalendarMode {
+  return typeof value === 'string' && (MODES as string[]).includes(value)
+    ? (value as CalendarMode)
+    : fallback;
+}
