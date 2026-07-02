@@ -1,6 +1,6 @@
 import { moment, Plugin } from 'obsidian';
 
-import { todayKey } from './dates.ts';
+import { parseDayKey, todayKey } from './dates.ts';
 import { openPeriodicNote } from './edits/note-creator.ts';
 import { DayIndexService } from './index/indexer.ts';
 import { PeriodicService } from './index/periodic.ts';
@@ -34,7 +34,8 @@ export default class HorizonPlugin extends Plugin {
       (period) => this.settings.periods[period],
     );
     this.dayIndex = new DayIndexService(this.app, (path) => this.periodic.isPeriodicPath(path));
-    this.uiState = new UiState(todayKey(), this.settings.lastMode);
+    const today = parseDayKey(todayKey()) ?? { y: 2026, m: 1, d: 1 };
+    this.uiState = new UiState(todayKey(), this.settings.lastMode, { y: today.y, m: today.m });
 
     this.registerHoverLinkSource('horizon', {
       display: 'Horizon',

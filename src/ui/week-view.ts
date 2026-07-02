@@ -1,6 +1,6 @@
 import { Component } from 'obsidian';
 
-import { addDays, isoWeek, startOfWeekMonday, todayKey, weekDays } from '../dates.ts';
+import { addDays, isoWeek, parseDayKey, startOfWeekMonday, todayKey, weekDays } from '../dates.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { chipsForDay, renderChip } from './day-cell.ts';
@@ -65,18 +65,26 @@ export class WeekView extends Component {
 
   step(direction: 1 | -1): void {
     this.monday = addDays(this.monday, direction * 7);
+    this.syncVisibleMonth();
     this.render();
   }
 
   goToday(): void {
     this.monday = startOfWeekMonday(todayKey());
+    this.syncVisibleMonth();
     this.ctx.uiState.setActiveDate(todayKey());
     this.render();
   }
 
   showDate(key: DayKey): void {
     this.monday = startOfWeekMonday(key);
+    this.syncVisibleMonth();
     this.render();
+  }
+
+  private syncVisibleMonth(): void {
+    const ymd = parseDayKey(this.monday);
+    if (ymd) this.ctx.uiState.setVisibleMonth({ y: ymd.y, m: ymd.m });
   }
 
   render(): void {

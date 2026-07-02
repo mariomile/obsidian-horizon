@@ -34,13 +34,13 @@ export class MonthGrid extends Component {
     this.ctx = ctx;
     this.containerEl = containerEl;
     this.callbacks = callbacks;
-    const today = parseDayKey(todayKey());
-    this.displayed = today ? { y: today.y, m: today.m } : { y: 2026, m: 1 };
+    const { y, m } = ctx.uiState.visibleMonth;
+    this.displayed = { y, m };
   }
 
   onload(): void {
     this.register(this.ctx.dayIndex.subscribe(() => this.render()));
-    this.register(this.ctx.uiState.subscribe(() => this.followActiveDate()));
+    this.register(this.ctx.uiState.subscribe(() => this.followUiState()));
     this.containerEl.addClass('horizon-cal', 'horizon-cal--mini');
     this.containerEl.addEventListener('click', this.handleClick);
     this.containerEl.addEventListener('keydown', this.handleKeydown);
@@ -144,6 +144,7 @@ export class MonthGrid extends Component {
     const next = parseDayKey(addMonths(dayKey(this.displayed.y, this.displayed.m, 1), direction));
     if (!next) return;
     this.displayed = { y: next.y, m: next.m };
+    this.ctx.uiState.setVisibleMonth(this.displayed);
     this.render();
   }
 
@@ -151,15 +152,15 @@ export class MonthGrid extends Component {
     const today = parseDayKey(todayKey());
     if (!today) return;
     this.displayed = { y: today.y, m: today.m };
+    this.ctx.uiState.setVisibleMonth(this.displayed);
     this.ctx.uiState.setActiveDate(todayKey());
     this.render();
   }
 
-  private followActiveDate(): void {
-    const active = parseDayKey(this.ctx.uiState.activeDate);
-    if (!active) return;
-    if (active.y !== this.displayed.y || active.m !== this.displayed.m) {
-      this.displayed = { y: active.y, m: active.m };
+  private followUiState(): void {
+    const { y, m } = this.ctx.uiState.visibleMonth;
+    if (y !== this.displayed.y || m !== this.displayed.m) {
+      this.displayed = { y, m };
     }
     this.render();
   }
