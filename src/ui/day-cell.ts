@@ -185,7 +185,7 @@ export function taskRefFromChip(
 }
 
 export interface FullDayCellCallbacks {
-  onOverflow: (key: DayKey) => void;
+  onOverflow: (key: DayKey, anchorEl: HTMLElement, event: MouseEvent) => void;
 }
 
 const MAX_CHIPS_PER_CELL = 4;
@@ -237,7 +237,7 @@ export function renderFullDayCell(
     more.setAttribute('role', 'button');
     more.addEventListener('click', (event) => {
       event.stopPropagation();
-      callbacks.onOverflow(key);
+      callbacks.onOverflow(key, more, event);
     });
   }
   return cell;

@@ -7,6 +7,7 @@ import {
 } from 'obsidian';
 
 import { openPeriodicNote } from '../edits/note-creator.ts';
+import { showDayPopover } from './popover.ts';
 import { rescheduleTask, toggleTaskDone } from '../edits/task-edit.ts';
 import type { DragPayload } from './dnd.ts';
 import type { CalendarMode, DayKey } from '../types.ts';
@@ -163,7 +164,17 @@ export class HorizonCalendarView extends ItemView {
         onTaskDrop: shared.onTaskDrop,
         onOverdueClick: shared.onOverdueClick,
         onChipHover: shared.onChipHover,
-        onOverflow: (key) => this.setMode('week', key),
+        onOverflow: (key, anchorEl, event) => {
+          if (Keymap.isModEvent(event)) {
+            this.setMode('week', key);
+            return;
+          }
+          showDayPopover(this.ctx, anchorEl, key, {
+            onChipClick: shared.onChipClick,
+            onTaskToggle: shared.onTaskToggle,
+            onChipHover: shared.onChipHover,
+          });
+        },
         onDayHover: shared.onDayHover,
       });
     } else if (mode === 'week') {

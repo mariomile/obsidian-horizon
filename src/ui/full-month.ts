@@ -13,7 +13,7 @@ export interface FullMonthCallbacks {
   onWeekClick: (mondayKey: DayKey, event: MouseEvent) => void;
   onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
   onTaskToggle: (chipEl: HTMLElement) => void;
-  onOverflow: (key: DayKey) => void;
+  onOverflow: (key: DayKey, anchorEl: HTMLElement, event: MouseEvent) => void;
   onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
   onOverdueClick: () => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
@@ -128,7 +128,7 @@ export class FullMonth extends Component {
           grid,
           key,
           { displayedMonth: this.displayed, today, overdueCount: key === today ? overdueCount : 0 },
-          { onOverflow: (k) => this.callbacks.onOverflow(k) },
+          { onOverflow: (k, anchorEl, event) => this.callbacks.onOverflow(k, anchorEl, event) },
         );
       }
     }
