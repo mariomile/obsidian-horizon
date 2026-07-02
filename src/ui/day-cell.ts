@@ -22,6 +22,9 @@ function miniDots(ctx: HorizonContext, key: DayKey, bucket: DayBucket | null, to
   if (ctx.periodic.noteFor('daily', key)) {
     dots.push({ cls: 'horizon-dot--note', title: 'Nota giornaliera' });
   }
+  if (ctx.proposals.forDay(key).length > 0) {
+    dots.push({ cls: 'horizon-dot--ghost', title: 'Proposte degli agenti' });
+  }
   if (!bucket) return dots;
   const openDue = bucket.due.filter((t) => !t.done && t.status !== '-');
   if (settings.showDue && openDue.length > 0) {
@@ -49,10 +52,12 @@ export interface ChipSpec {
   path: string;
   line: number;
   rawText: string;
-  kind: 'due' | 'scheduled' | 'done' | 'note';
+  kind: 'due' | 'scheduled' | 'done' | 'note' | 'ghost';
   dayKey: DayKey;
   done: boolean;
   recurring: boolean;
+  proposalId?: string;
+  reason?: string;
 }
 
 /** Chips for the full-density cell, in display order: due, scheduled, notes, done. */
@@ -61,8 +66,7 @@ export function chipsForDay(
   key: DayKey,
   today: DayKey,
 ): ChipSpec[] {
-  const bucket = ctx.dayIndex.getBucket(key);
-  if (!bucket) return [];
+  const bucket = ctx.dayIndex.getBucket(key) ?? { due: [], scheduled: [], done: [], notes: [] };
   const { settings } = ctx;
   const chips: ChipSpec[] = [];
   if (settings.showDue) {
@@ -113,6 +117,21 @@ export function chipsForDay(
       });
     }
   }
+  for (const proposal of ctx.proposals.forDay(key)) {
+    chips.push({
+      cls: 'horizon-chip--ghost',
+      label: proposal.kind === 'new-task' ? proposal.text : `sposta qui: ${proposal.rawText.slice(0, 60)}`,
+      path: proposal.kind === 'reschedule' ? proposal.path : '',
+      line: proposal.kind === 'reschedule' ? proposal.line : -1,
+      rawText: '',
+      kind: 'ghost',
+      dayKey: key,
+      done: false,
+      recurring: false,
+      proposalId: proposal.id,
+      reason: proposal.reason,
+    });
+  }
   if (settings.showDone) {
     for (const task of bucket.done) {
       chips.push({
@@ -140,6 +159,20 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
   if (chip.rawText !== '') el.dataset.raw = chip.rawText;
   el.tabIndex = 0;
   el.setAttribute('role', 'button');
+  if (chip.kind === 'ghost') {
+    if (chip.proposalId !== undefined) el.dataset.proposal = chip.proposalId;
+    if (chip.reason !== undefined) el.setAttribute('title', chip.reason);
+    el.createSpan({ cls: 'horizon-chip__marker horizon-chip__marker--ghost', text: '\u2726' });
+    el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
+    const accept = el.createSpan({ cls: 'horizon-ghost__accept', text: '\u2713' });
+    accept.setAttribute('role', 'button');
+    accept.setAttribute('aria-label', 'Accetta proposta');
+    const dismiss = el.createSpan({ cls: 'horizon-ghost__dismiss', text: '\u2715' });
+    dismiss.setAttribute('role', 'button');
+    dismiss.setAttribute('aria-label', 'Scarta proposta');
+    el.setAttribute('aria-label', chip.label);
+    return el;
+  }
   if (chip.kind === 'note') {
     el.createSpan({ cls: 'horizon-chip__marker' });
   } else {

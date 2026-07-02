@@ -77,6 +77,27 @@ async function ensureFolder(app: App, folder: string): Promise<void> {
   await app.vault.createFolder(folder);
 }
 
+/** Get-or-create the periodic note for `key`, without opening or confirming. */
+export async function ensurePeriodicNote(
+  ctx: HorizonContext,
+  period: Period,
+  key: DayKey,
+): Promise<TFile | null> {
+  const config = ctx.settings.periods[period];
+  if (!config.enabled) return null;
+  const existing = ctx.periodic.noteFor(period, key);
+  if (existing) return existing;
+  const basename = dateToBasename(ctx.moment, key, config.format);
+  try {
+    await ensureFolder(ctx.app, config.folder.replace(/\/+$/, ''));
+    const content = await templateContent(ctx, config.template, key, basename);
+    return await ctx.app.vault.create(ctx.periodic.pathFor(period, key), content);
+  } catch (error) {
+    console.error('Horizon: creazione nota fallita', error);
+    return null;
+  }
+}
+
 /**
  * Open the periodic note for `key`, creating it from the configured template
  * when missing (with optional confirmation).
@@ -107,13 +128,10 @@ export async function openPeriodicNote(
     if (!ok) return;
   }
 
-  try {
-    await ensureFolder(ctx.app, config.folder.replace(/\/+$/, ''));
-    const content = await templateContent(ctx, config.template, key, basename);
-    const file = await ctx.app.vault.create(ctx.periodic.pathFor(period, key), content);
+  const file = await ensurePeriodicNote(ctx, period, key);
+  if (file) {
     await openFile(ctx, file, paneType);
-  } catch (error) {
-    console.error('Horizon: creazione nota fallita', error);
+  } else {
     new Notice(`Horizon: impossibile creare "${basename}".`);
   }
 }

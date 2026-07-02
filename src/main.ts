@@ -1,8 +1,11 @@
-import { moment, Plugin } from 'obsidian';
+import { moment, Notice, Plugin } from 'obsidian';
 
 import { parseDayKey, todayKey } from './dates.ts';
 import { openPeriodicNote } from './edits/note-creator.ts';
+import { HorizonApi } from './api.ts';
+import { addDays } from './dates.ts';
 import { DayIndexService } from './index/indexer.ts';
+import { ProposalsService } from './index/proposals-service.ts';
 import { PeriodicService } from './index/periodic.ts';
 import type { MomentLike } from './index/periodic.ts';
 import { HorizonSettingTab } from './settings-tab.ts';
@@ -18,7 +21,10 @@ export default class HorizonPlugin extends Plugin {
   momentLike!: MomentLike;
   periodic!: PeriodicService;
   dayIndex!: DayIndexService;
+  proposals!: ProposalsService;
   uiState!: UiState;
+  api!: HorizonApi;
+  private exportTimer: ReturnType<typeof setTimeout> | null = null;
 
   async onload(): Promise<void> {
     const data: unknown = await this.loadData();
@@ -34,6 +40,7 @@ export default class HorizonPlugin extends Plugin {
       (period) => this.settings.periods[period],
     );
     this.dayIndex = new DayIndexService(this.app, (path) => this.periodic.isPeriodicPath(path));
+    this.proposals = new ProposalsService(this.app, () => this.settings.proposalsPath);
     const today = parseDayKey(todayKey()) ?? { y: 2026, m: 1, d: 1 };
     this.uiState = new UiState(todayKey(), this.settings.lastMode, { y: today.y, m: today.m });
 
@@ -107,6 +114,21 @@ export default class HorizonPlugin extends Plugin {
     });
 
     this.dayIndex.start(this);
+    this.proposals.start(this);
+    this.api = new HorizonApi(ctx, () => this.writeAgendaExport());
+    this.register(this.dayIndex.subscribe(() => this.queueAgendaExport()));
+    this.register(() => {
+      if (this.exportTimer !== null) clearTimeout(this.exportTimer);
+    });
+    this.addCommand({
+      id: 'export-agenda',
+      name: 'Esporta agenda per gli agenti adesso',
+      callback: () => {
+        void this.writeAgendaExport().then((path) => {
+          new Notice(`Horizon: agenda esportata in ${path}.`);
+        });
+      },
+    });
     this.addSettingTab(new HorizonSettingTab(this.app, this));
 
     this.app.workspace.onLayoutReady(() => {
@@ -148,6 +170,7 @@ export default class HorizonPlugin extends Plugin {
       settings: this.settings,
       periodic: this.periodic,
       dayIndex: this.dayIndex,
+      proposals: this.proposals,
       uiState: this.uiState,
       saveSettings: () => this.saveSettings(),
     };
@@ -168,6 +191,36 @@ export default class HorizonPlugin extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+  }
+
+  /** Sync-churn friendly: at most one export write per 5 minutes of activity. */
+  private queueAgendaExport(): void {
+    if (!this.settings.agentExport.enabled) return;
+    if (this.exportTimer !== null) return;
+    this.exportTimer = setTimeout(() => {
+      this.exportTimer = null;
+      void this.writeAgendaExport();
+    }, 5 * 60 * 1000);
+  }
+
+  private async writeAgendaExport(): Promise<string> {
+    const path = this.settings.agentExport.path;
+    const today = todayKey();
+    const data = this.dayIndex.buildExport({
+      today,
+      from: addDays(today, -7),
+      to: addDays(today, this.settings.agendaHorizonDays),
+      generatedAt: new Date().toISOString(),
+    });
+    const slash = path.lastIndexOf('/');
+    if (slash > 0) {
+      const folder = path.slice(0, slash);
+      if (!(await this.app.vault.adapter.exists(folder))) {
+        await this.app.vault.adapter.mkdir(folder);
+      }
+    }
+    await this.app.vault.adapter.write(path, JSON.stringify(data, null, 2));
+    return path;
   }
 
   /**

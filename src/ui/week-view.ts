@@ -2,6 +2,7 @@ import { Component } from 'obsidian';
 
 import { addDays, isoWeek, parseDayKey, startOfWeekMonday, todayKey, weekDays } from '../dates.ts';
 import type { DayKey } from '../types.ts';
+import { acceptProposal } from '../edits/proposal-actions.ts';
 import type { HorizonContext } from './context.ts';
 import { chipsForDay, renderChip } from './day-cell.ts';
 import { registerDropTargets } from './dnd.ts';
@@ -35,6 +36,7 @@ export class WeekView extends Component {
 
   onload(): void {
     this.register(this.ctx.dayIndex.subscribe(() => this.render()));
+    this.register(this.ctx.proposals.subscribe(() => this.render()));
     this.containerEl.addClass('horizon-week');
     this.containerEl.addEventListener('click', this.handleClick);
     this.containerEl.addEventListener('keydown', this.handleKeydown);
@@ -136,6 +138,20 @@ export class WeekView extends Component {
   private readonly handleClick = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    const ghostBtn = target.closest<HTMLElement>('.horizon-ghost__accept, .horizon-ghost__dismiss');
+    if (ghostBtn) {
+      const ghostChip = ghostBtn.closest<HTMLElement>('.horizon-chip');
+      const proposalId = ghostChip?.dataset.proposal;
+      if (proposalId) {
+        const proposal = this.ctx.proposals.get(proposalId);
+        if (proposal && ghostBtn.classList.contains('horizon-ghost__accept')) {
+          void acceptProposal(this.ctx, proposal).then(() => this.ctx.proposals.remove(proposalId));
+        } else {
+          void this.ctx.proposals.remove(proposalId);
+        }
+      }
+      return;
+    }
     const checkEl = target.closest<HTMLElement>('.horizon-chip__check');
     if (checkEl) {
       const chipHost = checkEl.closest<HTMLElement>('.horizon-chip');

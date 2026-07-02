@@ -75,6 +75,43 @@ export class HorizonSettingTab extends PluginSettingTab {
         );
     }
 
+    containerEl.createEl('h3', { text: 'Agenti' });
+
+    new Setting(containerEl)
+      .setName('Esporta agenda per gli agenti')
+      .setDesc('Scrive periodicamente un JSON con agenda e task in ritardo, leggibile da skill e agenti.')
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.agentExport.enabled).onChange(async (value) => {
+          this.plugin.settings.agentExport.enabled = value;
+          await this.plugin.saveSettings();
+        }),
+      );
+
+    new Setting(containerEl)
+      .setName('Percorso export agenda')
+      .addText((text) =>
+        text
+          .setPlaceholder('_system/indices/horizon-agenda.json')
+          .setValue(this.plugin.settings.agentExport.path)
+          .onChange(async (value) => {
+            this.plugin.settings.agentExport.path = value.trim();
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName('Percorso proposte agenti')
+      .setDesc('File JSON dove gli agenti propongono task e spostamenti (ghost chips).')
+      .addText((text) =>
+        text
+          .setPlaceholder('_system/indices/horizon-proposals.json')
+          .setValue(this.plugin.settings.proposalsPath)
+          .onChange(async (value) => {
+            this.plugin.settings.proposalsPath = value.trim();
+            await this.plugin.saveSettings();
+          }),
+      );
+
     new Setting(containerEl)
       .setName('Conferma prima di creare')
       .setDesc('Chiedi conferma prima di creare una nuova nota periodica.')

@@ -569,6 +569,61 @@
   background-color: rgba(var(--color-red-rgb), 0.12);
 }
 
+/* ============================== Ghost chips (agent proposals) ============================== */
+
+.horizon-chip--ghost {
+  border: 1px dashed var(--interactive-accent);
+  opacity: 0.75;
+}
+
+.horizon-chip--ghost:hover {
+  opacity: 1;
+}
+
+.horizon-chip__marker--ghost {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: var(--interactive-accent);
+  font-size: 0.8em;
+  line-height: 1;
+}
+
+.horizon-ghost__accept,
+.horizon-ghost__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-s);
+  font-size: 0.8em;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background-color 80ms ease, color 80ms ease;
+}
+
+.horizon-ghost__accept {
+  margin-left: auto;
+}
+
+.horizon-ghost__accept:hover {
+  background-color: rgba(var(--color-green-rgb), 0.2);
+  color: var(--color-green);
+}
+
+.horizon-ghost__dismiss:hover {
+  background-color: rgba(var(--color-red-rgb), 0.2);
+  color: var(--color-red);
+}
+
+.horizon-dot--ghost {
+  background: none;
+  border: 1px dashed var(--interactive-accent);
+}
+
 /* ============================== Day popover ============================== */
 
 .horizon-popover {

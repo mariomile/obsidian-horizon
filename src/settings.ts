@@ -1,7 +1,14 @@
 import type { CalendarMode, Period, PeriodConfig } from './types.ts';
 
+export interface AgentExportSettings {
+  enabled: boolean;
+  path: string;
+}
+
 export interface HorizonSettings {
   periods: Record<Period, PeriodConfig>;
+  agentExport: AgentExportSettings;
+  proposalsPath: string;
   agendaHorizonDays: number;
   showWeekNumbers: boolean;
   showDue: boolean;
@@ -39,6 +46,11 @@ export const DEFAULT_SETTINGS: HorizonSettings = {
       template: '_system/templates/Yearly-Note',
     },
   },
+  agentExport: {
+    enabled: true,
+    path: '_system/indices/horizon-agenda.json',
+  },
+  proposalsPath: '_system/indices/horizon-proposals.json',
   agendaHorizonDays: 14,
   showWeekNumbers: true,
   showDue: true,
@@ -63,6 +75,8 @@ export function parseSettings(data: unknown): HorizonSettings {
       monthly: parsePeriod(periods.monthly, DEFAULT_SETTINGS.periods.monthly),
       yearly: parsePeriod(periods.yearly, DEFAULT_SETTINGS.periods.yearly),
     },
+    agentExport: parseAgentExport(data.agentExport),
+    proposalsPath: stringValue(data.proposalsPath, DEFAULT_SETTINGS.proposalsPath),
     agendaHorizonDays: numberValue(data.agendaHorizonDays, DEFAULT_SETTINGS.agendaHorizonDays),
     showWeekNumbers: booleanValue(data.showWeekNumbers, DEFAULT_SETTINGS.showWeekNumbers),
     showDue: booleanValue(data.showDue, DEFAULT_SETTINGS.showDue),
@@ -74,6 +88,14 @@ export function parseSettings(data: unknown): HorizonSettings {
       DEFAULT_SETTINGS.confirmBeforeCreate,
     ),
     lastMode: modeValue(data.lastMode, DEFAULT_SETTINGS.lastMode),
+  };
+}
+
+function parseAgentExport(value: unknown): AgentExportSettings {
+  if (!isRecord(value)) return { ...DEFAULT_SETTINGS.agentExport };
+  return {
+    enabled: booleanValue(value.enabled, DEFAULT_SETTINGS.agentExport.enabled),
+    path: stringValue(value.path, DEFAULT_SETTINGS.agentExport.path),
   };
 }
 

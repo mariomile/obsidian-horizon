@@ -1,6 +1,7 @@
 import type { App } from 'obsidian';
 
 import type { DayIndexService } from '../index/indexer.ts';
+import type { ProposalsService } from '../index/proposals-service.ts';
 import type { MomentLike, PeriodicService } from '../index/periodic.ts';
 import type { HorizonSettings } from '../settings.ts';
 import type { UiState } from '../state.ts';
@@ -12,6 +13,7 @@ export interface HorizonContext {
   settings: HorizonSettings;
   periodic: PeriodicService;
   dayIndex: DayIndexService;
+  proposals: ProposalsService;
   uiState: UiState;
   saveSettings(): Promise<void>;
 }

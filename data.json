@@ -25,6 +25,11 @@
       "template": "_system/templates/Yearly-Note"
     }
   },
+  "agentExport": {
+    "enabled": true,
+    "path": "_system/indices/horizon-agenda.json"
+  },
+  "proposalsPath": "_system/indices/horizon-proposals.json",
   "agendaHorizonDays": 14,
   "showWeekNumbers": true,
   "showDue": true,
@@ -32,5 +37,5 @@
   "showDone": true,
   "showNotes": true,
   "confirmBeforeCreate": true,
-  "lastMode": "agenda"
+  "lastMode": "month"
 }

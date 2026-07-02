@@ -40,6 +40,7 @@ export class MonthGrid extends Component {
 
   onload(): void {
     this.register(this.ctx.dayIndex.subscribe(() => this.render()));
+    this.register(this.ctx.proposals.subscribe(() => this.render()));
     this.register(this.ctx.uiState.subscribe(() => this.followUiState()));
     this.containerEl.addClass('horizon-cal', 'horizon-cal--mini');
     this.containerEl.addEventListener('click', this.handleClick);

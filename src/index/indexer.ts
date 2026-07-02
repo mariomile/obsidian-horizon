@@ -1,5 +1,7 @@
 import type { App, CachedMetadata, Plugin, TAbstractFile, TFile } from 'obsidian';
 
+import { buildAgendaExport } from './agenda-export.ts';
+import type { AgendaExport, AgendaExportOptions } from './agenda-export.ts';
 import { DayIndexCore } from './day-index.ts';
 import type { FileContribution } from './day-index.ts';
 import { normalizeFrontmatterDate } from './frontmatter-date.ts';
@@ -51,6 +53,10 @@ export class DayIndexService {
 
   openDueBefore(key: DayKey): TaskEntry[] {
     return this.core.openDueBefore(key);
+  }
+
+  buildExport(options: AgendaExportOptions): AgendaExport {
+    return buildAgendaExport(this.core, options);
   }
 
   subscribe(listener: () => void): () => void {
