@@ -857,3 +857,27 @@
 .horizon-agenda__chips .horizon-chip {
   padding-block: var(--size-2-1);
 }
+
+/* Bases calendar is content-first: rows grow with their cards. */
+.horizon-bases .horizon-month__grid {
+  grid-template-rows: auto;
+  grid-auto-rows: minmax(90px, auto);
+  height: auto;
+}
+
+.horizon-bases .horizon-cell--full {
+  overflow: visible;
+}
+
+.horizon-bases .horizon-cell__chips {
+  overflow: visible;
+}
+
+/* In cards the title may wrap to two lines — narrow month cells truncate too early. */
+.horizon-chip--card .horizon-card__title {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

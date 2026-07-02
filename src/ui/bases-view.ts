@@ -12,6 +12,7 @@ import { addDays, addMonths, dayKey, isoWeek, monthGrid, parseDayKey, todayKey }
 import { normalizeFrontmatterDate } from '../index/frontmatter-date.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
+import { renderChipOrCard } from './note-card.ts';
 
 export const BASES_CALENDAR_VIEW_TYPE = 'horizon';
 
@@ -166,16 +167,17 @@ export class HorizonBasesView extends BasesView {
     head.createSpan({ cls: 'horizon-cell__num', text: String(ymd.d) });
     const chipsEl = cell.createDiv({ cls: 'horizon-cell__chips' });
     for (const entry of this.byDay.get(key) ?? []) {
-      const chip = chipsEl.createDiv({ cls: 'horizon-chip horizon-chip--note' });
-      chip.dataset.path = entry.path;
-      chip.tabIndex = 0;
-      chip.setAttribute('role', 'button');
-      chip.createSpan({ cls: 'horizon-chip__marker' });
-      chip.createSpan({
-        cls: 'horizon-chip__label',
-        text: entry.time ? `${entry.time} · ${entry.title}` : entry.title,
+      renderChipOrCard(this.ctx, chipsEl, {
+        cls: 'horizon-chip--note',
+        label: entry.time ? `${entry.time} · ${entry.title}` : entry.title,
+        path: entry.path,
+        line: -1,
+        rawText: '',
+        kind: 'note',
+        dayKey: key,
+        done: false,
+        recurring: false,
       });
-      chip.setAttribute('aria-label', entry.title);
     }
   }
 

@@ -1,4 +1,5 @@
-import { chipsForDay, renderChip } from './day-cell.ts';
+import { chipsForDay } from './day-cell.ts';
+import { renderChipOrCard } from './note-card.ts';
 import { todayKey } from '../dates.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
@@ -27,7 +28,7 @@ export function showDayPopover(
   const title = ctx.moment(key, 'YYYY-MM-DD', true).format('dddd D MMMM');
   popover.createDiv({ cls: 'horizon-popover__title', text: title });
   const chipsEl = popover.createDiv({ cls: 'horizon-popover__chips' });
-  for (const chip of chipsForDay(ctx, key, todayKey())) renderChip(chipsEl, chip);
+  for (const chip of chipsForDay(ctx, key, todayKey())) renderChipOrCard(ctx, chipsEl, chip);
 
   const rect = anchorEl.getBoundingClientRect();
   popover.style.left = `${Math.min(rect.left, window.innerWidth - 320)}px`;
