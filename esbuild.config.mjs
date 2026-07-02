@@ -1,8 +1,17 @@
 import esbuild from 'esbuild';
 import process from 'node:process';
 import { builtinModules } from 'node:module';
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const production = process.argv[2] === 'production';
+const projectRoot = process.cwd();
+const localDirFile = resolve(projectRoot, '.obsidian-plugin-dir');
+const outdir =
+  process.env.OBSIDIAN_PLUGIN_DIR ||
+  (existsSync(localDirFile) ? readFileSync(localDirFile, 'utf8').trim() : projectRoot);
+
+mkdirSync(outdir, { recursive: true });
 
 const context = await esbuild.context({
   banner: {
@@ -30,15 +39,20 @@ const context = await esbuild.context({
   target: 'es2021',
   logLevel: 'info',
   minify: production,
-  outfile: 'main.js',
+  outfile: resolve(outdir, 'main.js'),
   sourcemap: production ? false : 'inline',
   treeShaking: true,
 });
 
+if (resolve(outdir) !== resolve(projectRoot)) {
+  copyFileSync('manifest.json', resolve(outdir, 'manifest.json'));
+  copyFileSync('styles.css', resolve(outdir, 'styles.css'));
+}
+
 if (production) {
   await context.rebuild();
   await context.dispose();
+  process.exit(0);
 } else {
   await context.watch();
 }
-
