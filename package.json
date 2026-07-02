@@ -1,6 +1,6 @@
 {
   "name": "horizon",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Calendar for your vault: daily and periodic notes, tasks, and dated notes in one place.",
   "main": "main.js",
   "type": "module",
