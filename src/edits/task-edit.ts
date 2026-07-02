@@ -61,6 +61,12 @@ export async function toggleTaskDone(ctx: HorizonContext, ref: TaskRef): Promise
   await editTaskLine(ctx, ref, (line) => toggleDone(line, todayKey()).line);
 }
 
+const FIELD_OF_KIND: Record<TaskDateKind, 'due' | 'scheduled' | 'doneDate'> = {
+  due: 'due',
+  scheduled: 'scheduled',
+  done: 'doneDate',
+};
+
 /** Rewrite one date field of a task (drag & drop, snooze, batch). */
 export async function rescheduleTask(
   ctx: HorizonContext,
@@ -69,11 +75,37 @@ export async function rescheduleTask(
   newKey: DayKey,
   options?: EditOptions,
 ): Promise<boolean> {
+  const oldKey = parseTaskLine(ref.rawText)?.[FIELD_OF_KIND[kind]];
   const changed = await editTaskLine(ctx, ref, (line) => rewriteDate(line, kind, newKey), options);
   if (changed && !options?.silent) {
-    new Notice(`Horizon: task spostato al ${newKey}.`);
+    noticeWithUndo(ctx, ref, kind, newKey, oldKey);
   }
   return changed;
+}
+
+/** Success Notice with a 10s "Annulla" that re-applies the old date through the same guards. */
+function noticeWithUndo(
+  ctx: HorizonContext,
+  ref: TaskRef,
+  kind: TaskDateKind,
+  newKey: DayKey,
+  oldKey: DayKey | undefined,
+): void {
+  const fragment = document.createDocumentFragment();
+  fragment.createSpan({ text: `Horizon: task spostato al ${newKey}. ` });
+  if (oldKey !== undefined) {
+    const undo = fragment.createEl('a', { text: 'Annulla' });
+    const notice = new Notice(fragment, 10_000);
+    undo.addEventListener('click', () => {
+      notice.hide();
+      const movedRef: TaskRef = { ...ref, rawText: rewriteDate(ref.rawText, kind, newKey) };
+      void rescheduleTask(ctx, movedRef, kind, oldKey, { silent: true }).then((ok) => {
+        new Notice(ok ? `Horizon: ripristinato al ${oldKey}.` : 'Horizon: annullamento non riuscito.');
+      });
+    });
+    return;
+  }
+  new Notice(fragment, 10_000);
 }
 
 /** Move every ref to `targetKey`; each edit is individually guarded. Returns moved count. */
