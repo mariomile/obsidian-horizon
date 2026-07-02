@@ -6,6 +6,7 @@ import { acceptProposal } from '../edits/proposal-actions.ts';
 import type { HorizonContext } from './context.ts';
 import { renderFullDayCell } from './day-cell.ts';
 import { registerDropTargets } from './dnd.ts';
+import { attachHoverCard } from './hover-card.ts';
 import { showTaskChipMenu } from './task-menu.ts';
 import type { DragPayload } from './dnd.ts';
 
@@ -54,6 +55,7 @@ export class FullMonth extends Component {
     this.containerEl.addEventListener('keydown', this.handleKeydown);
     this.containerEl.addEventListener('mouseover', this.handleHover);
     this.containerEl.addEventListener('contextmenu', this.handleContextMenu);
+    this.register(attachHoverCard(this.ctx, this.containerEl));
     this.register(
       registerDropTargets(this.containerEl, '.horizon-cell', (payload, key) =>
         this.callbacks.onTaskDrop(payload, key),
@@ -253,6 +255,7 @@ export class FullMonth extends Component {
     if (!(target instanceof Element)) return;
     const chipEl = target.closest<HTMLElement>('.horizon-chip');
     if (chipEl) {
+      if (chipEl.classList.contains('horizon-chip--note')) return; // rich hover-card handles notes
       const related = event.relatedTarget;
       if (related instanceof Node && chipEl.contains(related)) return;
       if (chipEl.dataset.path) this.callbacks.onChipHover(chipEl.dataset.path, chipEl, event);

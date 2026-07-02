@@ -75,6 +75,32 @@ export class HorizonSettingTab extends PluginSettingTab {
         );
     }
 
+    containerEl.createEl('h3', { text: 'Anteprime' });
+
+    new Setting(containerEl)
+      .setName('Mini-card con anteprima')
+      .setDesc('Le note in Agenda, Settimana, popover e viste Bases mostrano excerpt e immagine.')
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.richCards).onChange(async (value) => {
+          this.plugin.settings.richCards = value;
+          await this.plugin.saveSettings();
+        }),
+      );
+
+    new Setting(containerEl)
+      .setName('Lunghezza anteprima')
+      .setDesc('Caratteri di testo per card (la hover-card ne usa il doppio).')
+      .addSlider((slider) =>
+        slider
+          .setLimits(100, 600, 20)
+          .setDynamicTooltip()
+          .setValue(this.plugin.settings.previewCharacters)
+          .onChange(async (value) => {
+            this.plugin.settings.previewCharacters = value;
+            await this.plugin.saveSettings();
+          }),
+      );
+
     containerEl.createEl('h3', { text: 'Agenti' });
 
     new Setting(containerEl)

@@ -1,7 +1,7 @@
 {
   "id": "horizon",
   "name": "Horizon",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "minAppVersion": "1.10.0",
   "description": "Calendar for your vault: daily and periodic notes, tasks, and dated notes in one place.",
   "author": "Mario Miletta",

@@ -16,6 +16,10 @@ Calendar for your Obsidian vault: daily and periodic notes, tasks, and dated not
 2. **Tasks** with obsidian-tasks-plugin emoji dates: 📅 due, ⏳ scheduled, ✅ done. Cancelled tasks (status `-`) are hidden
 3. **Notes with a `date` frontmatter property** (periodic notes are excluded to avoid duplicates)
 
+## Rich mini-cards
+
+Notes in Agenda, Week, the day popover, and Bases views render as **mini-cards**: title (with time), a clean two-line excerpt, and the note's cover image (frontmatter `cover`/`image`/`thumbnail` → first embed → first external image). Hydration is async and LRU-cached. In the compact Month grid, hovering a note chip shows a floating **hover-card** with image and a longer excerpt. Settings: card length slider and a `richCards` toggle to fall back to compact chips.
+
 ## Overdue triage
 
 Open overdue tasks roll up to a pinned **"In ritardo"** section on today in the Agenda (with a batch "Porta tutto a oggi"), and today's cell shows a red `↩ N` badge in every view. Right-click any task chip for **snooze presets** (Oggi / Domani / Lunedì prossimo / +1 settimana). Every reschedule Notice carries a 10-second **Annulla** that re-applies the old date through the same guarded writes.
