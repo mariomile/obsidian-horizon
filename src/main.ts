@@ -1,6 +1,7 @@
 import { moment, Plugin } from 'obsidian';
 
 import { todayKey } from './dates.ts';
+import { openPeriodicNote } from './edits/note-creator.ts';
 import { DayIndexService } from './index/indexer.ts';
 import { PeriodicService } from './index/periodic.ts';
 import type { MomentLike } from './index/periodic.ts';
@@ -59,6 +60,13 @@ export default class HorizonPlugin extends Plugin {
       name: 'Apri il calendario in sidebar',
       callback: () => {
         void this.activateSidebar(true);
+      },
+    });
+    this.addCommand({
+      id: 'open-today-note',
+      name: 'Apri la nota di oggi',
+      callback: () => {
+        void openPeriodicNote(ctx, 'daily', todayKey(), false);
       },
     });
 

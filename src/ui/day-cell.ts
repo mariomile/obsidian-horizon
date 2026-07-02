@@ -21,7 +21,7 @@ function miniDots(ctx: HorizonContext, key: DayKey, bucket: DayBucket | null, to
     dots.push({ cls: 'horizon-dot--note', title: 'Nota giornaliera' });
   }
   if (!bucket) return dots;
-  const openDue = bucket.due.filter((t) => !t.done);
+  const openDue = bucket.due.filter((t) => !t.done && t.status !== '-');
   if (settings.showDue && openDue.length > 0) {
     const overdue = compareDayKeys(key, today) < 0;
     dots.push({
@@ -65,7 +65,7 @@ export function chipsForDay(
   const chips: ChipSpec[] = [];
   if (settings.showDue) {
     for (const task of bucket.due) {
-      if (task.done) continue;
+      if (task.done || task.status === '-') continue;
       const overdue = compareDayKeys(key, today) < 0;
       chips.push({
         cls: `horizon-chip--due${overdue ? ' horizon-chip--overdue' : ''}`,
@@ -82,7 +82,7 @@ export function chipsForDay(
   }
   if (settings.showScheduled) {
     for (const task of bucket.scheduled) {
-      if (task.done) continue;
+      if (task.done || task.status === '-') continue;
       chips.push({
         cls: 'horizon-chip--scheduled',
         label: task.description,
