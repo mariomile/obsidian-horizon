@@ -17,6 +17,7 @@ export interface FullMonthCallbacks {
   onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
   onOverdueClick: () => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
+  onChipHover: (path: string, chipEl: HTMLElement, event: MouseEvent) => void;
 }
 
 /** Month mode of the full calendar tab: 7-column grid with content chips. */
@@ -199,7 +200,12 @@ export class FullMonth extends Component {
     const target = event.target;
     if (!(target instanceof Element)) return;
     const chipEl = target.closest<HTMLElement>('.horizon-chip');
-    if (chipEl) return; // chips have their own identity; no day preview on top
+    if (chipEl) {
+      const related = event.relatedTarget;
+      if (related instanceof Node && chipEl.contains(related)) return;
+      if (chipEl.dataset.path) this.callbacks.onChipHover(chipEl.dataset.path, chipEl, event);
+      return;
+    }
     const cellEl = target.closest<HTMLElement>('.horizon-cell');
     if (!cellEl?.dataset.key) return;
     const related = event.relatedTarget;

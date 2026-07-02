@@ -139,6 +139,16 @@ export class HorizonCalendarView extends ItemView {
       onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) =>
         this.previewDay(key, cellEl, event),
       onOverdueClick: () => this.setMode('agenda'),
+      onChipHover: (path: string, chipEl: HTMLElement, event: MouseEvent) => {
+        this.app.workspace.trigger('hover-link', {
+          event,
+          source: 'horizon',
+          hoverParent: this,
+          targetEl: chipEl,
+          linktext: path,
+          sourcePath: '',
+        });
+      },
     };
 
     let component: MountedMode;
@@ -152,6 +162,7 @@ export class HorizonCalendarView extends ItemView {
         onTaskToggle: shared.onTaskToggle,
         onTaskDrop: shared.onTaskDrop,
         onOverdueClick: shared.onOverdueClick,
+        onChipHover: shared.onChipHover,
         onOverflow: (key) => this.setMode('week', key),
         onDayHover: shared.onDayHover,
       });

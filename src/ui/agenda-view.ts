@@ -16,6 +16,7 @@ export interface AgendaViewCallbacks {
   onTaskToggle: (chipEl: HTMLElement) => void;
   onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
+  onChipHover: (path: string, chipEl: HTMLElement, event: MouseEvent) => void;
 }
 
 /** Agenda mode: chronological list of the upcoming days that have content. */
@@ -221,6 +222,13 @@ export class AgendaView extends Component {
   private readonly handleHover = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (chipEl) {
+      const related = event.relatedTarget;
+      if (related instanceof Node && chipEl.contains(related)) return;
+      if (chipEl.dataset.path) this.callbacks.onChipHover(chipEl.dataset.path, chipEl, event);
+      return;
+    }
     const headEl = target.closest<HTMLElement>('.horizon-agenda__head');
     if (!headEl?.dataset.key) return;
     const related = event.relatedTarget;

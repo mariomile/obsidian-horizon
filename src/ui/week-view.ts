@@ -15,6 +15,7 @@ export interface WeekViewCallbacks {
   onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
   onOverdueClick: () => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
+  onChipHover: (path: string, chipEl: HTMLElement, event: MouseEvent) => void;
 }
 
 /** Week mode: seven full-height columns with every chip visible. */
@@ -174,6 +175,13 @@ export class WeekView extends Component {
   private readonly handleHover = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (chipEl) {
+      const related = event.relatedTarget;
+      if (related instanceof Node && chipEl.contains(related)) return;
+      if (chipEl.dataset.path) this.callbacks.onChipHover(chipEl.dataset.path, chipEl, event);
+      return;
+    }
     const headEl = target.closest<HTMLElement>('.horizon-week__head');
     if (!headEl?.dataset.key) return;
     const related = event.relatedTarget;
