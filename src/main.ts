@@ -6,6 +6,7 @@ import { HorizonApi } from './api.ts';
 import { addDays } from './dates.ts';
 import { DayIndexService } from './index/indexer.ts';
 import { ProposalsService } from './index/proposals-service.ts';
+import { NotePreviewService } from './preview.ts';
 import { PeriodicService } from './index/periodic.ts';
 import type { MomentLike } from './index/periodic.ts';
 import { HorizonSettingTab } from './settings-tab.ts';
@@ -23,6 +24,7 @@ export default class HorizonPlugin extends Plugin {
   periodic!: PeriodicService;
   dayIndex!: DayIndexService;
   proposals!: ProposalsService;
+  preview!: NotePreviewService;
   uiState!: UiState;
   api!: HorizonApi;
   private exportTimer: ReturnType<typeof setTimeout> | null = null;
@@ -42,6 +44,12 @@ export default class HorizonPlugin extends Plugin {
     );
     this.dayIndex = new DayIndexService(this.app, (path) => this.periodic.isPeriodicPath(path));
     this.proposals = new ProposalsService(this.app, () => this.settings.proposalsPath);
+    this.preview = new NotePreviewService(this.app);
+    this.registerEvent(this.app.vault.on('modify', (file) => this.preview.invalidate(file.path)));
+    this.registerEvent(this.app.vault.on('delete', (file) => this.preview.invalidate(file.path)));
+    this.registerEvent(
+      this.app.vault.on('rename', (_file, oldPath) => this.preview.invalidate(oldPath)),
+    );
     const today = parseDayKey(todayKey()) ?? { y: 2026, m: 1, d: 1 };
     this.uiState = new UiState(todayKey(), this.settings.lastMode, { y: today.y, m: today.m });
 
@@ -178,6 +186,7 @@ export default class HorizonPlugin extends Plugin {
       periodic: this.periodic,
       dayIndex: this.dayIndex,
       proposals: this.proposals,
+      preview: this.preview,
       uiState: this.uiState,
       saveSettings: () => this.saveSettings(),
     };
