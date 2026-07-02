@@ -4,6 +4,8 @@ import { addDays, addMonths, dayKey, isoWeek, monthGrid, parseDayKey, todayKey }
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { renderFullDayCell } from './day-cell.ts';
+import { registerDropTargets } from './dnd.ts';
+import type { DragPayload } from './dnd.ts';
 
 export interface FullMonthCallbacks {
   onDayNumberClick: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
@@ -11,6 +13,7 @@ export interface FullMonthCallbacks {
   onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
   onTaskToggle: (chipEl: HTMLElement) => void;
   onOverflow: (key: DayKey) => void;
+  onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
 }
 
@@ -36,6 +39,11 @@ export class FullMonth extends Component {
     this.containerEl.addEventListener('click', this.handleClick);
     this.containerEl.addEventListener('keydown', this.handleKeydown);
     this.containerEl.addEventListener('mouseover', this.handleHover);
+    this.register(
+      registerDropTargets(this.containerEl, '.horizon-cell', (payload, key) =>
+        this.callbacks.onTaskDrop(payload, key),
+      ),
+    );
     this.register(() => {
       this.containerEl.removeEventListener('click', this.handleClick);
       this.containerEl.removeEventListener('keydown', this.handleKeydown);

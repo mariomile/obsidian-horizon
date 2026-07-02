@@ -1,6 +1,7 @@
 import { compareDayKeys, parseDayKey } from '../dates.ts';
 import type { DayBucket, DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
+import { TASK_MIME } from './dnd.ts';
 
 export interface DayCellOptions {
   /** Month currently displayed by the grid, to dim spill-over days. */
@@ -148,6 +149,25 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
   el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
   if (chip.recurring) el.createSpan({ cls: 'horizon-chip__badge', text: '🔁' });
   el.setAttribute('aria-label', chip.label);
+  if (chip.kind !== 'note') {
+    el.draggable = true;
+    el.addEventListener('dragstart', (event) => {
+      if (!event.dataTransfer) return;
+      event.dataTransfer.setData(
+        TASK_MIME,
+        JSON.stringify({
+          path: chip.path,
+          line: chip.line,
+          rawText: chip.rawText,
+          dateKind: chip.kind,
+          fromKey: chip.dayKey,
+        }),
+      );
+      event.dataTransfer.effectAllowed = 'move';
+      el.addClass('horizon-chip--dragging');
+    });
+    el.addEventListener('dragend', () => el.removeClass('horizon-chip--dragging'));
+  }
   return el;
 }
 

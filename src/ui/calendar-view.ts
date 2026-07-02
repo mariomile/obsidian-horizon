@@ -7,8 +7,9 @@ import {
 } from 'obsidian';
 
 import { openPeriodicNote } from '../edits/note-creator.ts';
-import { toggleTaskDone } from '../edits/task-edit.ts';
+import { rescheduleTask, toggleTaskDone } from '../edits/task-edit.ts';
 import type { TaskRef } from '../edits/task-edit.ts';
+import type { DragPayload } from './dnd.ts';
 import type { CalendarMode, DayKey } from '../types.ts';
 import { AgendaView } from './agenda-view.ts';
 import type { HorizonContext } from './context.ts';
@@ -136,6 +137,14 @@ export class HorizonCalendarView extends ItemView {
         const ref = taskRefFromChip(chipEl);
         if (ref) void toggleTaskDone(this.ctx, ref);
       },
+      onTaskDrop: (payload: DragPayload, targetKey: DayKey) => {
+        void rescheduleTask(
+          this.ctx,
+          { path: payload.path, line: payload.line, rawText: payload.rawText },
+          payload.dateKind,
+          targetKey,
+        );
+      },
       onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) =>
         this.previewDay(key, cellEl, event),
     };
@@ -149,6 +158,7 @@ export class HorizonCalendarView extends ItemView {
         },
         onChipClick: shared.onChipClick,
         onTaskToggle: shared.onTaskToggle,
+        onTaskDrop: shared.onTaskDrop,
         onOverflow: (key) => this.setMode('week', key),
         onDayHover: shared.onDayHover,
       });

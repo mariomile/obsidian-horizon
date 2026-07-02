@@ -1,6 +1,7 @@
 import { ItemView, Keymap, type HoverPopover, type WorkspaceLeaf } from 'obsidian';
 
 import { openPeriodicNote } from '../edits/note-creator.ts';
+import { rescheduleTask } from '../edits/task-edit.ts';
 import type { HorizonContext } from './context.ts';
 import { MonthGrid } from './month-grid.ts';
 
@@ -38,6 +39,14 @@ export class HorizonSidebarView extends ItemView {
         },
         onWeekClick: (mondayKey, event) => {
           void openPeriodicNote(this.ctx, 'weekly', mondayKey, Keymap.isModEvent(event));
+        },
+        onTaskDrop: (payload, targetKey) => {
+          void rescheduleTask(
+            this.ctx,
+            { path: payload.path, line: payload.line, rawText: payload.rawText },
+            payload.dateKind,
+            targetKey,
+          );
         },
         onDayHover: (key, cellEl, event) => {
           if (!this.ctx.periodic.noteFor('daily', key)) return;
