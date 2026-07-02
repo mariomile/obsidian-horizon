@@ -31,11 +31,13 @@
   },
   "proposalsPath": "_system/indices/horizon-proposals.json",
   "agendaHorizonDays": 14,
+  "previewCharacters": 220,
+  "richCards": true,
   "showWeekNumbers": true,
   "showDue": true,
   "showScheduled": true,
   "showDone": true,
   "showNotes": true,
   "confirmBeforeCreate": true,
-  "lastMode": "month"
+  "lastMode": "agenda"
 }

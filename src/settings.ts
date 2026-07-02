@@ -10,6 +10,8 @@ export interface HorizonSettings {
   agentExport: AgentExportSettings;
   proposalsPath: string;
   agendaHorizonDays: number;
+  previewCharacters: number;
+  richCards: boolean;
   showWeekNumbers: boolean;
   showDue: boolean;
   showScheduled: boolean;
@@ -52,6 +54,8 @@ export const DEFAULT_SETTINGS: HorizonSettings = {
   },
   proposalsPath: '_system/indices/horizon-proposals.json',
   agendaHorizonDays: 14,
+  previewCharacters: 220,
+  richCards: true,
   showWeekNumbers: true,
   showDue: true,
   showScheduled: true,
@@ -78,6 +82,8 @@ export function parseSettings(data: unknown): HorizonSettings {
     agentExport: parseAgentExport(data.agentExport),
     proposalsPath: stringValue(data.proposalsPath, DEFAULT_SETTINGS.proposalsPath),
     agendaHorizonDays: numberValue(data.agendaHorizonDays, DEFAULT_SETTINGS.agendaHorizonDays),
+    previewCharacters: numberValue(data.previewCharacters, DEFAULT_SETTINGS.previewCharacters),
+    richCards: booleanValue(data.richCards, DEFAULT_SETTINGS.richCards),
     showWeekNumbers: booleanValue(data.showWeekNumbers, DEFAULT_SETTINGS.showWeekNumbers),
     showDue: booleanValue(data.showDue, DEFAULT_SETTINGS.showDue),
     showScheduled: booleanValue(data.showScheduled, DEFAULT_SETTINGS.showScheduled),

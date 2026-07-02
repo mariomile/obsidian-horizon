@@ -6,6 +6,7 @@ import { acceptProposal } from '../edits/proposal-actions.ts';
 import type { HorizonContext } from './context.ts';
 import { rescheduleAll } from '../edits/task-edit.ts';
 import { chipsForDay, renderChip } from './day-cell.ts';
+import { renderChipOrCard } from './note-card.ts';
 import type { ChipSpec } from './day-cell.ts';
 import { showTaskChipMenu } from './task-menu.ts';
 import { registerDropTargets } from './dnd.ts';
@@ -122,7 +123,7 @@ export class AgendaView extends Component {
       if (chips.length === 0) {
         chipsEl.createDiv({ cls: 'horizon-week__blank', text: 'Nessun elemento.' });
       } else {
-        for (const chip of chips) renderChip(chipsEl, chip);
+        for (const chip of chips) renderChipOrCard(this.ctx, chipsEl, chip);
       }
     }
     if (shown === 0) {

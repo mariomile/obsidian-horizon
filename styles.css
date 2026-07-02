@@ -569,6 +569,65 @@
   background-color: rgba(var(--color-red-rgb), 0.12);
 }
 
+/* ============================== Note mini-cards ============================== */
+
+.horizon-chip--card {
+  align-items: stretch;
+  gap: var(--size-2-3);
+  padding: var(--size-2-3);
+  border-radius: var(--radius-m);
+  background-color: var(--background-primary);
+  border: var(--border-width) solid var(--background-modifier-border);
+  min-height: 44px;
+}
+
+.horizon-chip--card:hover {
+  background-color: var(--background-primary);
+  border-color: var(--background-modifier-border-hover);
+  box-shadow: var(--shadow-s);
+}
+
+.horizon-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.horizon-card__title {
+  font-size: var(--font-ui-small);
+  font-weight: var(--font-medium);
+  color: var(--text-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.horizon-card__excerpt {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.horizon-card__excerpt:empty {
+  display: none;
+}
+
+.horizon-card__thumb {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--radius-s);
+  background-size: cover;
+  background-position: center;
+  align-self: center;
+}
+
 /* ============================== Ghost chips (agent proposals) ============================== */
 
 .horizon-chip--ghost {
