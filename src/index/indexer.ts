@@ -5,7 +5,7 @@ import type { FileContribution } from './day-index.ts';
 import { normalizeFrontmatterDate } from './frontmatter-date.ts';
 import { extractTasks } from './task-scanner.ts';
 import type { TaskListItem } from './task-scanner.ts';
-import type { DayBucket, DayKey } from '../types.ts';
+import type { DayBucket, DayKey, TaskEntry } from '../types.ts';
 
 const SCAN_CHUNK = 32;
 const EMIT_DEBOUNCE_MS = 300;
@@ -47,6 +47,10 @@ export class DayIndexService {
 
   getBucket(key: DayKey): DayBucket | null {
     return this.core.getBucket(key);
+  }
+
+  openDueBefore(key: DayKey): TaskEntry[] {
+    return this.core.openDueBefore(key);
   }
 
   subscribe(listener: () => void): () => void {

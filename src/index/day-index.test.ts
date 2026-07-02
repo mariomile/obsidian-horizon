@@ -139,6 +139,38 @@ describe('DayIndexCore', () => {
     );
   });
 
+  it('openDueBefore collects open due tasks from past days, sorted by due date', () => {
+    const core = new DayIndexCore();
+    core.setFile('a.md', {
+      tasks: [
+        task({ path: 'a.md', line: 0, due: '2026-06-20' }),
+        task({ path: 'a.md', line: 1, due: '2026-07-01' }),
+        task({ path: 'a.md', line: 2, due: '2026-07-02' }), // today: not overdue
+        task({ path: 'a.md', line: 3, due: '2026-07-10' }), // future
+        task({ path: 'a.md', line: 4, due: '2026-06-25', done: true, status: 'x' }),
+        task({ path: 'a.md', line: 5, due: '2026-06-25', status: '-' }), // cancelled
+      ],
+      note: null,
+    });
+    const overdue = core.openDueBefore('2026-07-02');
+    assert.deepEqual(
+      overdue.map((t) => [t.due, t.line]),
+      [
+        ['2026-06-20', 0],
+        ['2026-07-01', 1],
+      ],
+    );
+  });
+
+  it('openDueBefore returns empty when nothing is overdue', () => {
+    const core = new DayIndexCore();
+    core.setFile('a.md', {
+      tasks: [task({ path: 'a.md', line: 0, due: '2026-07-10' })],
+      note: null,
+    });
+    assert.deepEqual(core.openDueBefore('2026-07-02'), []);
+  });
+
   it('notifies subscribers only when notify() is called', () => {
     const core = new DayIndexCore();
     let calls = 0;

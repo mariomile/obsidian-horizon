@@ -5,6 +5,7 @@ import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { renderFullDayCell } from './day-cell.ts';
 import { registerDropTargets } from './dnd.ts';
+import { showTaskChipMenu } from './task-menu.ts';
 import type { DragPayload } from './dnd.ts';
 
 export interface FullMonthCallbacks {
@@ -14,6 +15,7 @@ export interface FullMonthCallbacks {
   onTaskToggle: (chipEl: HTMLElement) => void;
   onOverflow: (key: DayKey) => void;
   onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
+  onOverdueClick: () => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
 }
 
@@ -39,6 +41,7 @@ export class FullMonth extends Component {
     this.containerEl.addEventListener('click', this.handleClick);
     this.containerEl.addEventListener('keydown', this.handleKeydown);
     this.containerEl.addEventListener('mouseover', this.handleHover);
+    this.containerEl.addEventListener('contextmenu', this.handleContextMenu);
     this.register(
       registerDropTargets(this.containerEl, '.horizon-cell', (payload, key) =>
         this.callbacks.onTaskDrop(payload, key),
@@ -48,6 +51,7 @@ export class FullMonth extends Component {
       this.containerEl.removeEventListener('click', this.handleClick);
       this.containerEl.removeEventListener('keydown', this.handleKeydown);
       this.containerEl.removeEventListener('mouseover', this.handleHover);
+      this.containerEl.removeEventListener('contextmenu', this.handleContextMenu);
       this.containerEl.empty();
       this.containerEl.removeClass('horizon-month');
     });
@@ -85,6 +89,7 @@ export class FullMonth extends Component {
     const el = this.containerEl;
     el.empty();
     const today = todayKey();
+    const overdueCount = this.ctx.dayIndex.openDueBefore(today).length;
     const showWeeks = this.ctx.settings.showWeekNumbers;
     const grid = el.createDiv({
       cls: `horizon-month__grid${showWeeks ? ' horizon-month__grid--weeks' : ''}`,
@@ -121,7 +126,7 @@ export class FullMonth extends Component {
           this.ctx,
           grid,
           key,
-          { displayedMonth: this.displayed, today },
+          { displayedMonth: this.displayed, today, overdueCount: key === today ? overdueCount : 0 },
           { onOverflow: (k) => this.callbacks.onOverflow(k) },
         );
       }
@@ -131,6 +136,10 @@ export class FullMonth extends Component {
   private readonly handleClick = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    if (target.closest('.horizon-cell__overdue-badge')) {
+      this.callbacks.onOverdueClick();
+      return;
+    }
     const weekEl = target.closest<HTMLElement>('.horizon-cal__weeknum');
     if (weekEl?.dataset.week) {
       this.callbacks.onWeekClick(weekEl.dataset.week, event);
@@ -175,6 +184,15 @@ export class FullMonth extends Component {
       event.preventDefault();
       this.callbacks.onDayNumberClick(numEl.dataset.key, event);
     }
+  };
+
+  private readonly handleContextMenu = (event: MouseEvent): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (!chipEl?.dataset.raw) return;
+    event.preventDefault();
+    showTaskChipMenu(this.ctx, chipEl, event);
   };
 
   private readonly handleHover = (event: MouseEvent): void => {

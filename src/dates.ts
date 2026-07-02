@@ -77,6 +77,11 @@ export function startOfWeekMonday(key: DayKey): DayKey {
   return addDays(key, 1 - isoWeekday(key));
 }
 
+/** The Monday strictly after `key` (a Monday input yields the following week's). */
+export function nextMonday(key: DayKey): DayKey {
+  return addDays(key, 8 - isoWeekday(key));
+}
+
 export function weekDays(key: DayKey): DayKey[] {
   const monday = startOfWeekMonday(key);
   return Array.from({ length: 7 }, (_, i) => addDays(monday, i));

@@ -10,6 +10,7 @@ import {
   isoWeek,
   isValidDayKey,
   monthGrid,
+  nextMonday,
   parseDayKey,
   startOfWeekMonday,
   todayKey,
@@ -150,6 +151,17 @@ describe('monthGrid', () => {
     for (let i = 1; i < grid.length; i++) {
       assert.equal(grid[i], addDays(grid[i - 1] ?? '', 1));
     }
+  });
+});
+
+describe('nextMonday', () => {
+  it('returns the strictly next Monday', () => {
+    assert.equal(nextMonday('2026-07-02'), '2026-07-06'); // Thursday → next Monday
+    assert.equal(nextMonday('2026-07-05'), '2026-07-06'); // Sunday → next day
+  });
+
+  it('skips a full week when starting on Monday', () => {
+    assert.equal(nextMonday('2026-06-29'), '2026-07-06');
   });
 });
 

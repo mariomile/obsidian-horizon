@@ -3,7 +3,10 @@ import { Component } from 'obsidian';
 import { addDays, todayKey } from '../dates.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
+import { rescheduleAll } from '../edits/task-edit.ts';
 import { chipsForDay, renderChip } from './day-cell.ts';
+import type { ChipSpec } from './day-cell.ts';
+import { showTaskChipMenu } from './task-menu.ts';
 import { registerDropTargets } from './dnd.ts';
 import type { DragPayload } from './dnd.ts';
 
@@ -36,6 +39,7 @@ export class AgendaView extends Component {
     this.containerEl.addEventListener('click', this.handleClick);
     this.containerEl.addEventListener('keydown', this.handleKeydown);
     this.containerEl.addEventListener('mouseover', this.handleHover);
+    this.containerEl.addEventListener('contextmenu', this.handleContextMenu);
     this.register(
       registerDropTargets(this.containerEl, '.horizon-agenda__day', (payload, key) =>
         this.callbacks.onTaskDrop(payload, key),
@@ -45,6 +49,7 @@ export class AgendaView extends Component {
       this.containerEl.removeEventListener('click', this.handleClick);
       this.containerEl.removeEventListener('keydown', this.handleKeydown);
       this.containerEl.removeEventListener('mouseover', this.handleHover);
+      this.containerEl.removeEventListener('contextmenu', this.handleContextMenu);
       this.containerEl.empty();
       this.containerEl.removeClass('horizon-agenda');
     });
@@ -84,6 +89,7 @@ export class AgendaView extends Component {
     const el = this.containerEl;
     el.empty();
     const today = todayKey();
+    if (this.start === today) this.renderOverdueSection(el, today);
     let shown = 0;
     for (let i = 0; i < this.horizonDays; i++) {
       const key = addDays(this.start, i);
@@ -123,6 +129,56 @@ export class AgendaView extends Component {
       });
     }
   }
+
+  private renderOverdueSection(el: HTMLElement, today: DayKey): void {
+    const overdue = this.ctx.dayIndex.openDueBefore(today);
+    if (overdue.length === 0) return;
+    const section = el.createDiv({ cls: 'horizon-agenda__day horizon-agenda__overdue' });
+    const head = section.createDiv({ cls: 'horizon-agenda__head horizon-agenda__head--overdue' });
+    head.createSpan({ cls: 'horizon-agenda__date', text: `In ritardo (${overdue.length})` });
+    const batch = head.createEl('button', {
+      cls: 'horizon-agenda__batch-btn',
+      text: 'Porta tutto a oggi',
+    });
+    batch.addEventListener('click', (event) => {
+      event.stopPropagation();
+      void rescheduleAll(
+        this.ctx,
+        overdue.map((t) => ({
+          ref: { path: t.path, line: t.line, rawText: t.rawText },
+          kind: 'due' as const,
+        })),
+        today,
+      );
+    });
+    const chipsEl = section.createDiv({ cls: 'horizon-agenda__chips' });
+    for (const task of overdue) {
+      const dueLabel = task.due
+        ? this.ctx.moment(task.due, 'YYYY-MM-DD', true).format('D MMM')
+        : '';
+      const chip: ChipSpec = {
+        cls: 'horizon-chip--due horizon-chip--overdue',
+        label: dueLabel ? `${task.description} — ${dueLabel}` : task.description,
+        path: task.path,
+        line: task.line,
+        rawText: task.rawText,
+        kind: 'due',
+        dayKey: task.due ?? today,
+        done: false,
+        recurring: task.recurring,
+      };
+      renderChip(chipsEl, chip);
+    }
+  }
+
+  private readonly handleContextMenu = (event: MouseEvent): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (!chipEl?.dataset.raw) return;
+    event.preventDefault();
+    showTaskChipMenu(this.ctx, chipEl, event);
+  };
 
   private readonly handleClick = (event: MouseEvent): void => {
     const target = event.target;

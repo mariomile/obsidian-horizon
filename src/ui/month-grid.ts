@@ -70,6 +70,7 @@ export class MonthGrid extends Component {
     const el = this.containerEl;
     el.empty();
     const today = todayKey();
+    const overdueCount = this.ctx.dayIndex.openDueBefore(today).length;
     const firstOfMonth = dayKey(this.displayed.y, this.displayed.m, 1);
     const showWeeks = this.ctx.settings.showWeekNumbers;
 
@@ -115,7 +116,11 @@ export class MonthGrid extends Component {
       for (let i = 0; i < 7; i++) {
         const key = cells[week * 7 + i];
         if (key === undefined) continue;
-        renderMiniDayCell(this.ctx, grid, key, { displayedMonth: this.displayed, today });
+        renderMiniDayCell(this.ctx, grid, key, {
+          displayedMonth: this.displayed,
+          today,
+          overdueCount: key === today ? overdueCount : 0,
+        });
       }
     }
   }

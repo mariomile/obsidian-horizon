@@ -509,6 +509,66 @@
   background-color: var(--background-modifier-hover) !important;
 }
 
+/* ============================== Overdue triage ============================== */
+
+.horizon-cell__overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--size-2-2);
+  border-radius: var(--radius-s);
+  background-color: rgba(var(--color-red-rgb), 0.15);
+  color: var(--color-red);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-semibold);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 80ms ease;
+}
+
+.horizon-cell__overdue-badge:hover {
+  background-color: rgba(var(--color-red-rgb), 0.3);
+}
+
+.horizon-cell__mini-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 12px;
+  padding: 0 3px;
+  border-radius: 6px;
+  background-color: var(--color-red);
+  color: var(--text-on-accent);
+  font-size: 8px;
+  font-weight: var(--font-semibold);
+  line-height: 12px;
+  text-align: center;
+}
+
+.horizon-agenda__overdue {
+  box-shadow: inset 0 0 0 1.5px var(--color-red);
+}
+
+.horizon-agenda__head--overdue .horizon-agenda__date {
+  color: var(--color-red);
+}
+
+.horizon-agenda__batch-btn {
+  margin-left: auto;
+  padding: var(--size-2-1) var(--size-2-3);
+  font-size: var(--font-ui-smaller);
+  border-radius: var(--radius-s);
+  border: var(--border-width) solid rgba(var(--color-red-rgb), 0.5);
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--color-red);
+  cursor: pointer;
+  transition: background-color 80ms ease;
+}
+
+.horizon-agenda__batch-btn:hover {
+  background-color: rgba(var(--color-red-rgb), 0.12);
+}
+
 /* ============================== Week mode ============================== */
 
 .horizon-week {

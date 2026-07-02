@@ -5,6 +5,7 @@ import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { chipsForDay, renderChip } from './day-cell.ts';
 import { registerDropTargets } from './dnd.ts';
+import { showTaskChipMenu } from './task-menu.ts';
 import type { DragPayload } from './dnd.ts';
 
 export interface WeekViewCallbacks {
@@ -12,6 +13,7 @@ export interface WeekViewCallbacks {
   onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
   onTaskToggle: (chipEl: HTMLElement) => void;
   onTaskDrop: (payload: DragPayload, targetKey: DayKey) => void;
+  onOverdueClick: () => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
 }
 
@@ -36,6 +38,7 @@ export class WeekView extends Component {
     this.containerEl.addEventListener('click', this.handleClick);
     this.containerEl.addEventListener('keydown', this.handleKeydown);
     this.containerEl.addEventListener('mouseover', this.handleHover);
+    this.containerEl.addEventListener('contextmenu', this.handleContextMenu);
     this.register(
       registerDropTargets(this.containerEl, '.horizon-week__col', (payload, key) =>
         this.callbacks.onTaskDrop(payload, key),
@@ -45,6 +48,7 @@ export class WeekView extends Component {
       this.containerEl.removeEventListener('click', this.handleClick);
       this.containerEl.removeEventListener('keydown', this.handleKeydown);
       this.containerEl.removeEventListener('mouseover', this.handleHover);
+      this.containerEl.removeEventListener('contextmenu', this.handleContextMenu);
       this.containerEl.empty();
       this.containerEl.removeClass('horizon-week');
     });
@@ -78,6 +82,7 @@ export class WeekView extends Component {
     const el = this.containerEl;
     el.empty();
     const today = todayKey();
+    const overdueCount = this.ctx.dayIndex.openDueBefore(today).length;
     for (const key of weekDays(this.monday)) {
       const col = el.createDiv({
         cls: `horizon-week__col${key === today ? ' horizon-week__col--today' : ''}`,
@@ -96,6 +101,17 @@ export class WeekView extends Component {
         text: this.ctx.moment(key, 'YYYY-MM-DD', true).format('D'),
       });
       if (key === today) num.addClass('horizon-week__num--today');
+      if (key === today && overdueCount > 0) {
+        const badge = head.createSpan({
+          cls: 'horizon-cell__overdue-badge',
+          text: `\u21a9 ${overdueCount}`,
+        });
+        badge.setAttribute('aria-label', `${overdueCount} task in ritardo`);
+        badge.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.callbacks.onOverdueClick();
+        });
+      }
       if (this.ctx.periodic.noteFor('daily', key)) head.addClass('horizon-week__head--has-note');
 
       const chips = chipsForDay(this.ctx, key, today);
@@ -144,6 +160,15 @@ export class WeekView extends Component {
       event.preventDefault();
       this.callbacks.onDayClick(headEl.dataset.key, event);
     }
+  };
+
+  private readonly handleContextMenu = (event: MouseEvent): void => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const chipEl = target.closest<HTMLElement>('.horizon-chip');
+    if (!chipEl?.dataset.raw) return;
+    event.preventDefault();
+    showTaskChipMenu(this.ctx, chipEl, event);
   };
 
   private readonly handleHover = (event: MouseEvent): void => {

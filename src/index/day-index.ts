@@ -58,6 +58,24 @@ export class DayIndexCore {
     return this.buckets().get(key) ?? null;
   }
 
+  /** Open (not done, not cancelled) due tasks strictly before `key`, oldest first. */
+  openDueBefore(key: DayKey): TaskEntry[] {
+    const result: TaskEntry[] = [];
+    for (const [day, bucket] of this.buckets()) {
+      if (day >= key) continue;
+      for (const entry of bucket.due) {
+        if (!entry.done && entry.status !== '-') result.push(entry);
+      }
+    }
+    result.sort((a, b) => {
+      const da = a.due ?? '';
+      const db = b.due ?? '';
+      if (da !== db) return da < db ? -1 : 1;
+      return byPathAndLine(a, b);
+    });
+    return result;
+  }
+
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);

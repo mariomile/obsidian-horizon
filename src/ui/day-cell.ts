@@ -7,6 +7,8 @@ export interface DayCellOptions {
   /** Month currently displayed by the grid, to dim spill-over days. */
   displayedMonth: { y: number; m: number };
   today: DayKey;
+  /** Open overdue tasks as of today; rendered as a badge on today's cell only. */
+  overdueCount?: number;
 }
 
 interface DotSpec {
@@ -171,6 +173,17 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
   return el;
 }
 
+/** Rebuild the guarded task reference carried by a chip's data attributes. */
+export function taskRefFromChip(
+  chipEl: HTMLElement,
+): { path: string; line: number; rawText: string } | null {
+  const { path, line, raw } = chipEl.dataset;
+  if (path === undefined || line === undefined || raw === undefined) return null;
+  const lineNumber = Number(line);
+  if (!Number.isInteger(lineNumber) || lineNumber < 0) return null;
+  return { path, line: lineNumber, rawText: raw };
+}
+
 export interface FullDayCellCallbacks {
   onOverflow: (key: DayKey) => void;
 }
@@ -200,6 +213,15 @@ export function renderFullDayCell(
   num.tabIndex = 0;
   num.setAttribute('role', 'button');
   num.setAttribute('aria-label', `Nota del ${key}`);
+  if (key === options.today && (options.overdueCount ?? 0) > 0) {
+    const badge = head.createSpan({
+      cls: 'horizon-cell__overdue-badge',
+      text: `\u21a9 ${options.overdueCount}`,
+    });
+    badge.tabIndex = 0;
+    badge.setAttribute('role', 'button');
+    badge.setAttribute('aria-label', `${options.overdueCount} task in ritardo`);
+  }
 
   const chips = chipsForDay(ctx, key, options.today);
   const chipsEl = cell.createDiv({ cls: 'horizon-cell__chips' });
@@ -241,6 +263,13 @@ export function renderMiniDayCell(
   if (ctx.periodic.noteFor('daily', key)) cell.addClass('horizon-cell--has-note');
 
   cell.createSpan({ cls: 'horizon-cell__num', text: String(ymd.d) });
+  if (key === options.today && (options.overdueCount ?? 0) > 0) {
+    const badge = cell.createSpan({
+      cls: 'horizon-cell__mini-badge',
+      text: String(options.overdueCount),
+    });
+    badge.setAttribute('aria-label', `${options.overdueCount} task in ritardo`);
+  }
 
   const bucket = ctx.dayIndex.getBucket(key);
   const dots = miniDots(ctx, key, bucket, options.today);
