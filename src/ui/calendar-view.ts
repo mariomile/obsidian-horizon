@@ -101,6 +101,16 @@ export class HorizonCalendarView extends ItemView {
     this.contentEl.removeClass('horizon-view');
   }
 
+  stepActive(direction: 1 | -1): void {
+    this.active?.step(direction);
+    this.refreshTitle();
+  }
+
+  goTodayActive(): void {
+    this.active?.goToday();
+    this.refreshTitle();
+  }
+
   /** Switch mode, persist it, and re-mount the body. */
   setMode(mode: CalendarMode, focusDate?: DayKey): void {
     if (focusDate) this.ctx.uiState.setActiveDate(focusDate);

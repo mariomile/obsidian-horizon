@@ -180,6 +180,7 @@ export class MonthGrid extends Component {
   };
 
   private readonly handleKeydown = (event: KeyboardEvent): void => {
+    if (this.handleArrowNav(event, '.horizon-cell')) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
@@ -189,6 +190,29 @@ export class MonthGrid extends Component {
     this.ctx.uiState.setActiveDate(cellEl.dataset.key);
     this.callbacks.onDayClick?.(cellEl.dataset.key, event);
   };
+
+  private handleArrowNav(event: KeyboardEvent, selector: string): boolean {
+    const deltas: Record<string, number> = {
+      ArrowLeft: -1,
+      ArrowRight: 1,
+      ArrowUp: -7,
+      ArrowDown: 7,
+    };
+    const delta = deltas[event.key];
+    if (delta === undefined) return false;
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return false;
+    const cellEl = target.closest<HTMLElement>(selector);
+    if (!cellEl?.dataset.key) return false;
+    const nextKey = addDays(cellEl.dataset.key, delta);
+    const nextEl = this.containerEl.querySelector<HTMLElement>(
+      `${selector}[data-key="${nextKey}"]`,
+    );
+    if (!nextEl) return false;
+    event.preventDefault();
+    nextEl.focus();
+    return true;
+  }
 
   private readonly handleHover = (event: MouseEvent): void => {
     const target = event.target;

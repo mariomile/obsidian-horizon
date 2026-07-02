@@ -63,6 +63,41 @@ export default class HorizonPlugin extends Plugin {
         void this.activateSidebar(true);
       },
     });
+    const modeLabels: Record<string, string> = {
+      month: 'Vista mese',
+      week: 'Vista settimana',
+      agenda: 'Vista agenda',
+    };
+    for (const mode of ['month', 'week', 'agenda'] as const) {
+      this.addCommand({
+        id: `mode-${mode}`,
+        name: modeLabels[mode] ?? mode,
+        callback: () => {
+          void this.withCalendarView((view) => view.setMode(mode));
+        },
+      });
+    }
+    this.addCommand({
+      id: 'next-period',
+      name: 'Periodo successivo',
+      callback: () => {
+        void this.withCalendarView((view) => view.stepActive(1));
+      },
+    });
+    this.addCommand({
+      id: 'prev-period',
+      name: 'Periodo precedente',
+      callback: () => {
+        void this.withCalendarView((view) => view.stepActive(-1));
+      },
+    });
+    this.addCommand({
+      id: 'go-today',
+      name: 'Vai a oggi',
+      callback: () => {
+        void this.withCalendarView((view) => view.goTodayActive());
+      },
+    });
     this.addCommand({
       id: 'open-today-note',
       name: 'Apri la nota di oggi',
@@ -82,6 +117,21 @@ export default class HorizonPlugin extends Plugin {
   onunload(): void {
     this.app.workspace.detachLeavesOfType(SIDEBAR_VIEW_TYPE);
     this.app.workspace.detachLeavesOfType(CALENDAR_VIEW_TYPE);
+  }
+
+  /** Run an action on the calendar tab view, opening it first when absent. */
+  private async withCalendarView(action: (view: HorizonCalendarView) => void): Promise<void> {
+    let view = this.calendarView();
+    if (!view) {
+      await this.activateCalendar();
+      view = this.calendarView();
+    }
+    if (view) action(view);
+  }
+
+  private calendarView(): HorizonCalendarView | null {
+    const leaf = this.app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE)[0];
+    return leaf && leaf.view instanceof HorizonCalendarView ? leaf.view : null;
   }
 
   private async activateCalendar(): Promise<void> {

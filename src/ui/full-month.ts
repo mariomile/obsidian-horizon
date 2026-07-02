@@ -183,6 +183,7 @@ export class FullMonth extends Component {
   };
 
   private readonly handleKeydown = (event: KeyboardEvent): void => {
+    if (this.handleArrowNav(event)) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
@@ -198,6 +199,29 @@ export class FullMonth extends Component {
       this.callbacks.onDayNumberClick(numEl.dataset.key, event);
     }
   };
+
+  private handleArrowNav(event: KeyboardEvent): boolean {
+    const deltas: Record<string, number> = {
+      ArrowLeft: -1,
+      ArrowRight: 1,
+      ArrowUp: -7,
+      ArrowDown: 7,
+    };
+    const delta = deltas[event.key];
+    if (delta === undefined) return false;
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return false;
+    const numEl = target.closest<HTMLElement>('.horizon-cell__num');
+    if (!numEl?.dataset.key) return false;
+    const nextKey = addDays(numEl.dataset.key, delta);
+    const nextEl = this.containerEl.querySelector<HTMLElement>(
+      `.horizon-cell__num[data-key="${nextKey}"]`,
+    );
+    if (!nextEl) return false;
+    event.preventDefault();
+    nextEl.focus();
+    return true;
+  }
 
   private readonly handleContextMenu = (event: MouseEvent): void => {
     const target = event.target;
