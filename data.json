@@ -1,0 +1,36 @@
+{
+  "periods": {
+    "daily": {
+      "enabled": true,
+      "folder": "Journal/Daily",
+      "format": "DD-MM-YYYY",
+      "template": "_system/templates/Daily-Note"
+    },
+    "weekly": {
+      "enabled": true,
+      "folder": "Journal/Weekly",
+      "format": "GGGG-[W]WW",
+      "template": "_system/templates/Weekly-Note"
+    },
+    "monthly": {
+      "enabled": false,
+      "folder": "Journal/Monthly",
+      "format": "YYYY-MM",
+      "template": "_system/templates/Monthly-Note"
+    },
+    "yearly": {
+      "enabled": false,
+      "folder": "Journal/Yearly",
+      "format": "YYYY",
+      "template": "_system/templates/Yearly-Note"
+    }
+  },
+  "agendaHorizonDays": 14,
+  "showWeekNumbers": true,
+  "showDue": true,
+  "showScheduled": true,
+  "showDone": true,
+  "showNotes": true,
+  "confirmBeforeCreate": true,
+  "lastMode": "agenda"
+}

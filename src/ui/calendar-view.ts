@@ -8,8 +8,10 @@ import {
 
 import { openPeriodicNote } from '../edits/note-creator.ts';
 import type { CalendarMode, DayKey } from '../types.ts';
+import { AgendaView } from './agenda-view.ts';
 import type { HorizonContext } from './context.ts';
 import { FullMonth } from './full-month.ts';
+import { WeekView } from './week-view.ts';
 
 export const CALENDAR_VIEW_TYPE = 'horizon-calendar';
 
@@ -24,8 +26,10 @@ interface ModeComponent {
   title(): string;
   step(direction: 1 | -1): void;
   goToday(): void;
-  showDate?(key: DayKey): void;
+  showDate(key: DayKey): void;
 }
+
+type MountedMode = ModeComponent & (FullMonth | WeekView | AgendaView);
 
 export class HorizonCalendarView extends ItemView {
   hoverPopover: HoverPopover | null = null;
@@ -33,7 +37,7 @@ export class HorizonCalendarView extends ItemView {
   private periodLabelEl: HTMLElement | null = null;
   private modeHostEl: HTMLElement | null = null;
   private modeButtons = new Map<CalendarMode, HTMLElement>();
-  private active: (ModeComponent & { component: FullMonth }) | null = null;
+  private active: MountedMode | null = null;
 
   constructor(leaf: WorkspaceLeaf, ctx: HorizonContext) {
     super(leaf);
@@ -110,33 +114,40 @@ export class HorizonCalendarView extends ItemView {
       button.toggleClass('horizon-view__mode-btn--active', key === mode);
     }
 
+    const openDaily = (key: DayKey, event: MouseEvent | KeyboardEvent): void => {
+      void openPeriodicNote(this.ctx, 'daily', key, Keymap.isModEvent(event));
+    };
+    const shared = {
+      onDayClick: openDaily,
+      onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) =>
+        this.openChip(chipEl, event),
+      onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) =>
+        this.previewDay(key, cellEl, event),
+    };
+
+    let component: MountedMode;
     if (mode === 'month') {
-      const component = new FullMonth(this.ctx, this.modeHostEl.createDiv(), {
-        onDayNumberClick: (key, event) => {
-          void openPeriodicNote(this.ctx, 'daily', key, Keymap.isModEvent(event));
-        },
+      component = new FullMonth(this.ctx, this.modeHostEl.createDiv(), {
+        onDayNumberClick: openDaily,
         onWeekClick: (mondayKey, event) => {
           void openPeriodicNote(this.ctx, 'weekly', mondayKey, Keymap.isModEvent(event));
         },
-        onChipClick: (chipEl, event) => this.openChip(chipEl, event),
+        onChipClick: shared.onChipClick,
         onOverflow: (key) => this.setMode('week', key),
-        onDayHover: (key, cellEl, event) => this.previewDay(key, cellEl, event),
+        onDayHover: shared.onDayHover,
       });
-      this.addChild(component);
-      this.active = Object.assign(component, { component });
+    } else if (mode === 'week') {
+      component = new WeekView(this.ctx, this.modeHostEl.createDiv(), shared);
     } else {
-      // Week and Agenda modes arrive with the next implementation step.
-      this.modeHostEl.createDiv({
-        cls: 'horizon-view__empty',
-        text: `${MODE_LABELS[mode]} — in arrivo.`,
-      });
-      this.active = null;
+      component = new AgendaView(this.ctx, this.modeHostEl.createDiv(), shared);
     }
+    this.addChild(component);
+    this.active = component;
     this.refreshTitle();
   }
 
   private unmountMode(): void {
-    if (this.active) this.removeChild(this.active.component);
+    if (this.active) this.removeChild(this.active);
     this.active = null;
   }
 

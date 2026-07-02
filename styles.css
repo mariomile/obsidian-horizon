@@ -472,3 +472,147 @@
 .horizon-chip--more:hover {
   color: var(--text-accent);
 }
+
+/* ============================== Week mode ============================== */
+
+.horizon-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--size-2-2);
+  height: 100%;
+}
+
+.horizon-week__col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  overflow: hidden;
+}
+
+.horizon-week__col--today {
+  box-shadow: inset 0 0 0 1.5px var(--interactive-accent);
+}
+
+.horizon-week__head {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-2);
+  padding: var(--size-2-3) var(--size-4-2);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 80ms ease;
+}
+
+.horizon-week__head:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.horizon-week__dow {
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.horizon-week__head--has-note .horizon-week__dow {
+  color: var(--text-accent);
+}
+
+.horizon-week__num {
+  margin-left: auto;
+}
+
+.horizon-week__num--today {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: var(--font-semibold);
+}
+
+.horizon-week__chips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--size-2-2);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.horizon-week__blank {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  padding: var(--size-2-2);
+}
+
+/* ============================== Agenda mode ============================== */
+
+.horizon-agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-3);
+  max-width: 620px;
+  margin-inline: auto;
+  padding-bottom: var(--size-4-4);
+}
+
+.horizon-agenda__day {
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  overflow: hidden;
+}
+
+.horizon-agenda__day--today {
+  box-shadow: inset 0 0 0 1.5px var(--interactive-accent);
+}
+
+.horizon-agenda__head {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-3);
+  padding: var(--size-2-3) var(--size-4-3);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+  cursor: pointer;
+  transition: background-color 80ms ease;
+}
+
+.horizon-agenda__head:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.horizon-agenda__date {
+  font-weight: var(--font-medium);
+  color: var(--text-normal);
+  text-transform: capitalize;
+}
+
+.horizon-agenda__badge {
+  padding: 1px var(--size-2-2);
+  border-radius: var(--radius-s);
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+}
+
+.horizon-agenda__note-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--interactive-accent);
+  margin-left: auto;
+}
+
+.horizon-agenda__chips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--size-2-3);
+}
+
+.horizon-agenda__chips .horizon-chip {
+  padding-block: var(--size-2-1);
+}
