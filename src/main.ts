@@ -12,6 +12,7 @@ import { HorizonSettingTab } from './settings-tab.ts';
 import { DEFAULT_SETTINGS, parseSettings } from './settings.ts';
 import type { HorizonSettings } from './settings.ts';
 import { UiState } from './state.ts';
+import { BASES_CALENDAR_VIEW_TYPE, HorizonBasesView } from './ui/bases-view.ts';
 import { CALENDAR_VIEW_TYPE, HorizonCalendarView } from './ui/calendar-view.ts';
 import type { HorizonContext } from './ui/context.ts';
 import { HorizonSidebarView, SIDEBAR_VIEW_TYPE } from './ui/sidebar-view.ts';
@@ -52,6 +53,12 @@ export default class HorizonPlugin extends Plugin {
     const ctx = this.context();
     this.registerView(SIDEBAR_VIEW_TYPE, (leaf) => new HorizonSidebarView(leaf, ctx));
     this.registerView(CALENDAR_VIEW_TYPE, (leaf) => new HorizonCalendarView(leaf, ctx));
+    this.registerBasesView(BASES_CALENDAR_VIEW_TYPE, {
+      name: 'Horizon',
+      icon: 'calendar-days',
+      factory: (controller, containerEl) => new HorizonBasesView(controller, containerEl, ctx),
+      options: HorizonBasesView.getViewOptions,
+    });
 
     this.addRibbonIcon('calendar-days', 'Apri Horizon', () => {
       void this.activateCalendar();

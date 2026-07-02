@@ -16,6 +16,28 @@ Calendar for your Obsidian vault: daily and periodic notes, tasks, and dated not
 2. **Tasks** with obsidian-tasks-plugin emoji dates: 📅 due, ⏳ scheduled, ✅ done. Cancelled tasks (status `-`) are hidden
 3. **Notes with a `date` frontmatter property** (periodic notes are excluded to avoid duplicates)
 
+## Overdue triage
+
+Open overdue tasks roll up to a pinned **"In ritardo"** section on today in the Agenda (with a batch "Porta tutto a oggi"), and today's cell shows a red `↩ N` badge in every view. Right-click any task chip for **snooze presets** (Oggi / Domani / Lunedì prossimo / +1 settimana). Every reschedule Notice carries a 10-second **Annulla** that re-applies the old date through the same guarded writes.
+
+## Bases view
+
+Horizon registers as a **Bases view**: any `.base` gains a month calendar. The Base decides *which* notes (filters); the view option `dateProperty` decides *when* (default `date` — set it to `created` for Granola meeting notes). Timestamps with an explicit offset (Granola writes UTC `Z`) are converted to the local day and time.
+
+## Template tokens
+
+Beyond `{{title}}` / `{{date:FMT}}` / `{{time:FMT}}`, periodic-note templates can use:
+
+- `{{agenda}}` — the target day's meetings (with times) and open tasks, as plain bullets with source links (never `- [ ]` lines: no task duplication)
+- `{{week-digest}}` — pre-compiled weekly review: *Fatto* (done per day), *Meeting e note*, *In arrivo* (due next week). Already wired into `_system/templates/Weekly-Note.md`
+
+## Agents
+
+`(app.plugins.getPlugin('horizon') as HorizonPlugin).api` exposes: `getAgenda(from, to)`, `getOverdue()`, `rescheduleTask(ref, kind, day)`, `toggleTaskDone(ref)`, `exportAgenda()`, `propose(proposal)`. Reads come from the live index; writes go through the guarded line-edit path.
+
+- **Agenda export** — `_system/indices/horizon-agenda.json` (setting-configurable), rewritten at most every 5 minutes of activity: window `today-7 … today+horizon`, per-day buckets plus the explicit `overdue` set. Skills read this instead of re-parsing emoji syntax.
+- **Ghost proposals** — agents append to `_system/indices/horizon-proposals.json` (`kind: 'reschedule' | 'new-task'`, `targetKey`, optional `reason`). Horizon renders dashed ✦ ghost chips on the target days; ✓ accepts (guarded write / task appended to the daily note), ✕ dismisses. The human is the only committer.
+
 ## Interactions
 
 - Click a day (or its number in the tab view) → open the daily note, creating it from the template when missing ({{title}}, {{date:FMT}}, {{time:FMT}} tokens fill against the target day). Mod-click opens in a new tab

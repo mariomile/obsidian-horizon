@@ -58,4 +58,31 @@ describe('applyTemplate', () => {
   it('returns empty for empty source', () => {
     assert.equal(applyTemplate('', moment, '2026-07-10', 't'), '');
   });
+
+  it('fills caller-supplied data tokens lazily', () => {
+    let rendered = 0;
+    const tokens = {
+      agenda: () => {
+        rendered += 1;
+        return '- 09:30 · [[Standup]]';
+      },
+    };
+    assert.equal(
+      applyTemplate('## Agenda\n{{agenda}}', moment, '2026-07-10', 't', undefined, tokens),
+      '## Agenda\n- 09:30 · [[Standup]]',
+    );
+    assert.equal(rendered, 1);
+    // Token absent from the source → renderer never invoked.
+    applyTemplate('no tokens here', moment, '2026-07-10', 't', undefined, tokens);
+    assert.equal(rendered, 1);
+  });
+
+  it('supports hyphenated token names like week-digest', () => {
+    assert.equal(
+      applyTemplate('{{week-digest}}', moment, '2026-07-10', 't', undefined, {
+        'week-digest': () => '### Fatto',
+      }),
+      '### Fatto',
+    );
+  });
 });
