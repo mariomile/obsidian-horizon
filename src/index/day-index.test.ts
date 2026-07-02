@@ -117,6 +117,28 @@ describe('DayIndexCore', () => {
     );
   });
 
+  it('sorts timed notes chronologically before untimed ones', () => {
+    const core = new DayIndexCore();
+    core.setFile('c.md', {
+      tasks: [],
+      note: { path: 'c.md', title: 'Senza orario', date: '2026-07-02' },
+    });
+    core.setFile('b.md', {
+      tasks: [],
+      note: { path: 'b.md', title: 'Standup', date: '2026-07-02', time: '09:30' },
+    });
+    core.setFile('a.md', {
+      tasks: [],
+      note: { path: 'a.md', title: 'Weekly sync', date: '2026-07-02', time: '14:00' },
+    });
+    const bucket = core.getBucket('2026-07-02');
+    assert.ok(bucket);
+    assert.deepEqual(
+      bucket.notes.map((n) => n.title),
+      ['Standup', 'Weekly sync', 'Senza orario'],
+    );
+  });
+
   it('notifies subscribers only when notify() is called', () => {
     const core = new DayIndexCore();
     let calls = 0;

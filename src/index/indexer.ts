@@ -92,10 +92,10 @@ export class DayIndexService {
   private contributionFor(path: string, content: string, cache: CachedMetadata): FileContribution {
     const items = cacheTaskItems(cache);
     const tasks = items.length > 0 ? extractTasks(path, content, items) : [];
-    const date = normalizeFrontmatterDate(cache.frontmatter?.date);
+    const parsed = normalizeFrontmatterDate(cache.frontmatter?.date);
     const note =
-      date !== null && !this.isPeriodicPath(path)
-        ? { path, title: noteTitle(path), date }
+      parsed !== null && !this.isPeriodicPath(path)
+        ? { path, title: noteTitle(path), date: parsed.day, time: parsed.time ?? undefined }
         : null;
     return { tasks, note };
   }
@@ -110,11 +110,16 @@ export class DayIndexService {
         taskFiles.push(file);
         continue;
       }
-      const date = normalizeFrontmatterDate(cache.frontmatter?.date);
-      if (date !== null && !this.isPeriodicPath(file.path)) {
+      const parsed = normalizeFrontmatterDate(cache.frontmatter?.date);
+      if (parsed !== null && !this.isPeriodicPath(file.path)) {
         this.core.setFile(file.path, {
           tasks: [],
-          note: { path: file.path, title: noteTitle(file.path), date },
+          note: {
+            path: file.path,
+            title: noteTitle(file.path),
+            date: parsed.day,
+            time: parsed.time ?? undefined,
+          },
         });
       }
     }

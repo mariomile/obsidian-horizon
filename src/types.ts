@@ -30,6 +30,8 @@ export interface TaskRef {
 export interface NoteEntry {
   path: string;
   title: string;
+  /** Wall-clock 'HH:mm' from the frontmatter date, when present (e.g. meetings). */
+  time?: string;
 }
 
 export interface DayBucket {

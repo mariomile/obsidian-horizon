@@ -13,7 +13,11 @@ function byPathAndLine(a: TaskEntry, b: TaskEntry): number {
   return a.path === b.path ? a.line - b.line : a.path < b.path ? -1 : 1;
 }
 
-function byTitle(a: NoteEntry, b: NoteEntry): number {
+/** Timed notes first in chronological order, then untimed alphabetically. */
+function byTimeThenTitle(a: NoteEntry, b: NoteEntry): number {
+  const ta = a.time ?? '99:99';
+  const tb = b.time ?? '99:99';
+  if (ta !== tb) return ta < tb ? -1 : 1;
   return a.title === b.title ? (a.path < b.path ? -1 : 1) : a.title < b.title ? -1 : 1;
 }
 
@@ -81,17 +85,19 @@ export class DayIndexCore {
         if (task.doneDate) bucketFor(task.doneDate).done.push(task);
       }
       if (contribution.note) {
-        bucketFor(contribution.note.date).notes.push({
+        const entry: NoteEntry = {
           path: contribution.note.path,
           title: contribution.note.title,
-        });
+        };
+        if (contribution.note.time !== undefined) entry.time = contribution.note.time;
+        bucketFor(contribution.note.date).notes.push(entry);
       }
     }
     for (const bucket of map.values()) {
       bucket.due.sort(byPathAndLine);
       bucket.scheduled.sort(byPathAndLine);
       bucket.done.sort(byPathAndLine);
-      bucket.notes.sort(byTitle);
+      bucket.notes.sort(byTimeThenTitle);
     }
     this.byDay = map;
     return map;

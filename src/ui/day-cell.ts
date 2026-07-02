@@ -100,7 +100,7 @@ export function chipsForDay(
     for (const note of bucket.notes) {
       chips.push({
         cls: 'horizon-chip--note',
-        label: note.title,
+        label: note.time ? `${note.time} · ${note.title}` : note.title,
         path: note.path,
         line: -1,
         rawText: '',
