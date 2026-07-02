@@ -8,6 +8,7 @@ import { chipsForDay, renderChip } from './day-cell.ts';
 export interface WeekViewCallbacks {
   onDayClick: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
   onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
+  onTaskToggle: (chipEl: HTMLElement) => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
 }
 
@@ -101,6 +102,12 @@ export class WeekView extends Component {
   private readonly handleClick = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    const checkEl = target.closest<HTMLElement>('.horizon-chip__check');
+    if (checkEl) {
+      const chipHost = checkEl.closest<HTMLElement>('.horizon-chip');
+      if (chipHost) this.callbacks.onTaskToggle(chipHost);
+      return;
+    }
     const chipEl = target.closest<HTMLElement>('.horizon-chip');
     if (chipEl?.dataset.path) {
       this.callbacks.onChipClick(chipEl, event);

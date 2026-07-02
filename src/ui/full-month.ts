@@ -9,6 +9,7 @@ export interface FullMonthCallbacks {
   onDayNumberClick: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
   onWeekClick: (mondayKey: DayKey, event: MouseEvent) => void;
   onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
+  onTaskToggle: (chipEl: HTMLElement) => void;
   onOverflow: (key: DayKey) => void;
   onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) => void;
 }
@@ -125,6 +126,12 @@ export class FullMonth extends Component {
     const weekEl = target.closest<HTMLElement>('.horizon-cal__weeknum');
     if (weekEl?.dataset.week) {
       this.callbacks.onWeekClick(weekEl.dataset.week, event);
+      return;
+    }
+    const checkEl = target.closest<HTMLElement>('.horizon-chip__check');
+    if (checkEl) {
+      const chipHost = checkEl.closest<HTMLElement>('.horizon-chip');
+      if (chipHost) this.callbacks.onTaskToggle(chipHost);
       return;
     }
     const chipEl = target.closest<HTMLElement>('.horizon-chip');

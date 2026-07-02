@@ -7,6 +7,8 @@ import {
 } from 'obsidian';
 
 import { openPeriodicNote } from '../edits/note-creator.ts';
+import { toggleTaskDone } from '../edits/task-edit.ts';
+import type { TaskRef } from '../edits/task-edit.ts';
 import type { CalendarMode, DayKey } from '../types.ts';
 import { AgendaView } from './agenda-view.ts';
 import type { HorizonContext } from './context.ts';
@@ -30,6 +32,15 @@ interface ModeComponent {
 }
 
 type MountedMode = ModeComponent & (FullMonth | WeekView | AgendaView);
+
+/** Rebuild the guarded task reference carried by a chip's data attributes. */
+function taskRefFromChip(chipEl: HTMLElement): TaskRef | null {
+  const { path, line, raw } = chipEl.dataset;
+  if (path === undefined || line === undefined || raw === undefined) return null;
+  const lineNumber = Number(line);
+  if (!Number.isInteger(lineNumber) || lineNumber < 0) return null;
+  return { path, line: lineNumber, rawText: raw };
+}
 
 export class HorizonCalendarView extends ItemView {
   hoverPopover: HoverPopover | null = null;
@@ -121,6 +132,10 @@ export class HorizonCalendarView extends ItemView {
       onDayClick: openDaily,
       onChipClick: (chipEl: HTMLElement, event: MouseEvent | KeyboardEvent) =>
         this.openChip(chipEl, event),
+      onTaskToggle: (chipEl: HTMLElement) => {
+        const ref = taskRefFromChip(chipEl);
+        if (ref) void toggleTaskDone(this.ctx, ref);
+      },
       onDayHover: (key: DayKey, cellEl: HTMLElement, event: MouseEvent) =>
         this.previewDay(key, cellEl, event),
     };
@@ -133,6 +148,7 @@ export class HorizonCalendarView extends ItemView {
           void openPeriodicNote(this.ctx, 'weekly', mondayKey, Keymap.isModEvent(event));
         },
         onChipClick: shared.onChipClick,
+        onTaskToggle: shared.onTaskToggle,
         onOverflow: (key) => this.setMode('week', key),
         onDayHover: shared.onDayHover,
       });

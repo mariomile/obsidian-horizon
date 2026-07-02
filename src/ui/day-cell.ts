@@ -45,6 +45,7 @@ export interface ChipSpec {
   label: string;
   path: string;
   line: number;
+  rawText: string;
   kind: 'due' | 'scheduled' | 'done' | 'note';
   dayKey: DayKey;
   done: boolean;
@@ -70,6 +71,7 @@ export function chipsForDay(
         label: task.description,
         path: task.path,
         line: task.line,
+        rawText: task.rawText,
         kind: 'due',
         dayKey: key,
         done: false,
@@ -85,6 +87,7 @@ export function chipsForDay(
         label: task.description,
         path: task.path,
         line: task.line,
+        rawText: task.rawText,
         kind: 'scheduled',
         dayKey: key,
         done: false,
@@ -99,6 +102,7 @@ export function chipsForDay(
         label: note.title,
         path: note.path,
         line: -1,
+        rawText: '',
         kind: 'note',
         dayKey: key,
         done: false,
@@ -113,6 +117,7 @@ export function chipsForDay(
         label: task.description,
         path: task.path,
         line: task.line,
+        rawText: task.rawText,
         kind: 'done',
         dayKey: key,
         done: true,
@@ -129,9 +134,17 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
   el.dataset.kind = chip.kind;
   el.dataset.key = chip.dayKey;
   if (chip.line >= 0) el.dataset.line = String(chip.line);
+  if (chip.rawText !== '') el.dataset.raw = chip.rawText;
   el.tabIndex = 0;
   el.setAttribute('role', 'button');
-  el.createSpan({ cls: 'horizon-chip__marker' });
+  if (chip.kind === 'note') {
+    el.createSpan({ cls: 'horizon-chip__marker' });
+  } else {
+    const check = el.createSpan({ cls: 'horizon-chip__check' });
+    check.setAttribute('role', 'checkbox');
+    check.setAttribute('aria-checked', String(chip.done));
+    check.setAttribute('aria-label', chip.done ? 'Riapri task' : 'Completa task');
+  }
   el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
   if (chip.recurring) el.createSpan({ cls: 'horizon-chip__badge', text: '🔁' });
   el.setAttribute('aria-label', chip.label);

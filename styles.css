@@ -422,6 +422,48 @@
   flex-shrink: 0;
 }
 
+.horizon-chip__check {
+  --horizon-check-color: var(--text-faint);
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1.5px solid var(--horizon-check-color);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 80ms ease, border-color 80ms ease;
+}
+
+.horizon-chip__check:hover {
+  border-color: var(--interactive-accent);
+}
+
+.horizon-chip--due .horizon-chip__check {
+  --horizon-check-color: var(--color-orange);
+}
+
+.horizon-chip--overdue .horizon-chip__check {
+  --horizon-check-color: var(--color-red);
+}
+
+.horizon-chip--scheduled .horizon-chip__check {
+  --horizon-check-color: var(--color-cyan);
+}
+
+.horizon-chip--done .horizon-chip__check {
+  --horizon-check-color: var(--color-green);
+  background-color: var(--color-green);
+}
+
+.horizon-chip--done .horizon-chip__check::after {
+  content: '';
+  position: absolute;
+  inset: 1px 2px 3px 2px;
+  border: solid var(--background-primary);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg) scale(0.8);
+}
+
 .horizon-chip--due .horizon-chip__marker {
   background-color: var(--color-orange);
 }
