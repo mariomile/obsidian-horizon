@@ -127,6 +127,24 @@ export default class HorizonPlugin extends Plugin {
         void openPeriodicNote(ctx, 'daily', todayKey(), false);
       },
     });
+    this.addCommand({
+      id: 'open-active-day-in-runway',
+      name: 'Apri il giorno attivo in Runway',
+      callback: () => {
+        const runway = (
+          this.app as unknown as {
+            plugins: {
+              plugins: Record<string, { api?: { openForDay?: (day: string) => Promise<void> } }>;
+            };
+          }
+        ).plugins.plugins.runway;
+        if (!runway?.api?.openForDay) {
+          new Notice('Horizon: Runway non è attivo.');
+          return;
+        }
+        void runway.api.openForDay(this.uiState.activeDate);
+      },
+    });
 
     this.dayIndex.start(this);
     this.proposals.start(this);

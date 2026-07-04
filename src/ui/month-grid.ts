@@ -132,7 +132,7 @@ export class MonthGrid extends Component {
     label: string,
     onClick: () => void,
   ): void {
-    const button = parent.createEl('button', { cls: 'clickable-icon horizon-cal__nav-btn' });
+    const button = parent.createEl('button', { cls: 'horizon-cal__nav-btn' });
     button.setAttribute('aria-label', label);
     setIcon(button, icon);
     button.addEventListener('click', (event) => {

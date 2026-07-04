@@ -32,17 +32,21 @@ export function renderNoteCard(
       if (!el.isConnected) return;
       if (preview.excerpt) {
         excerptEl.setText(preview.excerpt);
+        excerptEl.addClass('is-loaded');
       } else {
-        excerptEl.remove();
+        excerptEl.addClass('horizon-card__excerpt--empty');
       }
       if (preview.imageUrl) {
         const thumb = el.createDiv({ cls: 'horizon-card__thumb' });
         thumb.style.backgroundImage = `url("${preview.imageUrl}")`;
         el.addClass('horizon-chip--card-image');
+        // Next frame, so the browser paints the transparent thumb first —
+        // otherwise the opacity transition has nothing to animate from.
+        requestAnimationFrame(() => thumb.addClass('is-loaded'));
       }
     });
   } else {
-    excerptEl.remove();
+    excerptEl.addClass('horizon-card__excerpt--empty');
   }
   return el;
 }
