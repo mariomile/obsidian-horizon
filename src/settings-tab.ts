@@ -117,7 +117,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       .setName('Percorso export agenda')
       .addText((text) =>
         text
-          .setPlaceholder('_system/indices/horizon-agenda.json')
+          .setPlaceholder('.horizon/agenda.json')
           .setValue(this.plugin.settings.agentExport.path)
           .onChange(async (value) => {
             this.plugin.settings.agentExport.path = value.trim();
@@ -130,7 +130,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       .setDesc('File JSON dove gli agenti propongono task e spostamenti (ghost chips).')
       .addText((text) =>
         text
-          .setPlaceholder('_system/indices/horizon-proposals.json')
+          .setPlaceholder('.horizon/proposals.json')
           .setValue(this.plugin.settings.proposalsPath)
           .onChange(async (value) => {
             this.plugin.settings.proposalsPath = value.trim();
@@ -168,7 +168,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       .setName('Cartella')
       .addText((text) =>
         text
-          .setPlaceholder('Journal/Daily')
+          .setPlaceholder('Daily')
           .setValue(config.folder)
           .onChange(async (value) => {
             config.folder = value.trim();
@@ -194,7 +194,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       .setDesc('Percorso del template per le nuove note (opzionale).')
       .addText((text) =>
         text
-          .setPlaceholder('_system/templates/Daily-Note')
+          .setPlaceholder('Templates/Daily Note')
           .setValue(config.template)
           .onChange(async (value) => {
             config.template = value.trim();

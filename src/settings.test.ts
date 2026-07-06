@@ -42,6 +42,6 @@ describe('parseSettings', () => {
   it('never aliases the DEFAULT_SETTINGS object', () => {
     const parsed = parseSettings(null);
     parsed.periods.daily.folder = 'Mutated';
-    assert.equal(DEFAULT_SETTINGS.periods.daily.folder, 'Journal/Daily');
+    assert.equal(DEFAULT_SETTINGS.periods.daily.folder, '');
   });
 });

@@ -33,14 +33,14 @@ Horizon registers as a **Bases view**: any `.base` gains a month calendar. The B
 Beyond `{{title}}` / `{{date:FMT}}` / `{{time:FMT}}`, periodic-note templates can use:
 
 - `{{agenda}}` — the target day's meetings (with times) and open tasks, as plain bullets with source links (never `- [ ]` lines: no task duplication)
-- `{{week-digest}}` — pre-compiled weekly review: *Fatto* (done per day), *Meeting e note*, *In arrivo* (due next week). Already wired into `_system/templates/Weekly-Note.md`
+- `{{week-digest}}` — pre-compiled weekly review: *Fatto* (done per day), *Meeting e note*, *In arrivo* (due next week).
 
 ## Agents
 
 `(app.plugins.getPlugin('horizon') as HorizonPlugin).api` exposes: `getAgenda(from, to)`, `getOverdue()`, `rescheduleTask(ref, kind, day)`, `toggleTaskDone(ref)`, `exportAgenda()`, `propose(proposal)`. Reads come from the live index; writes go through the guarded line-edit path.
 
-- **Agenda export** — `_system/indices/horizon-agenda.json` (setting-configurable), rewritten at most every 5 minutes of activity: window `today-7 … today+horizon`, per-day buckets plus the explicit `overdue` set. Skills read this instead of re-parsing emoji syntax.
-- **Ghost proposals** — agents append to `_system/indices/horizon-proposals.json` (`kind: 'reschedule' | 'new-task'`, `targetKey`, optional `reason`). Horizon renders dashed ✦ ghost chips on the target days; ✓ accepts (guarded write / task appended to the daily note), ✕ dismisses. The human is the only committer.
+- **Agenda export** — disabled by default; when enabled, writes to the configurable `.horizon/agenda.json` path at most every 5 minutes of activity.
+- **Ghost proposals** — agents append to the configurable `.horizon/proposals.json` path (`kind: 'reschedule' | 'new-task'`, `targetKey`, optional `reason`). Horizon renders dashed ✦ ghost chips on the target days; ✓ accepts, ✕ dismisses.
 
 ## Interactions
 

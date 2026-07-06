@@ -980,9 +980,55 @@
   overflow: hidden;
 }
 
-/* No focus ring on buttons — Mario's preference (suite-wide, keyboard included). */
-:is([class^="horizon-"], [class*=" horizon-"]) :is(button, .clickable-icon, [role="button"]):focus,
+/* Preserve a visible keyboard focus indicator. */
 :is([class^="horizon-"], [class*=" horizon-"]) :is(button, .clickable-icon, [role="button"]):focus-visible {
-  outline: none !important;
+  outline: 2px solid var(--interactive-accent) !important;
+  outline-offset: 2px;
   box-shadow: none !important;
+}
+
+/* ============================== Mobile ==============================
+   On a phone the whole viewport IS the pane, so viewport width is a reliable
+   proxy for "this surface is now touch-width". The base layout is desktop-only
+   (no breakpoints existed), which breaks two ways on mobile:
+   1. Week mode packs seven columns side by side → each ~48px, chips truncate to
+      a couple of letters. Unusable. → stack into a single scrollable list.
+   2. The sidebar mini month relies on `aspect-ratio: 1` day cells to stay square.
+      That aspect-ratio feeds the cell's width back into the grid track in mobile
+      WebKit (Obsidian iOS/iPadOS), sizing the day columns wider than the plain
+      weekday-header spans → day numbers drift out of line with their weekday
+      letters. Pinning row height (aspect-ratio: auto) makes the columns purely
+      1fr text tracks, so headers and days share identical columns. */
+@media (max-width: 480px) {
+  /* Week mode → vertical stack of day cards (same shape as Agenda). */
+  .horizon-week {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-4-2);
+    height: auto;
+  }
+
+  .horizon-week__col {
+    min-height: 60px;
+  }
+
+  /* The view body scrolls as a whole; individual day columns grow to content. */
+  .horizon-week__chips {
+    overflow: visible;
+    min-height: 0;
+  }
+
+  /* Sidebar mini month: fixed row height instead of width-derived aspect-ratio,
+     so the day columns can't outgrow the weekday-header columns. */
+  .horizon-cal--mini .horizon-cell--mini {
+    aspect-ratio: auto;
+    min-height: 2.6em;
+  }
+
+  /* Fixed week-number column (was minmax(0, 0.6fr) — a proportional share that
+     shifts with pane width). A `ch` width keeps the seven day columns identical
+     to their headers regardless of viewport. */
+  .horizon-cal--mini .horizon-cal__grid--weeks {
+    grid-template-columns: 2.4ch repeat(7, minmax(0, 1fr));
+  }
 }

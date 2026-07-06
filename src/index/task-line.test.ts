@@ -44,8 +44,8 @@ describe('parseTaskLine', () => {
     assert.equal(parsed.description, 'Weekly review');
   });
 
-  it('ignores corrupt dates but keeps valid ones (real vault fixture)', () => {
-    // Journal/Daily/18-01-2026.md:18 ends with a truncated done date.
+  it('ignores corrupt dates but keeps valid ones', () => {
+    // A malformed source line ends with a truncated done date.
     const parsed = parseTaskLine('- [x] Fix onboarding copy 📅 2026-01-18 ✅ 2026-05-0');
     assert.ok(parsed);
     assert.equal(parsed.due, '2026-01-18');

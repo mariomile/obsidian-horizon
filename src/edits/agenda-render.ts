@@ -40,7 +40,7 @@ export interface DigestDay {
 
 /**
  * Pre-compiled weekly review for the {{week-digest}} token: what got done,
- * what happened, what lands next week. Mario reads it, he doesn't compile it.
+ * what happened and what lands next week without manual compilation.
  */
 export function renderWeekDigest(
   moment: MomentLike,

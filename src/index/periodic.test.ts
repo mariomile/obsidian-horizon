@@ -46,7 +46,7 @@ describe('basenameToDate', () => {
 
   it('rejects sync-conflict copies via strict round-trip', () => {
     assert.equal(
-      basenameToDate(moment, '25-06-2026 (Conflicted copy iPhone Mario)', 'DD-MM-YYYY'),
+      basenameToDate(moment, '25-06-2026 (Conflicted copy)', 'DD-MM-YYYY'),
       null,
     );
   });

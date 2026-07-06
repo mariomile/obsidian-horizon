@@ -8,7 +8,7 @@ import { applyTemplate } from './template.ts';
 const moment = realMoment as unknown as MomentLike;
 
 describe('applyTemplate', () => {
-  it('fills {{date:FMT}} with the TARGET day, not today (real vault template)', () => {
+  it('fills {{date:FMT}} with the target day, not today', () => {
     const source = [
       '---',
       'type: log',
