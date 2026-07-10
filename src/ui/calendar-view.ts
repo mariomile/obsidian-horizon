@@ -15,6 +15,7 @@ import { AgendaView } from './agenda-view.ts';
 import { taskRefFromChip } from './day-cell.ts';
 import type { HorizonContext } from './context.ts';
 import { FullMonth } from './full-month.ts';
+import { JournalView } from './journal-view.ts';
 import { WeekView } from './week-view.ts';
 
 export const CALENDAR_VIEW_TYPE = 'horizon-calendar';
@@ -23,6 +24,7 @@ const MODE_LABELS: Record<CalendarMode, string> = {
   month: 'Mese',
   week: 'Settimana',
   agenda: 'Agenda',
+  journal: 'Diario',
 };
 
 /** A mode component mounted inside the calendar tab. */
@@ -33,7 +35,7 @@ interface ModeComponent {
   showDate(key: DayKey): void;
 }
 
-type MountedMode = ModeComponent & (FullMonth | WeekView | AgendaView);
+type MountedMode = ModeComponent & (FullMonth | WeekView | AgendaView | JournalView);
 
 export class HorizonCalendarView extends ItemView {
   hoverPopover: HoverPopover | null = null;
@@ -41,6 +43,7 @@ export class HorizonCalendarView extends ItemView {
   private periodLabelEl: HTMLElement | null = null;
   private modeHostEl: HTMLElement | null = null;
   private modeButtons = new Map<CalendarMode, HTMLElement>();
+  private periodButtons: HTMLElement[] = [];
   private active: MountedMode | null = null;
 
   constructor(leaf: WorkspaceLeaf, ctx: HorizonContext) {
@@ -68,7 +71,7 @@ export class HorizonCalendarView extends ItemView {
     this.periodLabelEl = header.createSpan({ cls: 'horizon-view__title' });
 
     const modeSwitch = header.createDiv({ cls: 'horizon-view__modes' });
-    for (const mode of ['month', 'week', 'agenda'] as CalendarMode[]) {
+    for (const mode of ['month', 'week', 'agenda', 'journal'] as CalendarMode[]) {
       const button = modeSwitch.createEl('button', {
         cls: 'horizon-view__mode-btn',
         text: MODE_LABELS[mode],
@@ -78,19 +81,19 @@ export class HorizonCalendarView extends ItemView {
     }
 
     const nav = header.createDiv({ cls: 'horizon-view__nav' });
-    this.navButton(nav, 'chevron-left', 'Precedente', () => {
+    this.periodButtons.push(this.navButton(nav, 'chevron-left', 'Precedente', () => {
       this.active?.step(-1);
       this.refreshTitle();
-    });
+    }));
     const todayBtn = nav.createEl('button', { cls: 'horizon-view__today-btn', text: 'Oggi' });
     todayBtn.addEventListener('click', () => {
       this.active?.goToday();
       this.refreshTitle();
     });
-    this.navButton(nav, 'chevron-right', 'Successivo', () => {
+    this.periodButtons.push(this.navButton(nav, 'chevron-right', 'Successivo', () => {
       this.active?.step(1);
       this.refreshTitle();
-    });
+    }));
 
     this.modeHostEl = this.contentEl.createDiv({ cls: 'horizon-view__body' });
     this.mountMode(this.ctx.settings.lastMode);
@@ -126,6 +129,9 @@ export class HorizonCalendarView extends ItemView {
     this.modeHostEl.empty();
     for (const [key, button] of this.modeButtons) {
       button.toggleClass('horizon-view__mode-btn--active', key === mode);
+    }
+    for (const button of this.periodButtons) {
+      button.toggleClass('horizon-view__nav-btn--hidden', mode === 'journal');
     }
 
     const openDaily = (key: DayKey, event: MouseEvent | KeyboardEvent): void => {
@@ -189,8 +195,10 @@ export class HorizonCalendarView extends ItemView {
       });
     } else if (mode === 'week') {
       component = new WeekView(this.ctx, this.modeHostEl.createDiv(), shared);
-    } else {
+    } else if (mode === 'agenda') {
       component = new AgendaView(this.ctx, this.modeHostEl.createDiv(), shared);
+    } else {
+      component = new JournalView(this.ctx, this.modeHostEl.createDiv(), { onOpen: openDaily });
     }
     this.addChild(component);
     this.active = component;
@@ -206,11 +214,12 @@ export class HorizonCalendarView extends ItemView {
     this.periodLabelEl?.setText(this.active?.title() ?? 'Horizon');
   }
 
-  private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): void {
+  private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): HTMLElement {
     const button = parent.createEl('button', { cls: 'clickable-icon horizon-view__nav-btn' });
     button.setAttribute('aria-label', label);
     setIcon(button, icon);
     button.addEventListener('click', onClick);
+    return button;
   }
 
   private openChip(chipEl: HTMLElement, event: MouseEvent | KeyboardEvent): void {

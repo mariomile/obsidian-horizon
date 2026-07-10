@@ -49,4 +49,4 @@ export interface PeriodConfig {
   template: string;
 }
 
-export type CalendarMode = 'month' | 'week' | 'agenda';
+export type CalendarMode = 'month' | 'week' | 'agenda' | 'journal';

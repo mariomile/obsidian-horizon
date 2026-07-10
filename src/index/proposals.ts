@@ -99,3 +99,17 @@ export function removeProposal(raw: string, id: string): string {
     return raw;
   }
 }
+
+/** Atomically append-ready rewrite used inside Vault.process. */
+export function appendProposal(raw: string, proposal: Proposal): string {
+  let value: Record<string, unknown> = {};
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (isRecord(parsed)) value = parsed;
+  } catch {
+    // Missing/corrupt content starts a clean proposal sidecar.
+  }
+  const proposals = Array.isArray(value.proposals) ? [...value.proposals] : [];
+  proposals.push(proposal);
+  return JSON.stringify({ ...value, proposals }, null, 2);
+}

@@ -89,8 +89,9 @@ export default class HorizonPlugin extends Plugin {
       month: 'Vista mese',
       week: 'Vista settimana',
       agenda: 'Vista agenda',
+      journal: 'Vista diario',
     };
-    for (const mode of ['month', 'week', 'agenda'] as const) {
+    for (const mode of ['month', 'week', 'agenda', 'journal'] as const) {
       this.addCommand({
         id: `mode-${mode}`,
         name: modeLabels[mode] ?? mode,

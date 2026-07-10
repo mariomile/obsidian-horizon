@@ -1,8 +1,9 @@
 import { addDays, todayKey } from './dates.ts';
+import { normalizePath } from 'obsidian';
 import { rescheduleTask, toggleTaskDone } from './edits/task-edit.ts';
 import type { TaskRef } from './edits/task-edit.ts';
 import type { AgendaExport, TaskExport } from './index/agenda-export.ts';
-import type { Proposal } from './index/proposals.ts';
+import { appendProposal, type Proposal } from './index/proposals.ts';
 import type { DayKey, TaskDateKind } from './types.ts';
 import type { HorizonContext } from './ui/context.ts';
 
@@ -51,24 +52,36 @@ export class HorizonApi {
 
   /** Append a ghost-chip proposal for the human to accept or dismiss. */
   async propose(proposal: Proposal): Promise<void> {
-    const path = this.ctx.settings.proposalsPath;
-    const adapter = this.ctx.app.vault.adapter;
-    let current: { proposals: unknown[] } = { proposals: [] };
-    try {
-      const raw = await adapter.read(path);
-      const parsed: unknown = JSON.parse(raw);
-      if (
-        typeof parsed === 'object' &&
-        parsed !== null &&
-        Array.isArray((parsed as { proposals?: unknown }).proposals)
-      ) {
-        current = parsed as { proposals: unknown[] };
-      }
-    } catch {
-      // Missing or corrupt file: start fresh.
+    const path = normalizePath(this.ctx.settings.proposalsPath);
+    const vault = this.ctx.app.vault;
+    const existing = vault.getFileByPath(path);
+    if (existing) {
+      await vault.process(existing, (raw) => appendProposal(raw, proposal));
+      return;
     }
-    current.proposals.push(proposal);
-    await adapter.write(path, JSON.stringify(current, null, 2));
+    await this.ensureParentFolder(path);
+    try {
+      await vault.create(path, appendProposal('', proposal));
+      return;
+    } catch {
+      // A concurrent first writer may have created it after our existence check.
+    }
+    const raced = vault.getFileByPath(path);
+    if (!raced) throw new Error(`Horizon: impossibile creare ${path}`);
+    await vault.process(raced, (raw) => appendProposal(raw, proposal));
+  }
+
+  private async ensureParentFolder(path: string): Promise<void> {
+    const slash = path.lastIndexOf('/');
+    if (slash <= 0) return;
+    const parts = path.slice(0, slash).split('/').filter(Boolean);
+    let current = '';
+    for (const part of parts) {
+      current = current === '' ? part : `${current}/${part}`;
+      if (!this.ctx.app.vault.getAbstractFileByPath(current)) {
+        await this.ctx.app.vault.createFolder(current);
+      }
+    }
   }
 
   /** Default export window: a week back through the agenda horizon. */

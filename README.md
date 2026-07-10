@@ -9,6 +9,7 @@ Calendar for your Obsidian vault: daily and periodic notes, tasks, and dated not
   - **Mese** — 7-column grid with content chips per day; "+N altri" jumps to the week view
   - **Settimana** — seven full-height columns, every chip visible
   - **Agenda** — chronological list of the upcoming days that have content
+  - **Diario** — a text-first feed of existing daily notes, newest first, with expandable previews
 
 ## Data sources
 

@@ -67,7 +67,7 @@ export const DEFAULT_SETTINGS: HorizonSettings = {
 
 export const PERIODS: Period[] = ['daily', 'weekly', 'monthly', 'yearly'];
 
-const MODES: CalendarMode[] = ['month', 'week', 'agenda'];
+const MODES: CalendarMode[] = ['month', 'week', 'agenda', 'journal'];
 
 export function parseSettings(data: unknown): HorizonSettings {
   if (!isRecord(data)) return structuredClone(DEFAULT_SETTINGS);

@@ -236,10 +236,12 @@
   flex-direction: column;
   height: 100%;
   padding: 0;
+  container-type: inline-size;
 }
 
 .horizon-view__header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: var(--size-4-3);
   padding: var(--size-4-2) var(--size-4-4);
@@ -252,13 +254,16 @@
   font-weight: var(--font-bold);
   color: var(--text-normal);
   text-transform: capitalize;
-  min-width: 12ch;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .horizon-view__modes {
   display: flex;
   gap: 2px;
-  margin-inline: auto;
+  justify-self: center;
   padding: 2px;
   border-radius: var(--radius-m);
   background-color: var(--background-secondary);
@@ -291,10 +296,15 @@
   display: flex;
   align-items: center;
   gap: var(--size-2-1);
+  justify-self: end;
 }
 
 .horizon-view__nav-btn {
   --icon-size: var(--icon-s);
+}
+
+.horizon-view__nav-btn--hidden {
+  display: none;
 }
 
 .horizon-view__today-btn {
@@ -916,6 +926,214 @@
   padding-block: var(--size-2-1);
 }
 
+/* ============================== Journal mode ============================== */
+
+.horizon-journal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-2);
+  max-width: 720px;
+  height: auto !important;
+  margin-inline: auto;
+  padding-bottom: var(--size-4-6);
+}
+
+.horizon-journal__context {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--size-4-3);
+  padding: var(--size-2-1) var(--size-2-2) var(--size-2-3);
+}
+
+.horizon-journal__context-copy {
+  min-width: 0;
+}
+
+.horizon-journal__eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.horizon-journal__description {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  line-height: 1.4;
+}
+
+.horizon-journal__count {
+  flex: 0 0 auto;
+  padding: 2px var(--size-2-2);
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.horizon-journal__card {
+  overflow: hidden;
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background-color: var(--background-primary);
+  box-shadow: var(--shadow-s);
+  transition: border-color 80ms ease, box-shadow 80ms ease;
+}
+
+.horizon-journal__card:hover {
+  border-color: var(--background-modifier-border-hover);
+  box-shadow: var(--shadow-m);
+}
+
+.horizon-journal__head {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-2);
+  min-height: 42px;
+  padding: var(--size-2-2) var(--size-4-3);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+}
+
+.horizon-journal__date {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--font-medium);
+  color: var(--text-normal);
+  text-transform: capitalize;
+}
+
+.horizon-journal__open,
+.horizon-journal__expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: var(--size-2-1) var(--size-2-2);
+  border: none;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-accent);
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+}
+
+.horizon-journal__open {
+  margin-left: auto;
+}
+
+.horizon-journal__open:hover,
+.horizon-journal__expand:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.horizon-journal__content {
+  padding: var(--size-4-3) var(--size-4-4);
+  color: var(--text-normal);
+  line-height: 1.55;
+}
+
+.horizon-journal__content :first-child {
+  margin-top: 0;
+}
+
+.horizon-journal__content :last-child {
+  margin-bottom: 0;
+}
+
+.horizon-journal__content input[type='checkbox'] {
+  cursor: default;
+}
+
+.horizon-journal__loading,
+.horizon-journal__empty,
+.horizon-journal__end {
+  color: var(--text-faint);
+  font-size: var(--font-ui-small);
+}
+
+.horizon-journal__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--size-2-2) var(--size-4-3);
+  border-top: var(--border-width) solid var(--background-modifier-border);
+}
+
+.horizon-journal__end {
+  padding: var(--size-4-2);
+  text-align: center;
+}
+
+@container (max-width: 640px) {
+  .horizon-view__header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--size-2-2) var(--size-4-2);
+    padding: var(--size-2-3) var(--size-4-3);
+  }
+
+  .horizon-view__title {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: var(--font-ui-medium);
+  }
+
+  .horizon-view__nav {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .horizon-view__modes {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .horizon-view__modes::-webkit-scrollbar {
+    display: none;
+  }
+
+  .horizon-view__mode-btn {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding-inline: var(--size-4-2);
+  }
+
+  .horizon-view__body {
+    padding: var(--size-4-2) var(--size-2-3) var(--size-4-4);
+  }
+
+  .horizon-journal {
+    gap: var(--size-2-3);
+    padding-bottom: var(--size-4-4);
+  }
+
+  .horizon-journal__context {
+    padding-inline: var(--size-2-2);
+  }
+
+  .horizon-journal__description {
+    max-width: 30ch;
+  }
+
+  .horizon-journal__head {
+    padding-inline: var(--size-4-3);
+  }
+
+  .horizon-journal__content {
+    padding: var(--size-4-3);
+  }
+}
+
 /* Bases calendar is content-first: rows grow with their cards. */
 .horizon-bases .horizon-month__grid {
   grid-template-rows: auto;
@@ -1037,6 +1255,13 @@
    i controlli raggiungono 44pt Apple HIG estendendo l'HIT AREA con uno
    pseudo-elemento trasparente centrato — glifo invariato. */
 @media (pointer: coarse) {
+  .horizon-view__mode-btn,
+  .horizon-view__today-btn,
+  .horizon-journal__open,
+  .horizon-journal__expand {
+    min-height: 44px;
+  }
+
   .horizon-cal__nav-btn {
     position: relative;
   }

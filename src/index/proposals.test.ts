@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseProposals, removeProposal } from './proposals.ts';
+import { appendProposal, parseProposals, removeProposal } from './proposals.ts';
 
 const VALID = JSON.stringify({
   proposals: [
@@ -68,5 +68,27 @@ describe('removeProposal', () => {
 
   it('tolerates a corrupt file', () => {
     assert.equal(removeProposal('not json', 'p1'), 'not json');
+  });
+});
+
+describe('appendProposal', () => {
+  it('preserves existing proposals while appending', () => {
+    const next = appendProposal(VALID, {
+      id: 'p3',
+      kind: 'new-task',
+      text: 'Terzo task',
+      targetKey: '2026-07-07',
+    });
+    assert.deepEqual(parseProposals(next).map((p) => p.id), ['p1', 'p2', 'p3']);
+  });
+
+  it('recovers from corrupt content', () => {
+    const next = appendProposal('not json', {
+      id: 'p1',
+      kind: 'new-task',
+      text: 'Task',
+      targetKey: '2026-07-07',
+    });
+    assert.deepEqual(parseProposals(next).map((p) => p.id), ['p1']);
   });
 });
