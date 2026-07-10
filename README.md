@@ -57,6 +57,10 @@ Beyond `{{title}}` / `{{date:FMT}}` / `{{time:FMT}}`, periodic-note templates ca
 - The stale Periodic Notes config is ignored on purpose; Horizon keeps its own per-period settings (first launch seeds the daily period from `daily-notes.json`)
 - Templater syntax in templates passes through unexecuted (core-Templates tokens only)
 
+## Mobile
+
+**Verified** — `isDesktopOnly: false` in `manifest.json`; `styles.css` ships a `pointer: coarse` media query with 44px hit areas plus a `max-width: 480px` responsive rule for compact layouts.
+
 ## Development
 
 ```bash
