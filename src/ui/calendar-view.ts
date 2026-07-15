@@ -114,6 +114,13 @@ export class HorizonCalendarView extends ItemView {
     this.refreshTitle();
   }
 
+  /** Re-render the active mode on external changes (e.g. plugin settings toggled). */
+  refresh(): void {
+    const active = this.active;
+    if (active && 'render' in active) active.render();
+    this.refreshTitle();
+  }
+
   /** Switch mode, persist it, and re-mount the body. */
   setMode(mode: CalendarMode, focusDate?: DayKey): void {
     if (focusDate) this.ctx.uiState.setActiveDate(focusDate);

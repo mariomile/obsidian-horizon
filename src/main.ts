@@ -28,6 +28,7 @@ export default class HorizonPlugin extends Plugin {
   uiState!: UiState;
   api!: HorizonApi;
   private exportTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly basesViews = new Set<HorizonBasesView>();
 
   async onload(): Promise<void> {
     const data: unknown = await this.loadData();
@@ -64,7 +65,13 @@ export default class HorizonPlugin extends Plugin {
     this.registerBasesView(BASES_CALENDAR_VIEW_TYPE, {
       name: 'Horizon',
       icon: 'calendar-days',
-      factory: (controller, containerEl) => new HorizonBasesView(controller, containerEl, ctx),
+      factory: (controller, containerEl) => {
+        const view = new HorizonBasesView(controller, containerEl, ctx, () => {
+          this.basesViews.delete(view);
+        });
+        this.basesViews.add(view);
+        return view;
+      },
       options: HorizonBasesView.getViewOptions,
     });
 
@@ -226,6 +233,21 @@ export default class HorizonPlugin extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+    this.refreshViews();
+  }
+
+  /**
+   * Live-refresh every open Horizon surface so display toggles (e.g. week
+   * numbers) take effect immediately instead of only on reopen.
+   */
+  private refreshViews(): void {
+    for (const view of this.basesViews) view.refresh();
+    for (const leaf of this.app.workspace.getLeavesOfType(SIDEBAR_VIEW_TYPE)) {
+      if (leaf.view instanceof HorizonSidebarView) leaf.view.refresh();
+    }
+    for (const leaf of this.app.workspace.getLeavesOfType(CALENDAR_VIEW_TYPE)) {
+      if (leaf.view instanceof HorizonCalendarView) leaf.view.refresh();
+    }
   }
 
   /** Sync-churn friendly: at most one export write per 5 minutes of activity. */

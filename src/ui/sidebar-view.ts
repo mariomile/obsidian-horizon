@@ -63,6 +63,11 @@ export class HorizonSidebarView extends ItemView {
     );
   }
 
+  /** Re-render on external changes (e.g. plugin settings toggled). */
+  refresh(): void {
+    this.grid?.render();
+  }
+
   async onClose(): Promise<void> {
     if (this.grid) this.removeChild(this.grid);
     this.grid = null;

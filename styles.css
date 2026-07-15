@@ -32,7 +32,7 @@
 .horizon-cal__nav {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: var(--size-2-2);
   flex-shrink: 0;
 }
 

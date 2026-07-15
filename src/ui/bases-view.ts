@@ -34,10 +34,17 @@ export class HorizonBasesView extends BasesView {
   private readonly rootEl: HTMLElement;
   private byDay = new Map<DayKey, BaseDayEntry[]>();
   private displayed: { y: number; m: number };
+  private readonly onUnloadCb?: () => void;
 
-  constructor(controller: QueryController, containerEl: HTMLElement, ctx: HorizonContext) {
+  constructor(
+    controller: QueryController,
+    containerEl: HTMLElement,
+    ctx: HorizonContext,
+    onUnload?: () => void,
+  ) {
     super(controller);
     this.ctx = ctx;
+    this.onUnloadCb = onUnload;
     const today = parseDayKey(todayKey());
     this.displayed = today ? { y: today.y, m: today.m } : { y: 2026, m: 1 };
     this.rootEl = containerEl.createDiv({ cls: 'horizon-bases' });
@@ -49,6 +56,12 @@ export class HorizonBasesView extends BasesView {
     this.rootEl.removeEventListener('click', this.handleClick);
     this.rootEl.removeEventListener('mouseover', this.handleHover);
     this.rootEl.remove();
+    this.onUnloadCb?.();
+  }
+
+  /** Re-render on external changes (e.g. plugin settings toggled). */
+  refresh(): void {
+    this.render();
   }
 
   static getViewOptions(): BasesAllOptions[] {
@@ -58,12 +71,6 @@ export class HorizonBasesView extends BasesView {
         type: 'text',
         key: 'dateProperty',
         default: 'date',
-      },
-      {
-        displayName: 'Numeri di settimana',
-        type: 'toggle',
-        key: 'showWeekNumbers',
-        default: true,
       },
     ];
   }
@@ -109,7 +116,7 @@ export class HorizonBasesView extends BasesView {
     const el = this.rootEl;
     el.empty();
     const today = todayKey();
-    const showWeeks = this.booleanOption('showWeekNumbers', true);
+    const showWeeks = this.ctx.settings.showWeekNumbers;
 
     const header = el.createDiv({ cls: 'horizon-cal__header' });
     header.createSpan({
@@ -201,11 +208,6 @@ export class HorizonBasesView extends BasesView {
   private textOption(key: string, fallback: string): string {
     const value = this.config.get(key);
     return typeof value === 'string' && value.trim() !== '' ? value.trim() : fallback;
-  }
-
-  private booleanOption(key: string, fallback: boolean): boolean {
-    const value = this.config.get(key);
-    return typeof value === 'boolean' ? value : fallback;
   }
 
   private readonly handleClick = (event: MouseEvent): void => {
