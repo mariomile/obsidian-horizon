@@ -2,6 +2,8 @@
 
 Calendar for your Obsidian vault: daily and periodic notes, tasks, and dated notes in one place.
 
+Part of the marioverse Obsidian plugin suite.
+
 ## Views
 
 - **Sidebar mini calendar** — month at a glance with content dots: daily note (accent), due tasks (orange), overdue (red), scheduled (cyan), done (green), dated notes (gray). ISO week numbers open weekly notes.
