@@ -4,6 +4,11 @@ Calendar for your Obsidian vault: daily and periodic notes, tasks, and dated not
 
 Part of the marioverse Obsidian plugin suite.
 
+<p align="center">
+  <img src="docs/month.png" width="900" alt="Horizon — month view" />
+</p>
+<p align="center"><em>The month grid, with daily notes and due tasks shown right on their date.</em></p>
+
 ## Views
 
 - **Sidebar mini calendar** — month at a glance with content dots: daily note (accent), due tasks (orange), overdue (red), scheduled (cyan), done (green), dated notes (gray). ISO week numbers open weekly notes.
