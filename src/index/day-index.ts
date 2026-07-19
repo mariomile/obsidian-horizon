@@ -81,6 +81,11 @@ export class DayIndexCore {
     return () => this.listeners.delete(listener);
   }
 
+  clear(): void {
+    this.perFile.clear();
+    this.byDay = null;
+  }
+
   notify(): void {
     for (const listener of this.listeners) listener();
   }
