@@ -26,7 +26,7 @@ export class HorizonSidebarView extends ItemView {
   }
 
   getIcon(): string {
-    return 'calendar';
+    return 'hi-calendar';
   }
 
   async onOpen(): Promise<void> {

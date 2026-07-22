@@ -60,7 +60,7 @@ export class HorizonCalendarView extends ItemView {
   }
 
   getIcon(): string {
-    return 'calendar-days';
+    return 'hi-calendar';
   }
 
   async onOpen(): Promise<void> {

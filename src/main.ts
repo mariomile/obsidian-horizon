@@ -1,4 +1,4 @@
-import { moment, Notice, Plugin } from 'obsidian';
+import { addIcon, moment, Notice, Plugin } from 'obsidian';
 
 import { parseDayKey, todayKey } from './dates.ts';
 import { openPeriodicNote } from './edits/note-creator.ts';
@@ -17,6 +17,17 @@ import { BASES_CALENDAR_VIEW_TYPE, HorizonBasesView } from './ui/bases-view.ts';
 import { CALENDAR_VIEW_TYPE, HorizonCalendarView } from './ui/calendar-view.ts';
 import type { HorizonContext } from './ui/context.ts';
 import { HorizonSidebarView, SIDEBAR_VIEW_TYPE } from './ui/sidebar-view.ts';
+
+// Huge Icons (hugeicons.com, free/MIT, Stroke Rounded, 24x24 grid) — addIcon()
+// always wraps content in a fixed viewBox="0 0 100 100", so a 4.166667x scale
+// (100/24) brings the 24-unit paths to fill it correctly.
+addIcon(
+  'hi-calendar',
+  '<g transform="scale(4.166667)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">' +
+    '<path d="M16 2v4M8 2v4m5-2h-2C7.229 4 5.343 4 4.172 5.172S3 8.229 3 12v2c0 3.771 0 5.657 1.172 6.828S7.229 22 11 22h2c3.771 0 5.657 0 6.828-1.172S21 17.771 21 14v-2c0-3.771 0-5.657-1.172-6.828S16.771 4 13 4M3 10h18"/>' +
+    '<path d="M12.126 14H12m.125 4H12m-4.376-4H7.5m.125 4H7.5m9.125-4H16.5m-4.25 0a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0m0 4a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0m-4.5-4a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0m0 4a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0m9-4a.25.25 0 1 1-.5 0a.25.25 0 0 1 .5 0"/>' +
+    '</g>',
+);
 
 export default class HorizonPlugin extends Plugin {
   settings: HorizonSettings = structuredClone(DEFAULT_SETTINGS);
@@ -64,7 +75,7 @@ export default class HorizonPlugin extends Plugin {
     this.registerView(CALENDAR_VIEW_TYPE, (leaf) => new HorizonCalendarView(leaf, ctx));
     this.registerBasesView(BASES_CALENDAR_VIEW_TYPE, {
       name: 'Horizon',
-      icon: 'calendar-days',
+      icon: 'hi-calendar',
       factory: (controller, containerEl) => {
         const view = new HorizonBasesView(controller, containerEl, ctx, () => {
           this.basesViews.delete(view);
@@ -75,7 +86,7 @@ export default class HorizonPlugin extends Plugin {
       options: HorizonBasesView.getViewOptions,
     });
 
-    this.addRibbonIcon('calendar-days', 'Apri Horizon', () => {
+    this.addRibbonIcon('hi-calendar', 'Apri Horizon', () => {
       void this.activateCalendar();
     });
     this.addCommand({
