@@ -42,21 +42,23 @@ export function showDatePicker(
       text: ctx.moment(month, 'YYYY-MM-DD', true).format('MMMM YYYY'),
     });
     const nav = header.createDiv({ cls: 'horizon-cal__nav' });
-    const prevBtn = nav.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    // Native `.clickable-icon` divs: transparent resting state under Cosmos
+    // (which fills plain <button>s) and correct icon sizing via --icon-size.
+    const prevBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(prevBtn, 'chevron-left');
     prevBtn.setAttribute('aria-label', 'Mese precedente');
     prevBtn.onclick = () => {
       month = addMonths(month, -1);
       render();
     };
-    const todayBtn = nav.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    const todayBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(todayBtn, 'circle-dot');
     todayBtn.setAttribute('aria-label', 'Oggi');
     todayBtn.onclick = () => {
       month = todayKey();
       render();
     };
-    const nextBtn = nav.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    const nextBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(nextBtn, 'chevron-right');
     nextBtn.setAttribute('aria-label', 'Mese successivo');
     nextBtn.onclick = () => {

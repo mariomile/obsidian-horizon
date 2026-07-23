@@ -19,12 +19,16 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     pill.toggleClass('is-pending', pending !== null);
     const shownKey = pending ?? key;
 
-    const prev = pill.createEl('button', { cls: 'horizon-daybar-arrow' });
+    // Icon controls use Obsidian's native `.clickable-icon` div (not a
+    // <button>): themes like Cosmos give plain <button>s a filled resting
+    // background, while `.clickable-icon` is the transparent icon-button
+    // primitive they skin — and it defines --icon-size so the svg renders.
+    const prev = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
     setIcon(prev, 'chevron-left');
     prev.setAttribute('aria-label', 'Giorno precedente');
     prev.onclick = () => void step(-1);
 
-    const label = pill.createEl('button', {
+    const label = pill.createDiv({
       cls: 'horizon-daybar-label',
       text: formatDayLabel(ctx.moment, shownKey),
     });
@@ -40,13 +44,13 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     };
 
     if (pending) {
-      const create = pill.createEl('button', { cls: 'horizon-daybar-create' });
+      const create = pill.createDiv({ cls: 'clickable-icon horizon-daybar-create' });
       setIcon(create, 'plus');
       create.setAttribute('aria-label', 'Crea questa nota');
       create.onclick = () => void createAndOpen(pending as DayKey);
     }
 
-    const next = pill.createEl('button', { cls: 'horizon-daybar-arrow' });
+    const next = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
     setIcon(next, 'chevron-right');
     next.setAttribute('aria-label', 'Giorno successivo');
     next.onclick = () => void step(1);

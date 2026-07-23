@@ -1274,9 +1274,10 @@
 
 /* ============================== Daybar ============================== */
 /* Date-stepper pill in the daily-note view-header. Transparent chrome — no
-   decorative surface behind the tab bar, only geometry + hover/active. Arrows
-   reuse the 28px icon-button treatment of .horizon-cal__nav-btn (the shared
-   house pattern across the suite) so the daybar reads as native Horizon. */
+   decorative surface behind the tab bar. The arrows and ＋ are native
+   `.clickable-icon` divs (see daybar.ts), so themes like Cosmos skin them as
+   transparent-at-rest icon buttons instead of filled <button>s — and
+   `.clickable-icon` defines --icon-size so the chevron svg sizes correctly. */
 .horizon-daybar {
   display: inline-flex;
   align-items: center;
@@ -1284,39 +1285,14 @@
   margin-right: var(--size-4-1);
 }
 
-.horizon-daybar-arrow,
+/* Tint only the create affordance; the arrows keep the native icon color. */
 .horizon-daybar-create {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-s);
-  box-shadow: none;
-  cursor: pointer;
-  transition: background-color 80ms ease, color 80ms ease;
-}
-/* The pill arrows and picker nav are flex buttons. Outside a .clickable-icon
-   context --icon-size is unset, so app.css's `svg.svg-icon { width: var(--icon-size) }`
-   yields no width and flex-shrink collapses the icon to 0px wide (an explicit
-   width alone is still overridden by the flex min-size). Pin the box AND stop
-   the shrink so the chevrons actually render. */
-.horizon-daybar .svg-icon,
-.horizon-datepicker .horizon-cal__nav-btn .svg-icon {
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
-  flex-shrink: 0;
+  color: var(--interactive-accent);
 }
 
+/* The date label is a plain div (not a <button>, which Cosmos fills): a subtle
+   text button that opens the calendar picker. */
 .horizon-daybar-label {
-  background: transparent;
-  border: none;
-  box-shadow: none;
   cursor: pointer;
   color: var(--text-normal);
   font-size: var(--font-ui-small);
@@ -1326,26 +1302,12 @@
   border-radius: var(--radius-s);
   transition: background-color 80ms ease, color 80ms ease;
 }
-
-.horizon-daybar-arrow:hover,
-.horizon-daybar-label:hover,
-.horizon-daybar-create:hover {
+.horizon-daybar-label:hover {
   background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
 }
-.horizon-daybar-arrow:focus-visible,
-.horizon-daybar-label:focus-visible,
-.horizon-daybar-create:focus-visible {
-  outline: 2px solid var(--interactive-accent);
-  outline-offset: 2px;
-}
-
 .horizon-daybar.is-pending .horizon-daybar-label {
   color: var(--text-faint);
   font-style: italic;
-}
-.horizon-daybar-create {
-  color: var(--interactive-accent);
 }
 
 /* Date-picker popover — the floating shell only. Its contents reuse Horizon's
