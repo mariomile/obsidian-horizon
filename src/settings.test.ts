@@ -45,3 +45,17 @@ describe('parseSettings', () => {
     assert.equal(DEFAULT_SETTINGS.periods.daily.folder, '');
   });
 });
+
+describe('daybar setting', () => {
+  it('defaults to true', () => {
+    assert.equal(DEFAULT_SETTINGS.daybar, true);
+  });
+
+  it('round-trips a stored false', () => {
+    assert.equal(parseSettings({ daybar: false }).daybar, false);
+  });
+
+  it('falls back to true when absent', () => {
+    assert.equal(parseSettings({}).daybar, true);
+  });
+});

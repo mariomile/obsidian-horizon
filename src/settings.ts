@@ -18,6 +18,7 @@ export interface HorizonSettings {
   showDone: boolean;
   showNotes: boolean;
   confirmBeforeCreate: boolean;
+  daybar: boolean;
   lastMode: CalendarMode;
 }
 
@@ -62,6 +63,7 @@ export const DEFAULT_SETTINGS: HorizonSettings = {
   showDone: true,
   showNotes: true,
   confirmBeforeCreate: true,
+  daybar: true,
   lastMode: 'month',
 };
 
@@ -93,6 +95,7 @@ export function parseSettings(data: unknown): HorizonSettings {
       data.confirmBeforeCreate,
       DEFAULT_SETTINGS.confirmBeforeCreate,
     ),
+    daybar: booleanValue(data.daybar, DEFAULT_SETTINGS.daybar),
     lastMode: modeValue(data.lastMode, DEFAULT_SETTINGS.lastMode),
   };
 }

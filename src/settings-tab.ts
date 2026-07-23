@@ -57,6 +57,16 @@ export class HorizonSettingTab extends PluginSettingTab {
         }),
       );
 
+    new Setting(containerEl)
+      .setName('Barra data nelle note giornaliere')
+      .setDesc('Mostra il selettore ‹ data › nell’intestazione delle note giornaliere.')
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.daybar).onChange(async (value) => {
+          this.plugin.settings.daybar = value;
+          await this.plugin.saveSettings();
+        }),
+      );
+
     const visibility: Array<{ key: 'showDue' | 'showScheduled' | 'showDone' | 'showNotes'; name: string; desc: string }> = [
       { key: 'showDue', name: 'Tasks in scadenza', desc: 'Mostra i tasks con data 📅 due.' },
       { key: 'showScheduled', name: 'Tasks pianificati', desc: 'Mostra i tasks con data ⏳ scheduled.' },
