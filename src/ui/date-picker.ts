@@ -1,4 +1,4 @@
-import { addMonths, dayKey, parseDayKey, todayKey } from '../dates.ts';
+import { addMonths, parseDayKey, todayKey } from '../dates.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { buildPickerCells } from './daybar-core.ts';

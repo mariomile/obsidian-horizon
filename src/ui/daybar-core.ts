@@ -1,4 +1,4 @@
-import { addDays, compareDayKeys, dayKey, monthGrid, parseDayKey } from '../dates.ts';
+import { compareDayKeys, monthGrid, parseDayKey } from '../dates.ts';
 import { basenameToDate } from '../index/periodic.ts';
 import type { MomentLike } from '../index/periodic.ts';
 import type { DayKey } from '../types.ts';
@@ -52,6 +52,3 @@ export function buildPickerCells(
     };
   });
 }
-
-// Re-export for convenience of callers stepping days.
-export { addDays, dayKey };

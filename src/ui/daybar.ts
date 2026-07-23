@@ -95,8 +95,8 @@ export class DaybarManager {
     actions.querySelectorAll(`.${PILL_CLASS}`).forEach((el) => el.remove());
 
     const file: TFile | null = view.file;
-    if (!file || !this.ctx.settings.daybar) return;
     const daily = this.ctx.settings.periods.daily;
+    if (!file || !this.ctx.settings.daybar || !daily.enabled) return;
     const key = resolveDailyKey(this.ctx.moment, daily.folder, daily.format, file.path);
     if (!key) return;
 
