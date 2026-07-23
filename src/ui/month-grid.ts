@@ -132,7 +132,9 @@ export class MonthGrid extends Component {
     label: string,
     onClick: () => void,
   ): void {
-    const button = parent.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    // Native clickable-icon div, not a <button>: themes like Cosmos fill plain
+    // <button>s with a resting background, reading as opaque bubbles.
+    const button = parent.createDiv({ cls: 'clickable-icon horizon-cal__nav-btn' });
     button.setAttribute('aria-label', label);
     setIcon(button, icon);
     button.addEventListener('click', (event) => {

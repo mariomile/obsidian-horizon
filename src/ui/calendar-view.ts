@@ -222,7 +222,8 @@ export class HorizonCalendarView extends ItemView {
   }
 
   private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): HTMLElement {
-    const button = parent.createEl('button', { cls: 'clickable-icon horizon-view__nav-btn' });
+    // Native clickable-icon div, not a <button> (Cosmos fills <button> by tag).
+    const button = parent.createDiv({ cls: 'clickable-icon horizon-view__nav-btn' });
     button.setAttribute('aria-label', label);
     setIcon(button, icon);
     button.addEventListener('click', onClick);

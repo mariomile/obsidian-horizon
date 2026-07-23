@@ -196,7 +196,8 @@ export class HorizonBasesView extends BasesView {
   }
 
   private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): void {
-    const button = parent.createEl('button', { cls: 'clickable-icon horizon-cal__nav-btn' });
+    // Native clickable-icon div, not a <button> (Cosmos fills <button> by tag).
+    const button = parent.createDiv({ cls: 'clickable-icon horizon-cal__nav-btn' });
     button.setAttribute('aria-label', label);
     setIcon(button, icon);
     button.addEventListener('click', (event) => {
