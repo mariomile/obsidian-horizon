@@ -1,3 +1,5 @@
+import { setIcon } from 'obsidian';
+
 import { addMonths, parseDayKey, todayKey } from '../dates.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
@@ -30,27 +32,40 @@ export function showDatePicker(
     pop.empty();
     const ymd = parseDayKey(month);
     if (!ymd) return;
-    const header = pop.createDiv({ cls: 'horizon-dp-header' });
-    header.createSpan({
-      cls: 'horizon-dp-title',
+    // Reuse Horizon's own calendar skin so the picker reads as the same
+    // component as the sidebar mini-calendar (and inherits theme overrides).
+    const cal = pop.createDiv({ cls: 'horizon-cal' });
+
+    const header = cal.createDiv({ cls: 'horizon-cal__header' });
+    header.createDiv({
+      cls: 'horizon-cal__title',
       text: ctx.moment(month, 'YYYY-MM-DD', true).format('MMMM YYYY'),
     });
-    const nav = header.createDiv({ cls: 'horizon-dp-nav' });
-    nav.createEl('button', { cls: 'horizon-dp-btn', text: '‹' }).onclick = () => {
+    const nav = header.createDiv({ cls: 'horizon-cal__nav' });
+    const prevBtn = nav.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    setIcon(prevBtn, 'chevron-left');
+    prevBtn.setAttribute('aria-label', 'Mese precedente');
+    prevBtn.onclick = () => {
       month = addMonths(month, -1);
       render();
     };
-    nav.createEl('button', { cls: 'horizon-dp-btn', text: '⊙' }).onclick = () => {
+    const todayBtn = nav.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    setIcon(todayBtn, 'circle-dot');
+    todayBtn.setAttribute('aria-label', 'Oggi');
+    todayBtn.onclick = () => {
       month = todayKey();
       render();
     };
-    nav.createEl('button', { cls: 'horizon-dp-btn', text: '›' }).onclick = () => {
+    const nextBtn = nav.createEl('button', { cls: 'horizon-cal__nav-btn' });
+    setIcon(nextBtn, 'chevron-right');
+    nextBtn.setAttribute('aria-label', 'Mese successivo');
+    nextBtn.onclick = () => {
       month = addMonths(month, 1);
       render();
     };
 
-    const grid = pop.createDiv({ cls: 'horizon-dp-grid' });
-    for (const wd of WEEKDAYS) grid.createSpan({ cls: 'horizon-dp-weekday', text: wd });
+    const grid = cal.createDiv({ cls: 'horizon-cal__grid' });
+    for (const wd of WEEKDAYS) grid.createDiv({ cls: 'horizon-cal__dow', text: wd });
 
     const cells = buildPickerCells(month, {
       currentKey,
@@ -59,14 +74,12 @@ export function showDatePicker(
     });
     for (const cell of cells) {
       const day = parseDayKey(cell.key);
-      const el = grid.createEl('button', {
-        cls: 'horizon-dp-day',
-        text: String(day?.d ?? ''),
-      });
-      el.toggleClass('is-out', !cell.inMonth);
-      el.toggleClass('is-today', cell.isToday);
-      el.toggleClass('is-current', cell.isCurrent);
-      el.toggleClass('has-note', cell.hasNote);
+      const el = grid.createDiv({ cls: 'horizon-cell--mini' });
+      el.toggleClass('horizon-cell--other-month', !cell.inMonth);
+      el.toggleClass('horizon-cell--today', cell.isToday);
+      el.toggleClass('horizon-cell--active', cell.isCurrent);
+      el.toggleClass('horizon-cell--has-note', cell.hasNote);
+      el.createDiv({ cls: 'horizon-cell__num', text: String(day?.d ?? '') });
       el.onclick = () => {
         onPick(cell.key);
         close();

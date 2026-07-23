@@ -1,4 +1,4 @@
-import { MarkdownView, type TFile } from 'obsidian';
+import { MarkdownView, setIcon, type TFile } from 'obsidian';
 
 import { addDays } from '../dates.ts';
 import { ensurePeriodicNote, openPeriodicNote } from '../edits/note-creator.ts';
@@ -19,7 +19,9 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     pill.toggleClass('is-pending', pending !== null);
     const shownKey = pending ?? key;
 
-    const prev = pill.createEl('button', { cls: 'horizon-daybar-arrow', text: '‹' });
+    const prev = pill.createEl('button', { cls: 'horizon-daybar-arrow' });
+    setIcon(prev, 'chevron-left');
+    prev.setAttribute('aria-label', 'Giorno precedente');
     prev.onclick = () => void step(-1);
 
     const label = pill.createEl('button', {
@@ -38,12 +40,15 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     };
 
     if (pending) {
-      const create = pill.createEl('button', { cls: 'horizon-daybar-create', text: '＋' });
+      const create = pill.createEl('button', { cls: 'horizon-daybar-create' });
+      setIcon(create, 'plus');
       create.setAttribute('aria-label', 'Crea questa nota');
       create.onclick = () => void createAndOpen(pending as DayKey);
     }
 
-    const next = pill.createEl('button', { cls: 'horizon-daybar-arrow', text: '›' });
+    const next = pill.createEl('button', { cls: 'horizon-daybar-arrow' });
+    setIcon(next, 'chevron-right');
+    next.setAttribute('aria-label', 'Giorno successivo');
     next.onclick = () => void step(1);
   };
 

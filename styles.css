@@ -1272,112 +1272,98 @@
   }
 }
 
-/* Daybar — date-stepper pill in the daily-note header */
+/* ============================== Daybar ============================== */
+/* Date-stepper pill in the daily-note view-header. Transparent chrome — no
+   decorative surface behind the tab bar, only geometry + hover/active. Arrows
+   reuse the 28px icon-button treatment of .horizon-cal__nav-btn (the shared
+   house pattern across the suite) so the daybar reads as native Horizon. */
 .horizon-daybar {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  margin-right: 6px;
-  padding: 2px;
-  border-radius: var(--radius-m);
-  background: var(--background-modifier-hover);
+  gap: var(--size-2-1);
+  margin-right: var(--size-4-1);
 }
+
 .horizon-daybar-arrow,
-.horizon-daybar-label,
 .horizon-daybar-create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-s);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 80ms ease, color 80ms ease;
+}
+.horizon-daybar-arrow .svg-icon,
+.horizon-daybar-create .svg-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.horizon-daybar-label {
   background: transparent;
   border: none;
   box-shadow: none;
   cursor: pointer;
-  color: var(--text-muted);
-  padding: 2px 6px;
-  border-radius: var(--radius-s);
-  font-size: var(--font-ui-small);
-}
-.horizon-daybar-label {
   color: var(--text-normal);
+  font-size: var(--font-ui-small);
   font-weight: var(--font-medium);
+  font-variant-numeric: tabular-nums;
+  padding: var(--size-2-1) var(--size-2-3);
+  border-radius: var(--radius-s);
+  transition: background-color 80ms ease, color 80ms ease;
 }
+
 .horizon-daybar-arrow:hover,
 .horizon-daybar-label:hover,
 .horizon-daybar-create:hover {
-  background: var(--background-modifier-hover);
+  background-color: var(--background-modifier-hover);
   color: var(--text-normal);
 }
+.horizon-daybar-arrow:focus-visible,
+.horizon-daybar-label:focus-visible,
+.horizon-daybar-create:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
 .horizon-daybar.is-pending .horizon-daybar-label {
   color: var(--text-faint);
   font-style: italic;
 }
 .horizon-daybar-create {
   color: var(--interactive-accent);
-  font-weight: var(--font-bold);
 }
 
-/* Date-picker popover */
+/* Date-picker popover — the floating shell only. Its contents reuse Horizon's
+   own calendar classes (.horizon-cal*, .horizon-cell--mini), so the grid,
+   day numbers, today/active/has-note states and any Cosmos/theme overrides
+   come for free and match the sidebar mini-calendar exactly. */
 .horizon-datepicker {
   z-index: var(--layer-menu);
+  width: 264px;
+  padding: var(--size-4-2);
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-s);
-  padding: 10px;
-  width: 260px;
 }
-.horizon-dp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.horizon-dp-title { font-weight: var(--font-medium); }
-.horizon-dp-nav { display: inline-flex; gap: 2px; }
-.horizon-dp-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 2px 6px;
-  border-radius: var(--radius-s);
-}
-.horizon-dp-btn:hover { background: var(--background-modifier-hover); }
-.horizon-dp-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-.horizon-dp-weekday {
-  text-align: center;
-  font-size: var(--font-ui-smaller);
-  color: var(--text-faint);
-  padding-bottom: 4px;
-}
-.horizon-dp-day {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: var(--radius-s);
-  color: var(--text-normal);
-  font-size: var(--font-ui-small);
-  position: relative;
-}
-.horizon-dp-day:hover { background: var(--background-modifier-hover); }
-.horizon-dp-day.is-out { color: var(--text-faint); }
-.horizon-dp-day.is-current { background: var(--background-modifier-hover); font-weight: var(--font-bold); }
-.horizon-dp-day.is-today { box-shadow: inset 0 0 0 1px var(--interactive-accent); }
-.horizon-dp-day.has-note::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--interactive-accent);
+.horizon-datepicker .horizon-cal__header {
+  padding-top: 0;
 }
 
-/* Mobile: header is cramped — trim padding, hide the pill background */
-.is-phone .horizon-daybar { background: transparent; margin-right: 2px; }
-.is-phone .horizon-daybar-label { padding: 2px 4px; }
+/* Mobile (phone): arrows-only. Dropping the label removes the popover trigger
+   too — compact ‹ › prev/next that don't crowd the header. The ＋ create
+   affordance still surfaces in the pending state. */
+.is-phone .horizon-daybar-label {
+  display: none;
+}
+.is-phone .horizon-daybar {
+  margin-right: var(--size-2-1);
+}
