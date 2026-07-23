@@ -1271,3 +1271,113 @@
     inset: calc((100% - 44px) / 2);
   }
 }
+
+/* Daybar — date-stepper pill in the daily-note header */
+.horizon-daybar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 6px;
+  padding: 2px;
+  border-radius: var(--radius-m);
+  background: var(--background-modifier-hover);
+}
+.horizon-daybar-arrow,
+.horizon-daybar-label,
+.horizon-daybar-create {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-small);
+}
+.horizon-daybar-label {
+  color: var(--text-normal);
+  font-weight: var(--font-medium);
+}
+.horizon-daybar-arrow:hover,
+.horizon-daybar-label:hover,
+.horizon-daybar-create:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.horizon-daybar.is-pending .horizon-daybar-label {
+  color: var(--text-faint);
+  font-style: italic;
+}
+.horizon-daybar-create {
+  color: var(--interactive-accent);
+  font-weight: var(--font-bold);
+}
+
+/* Date-picker popover */
+.horizon-datepicker {
+  z-index: var(--layer-menu);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-s);
+  padding: 10px;
+  width: 260px;
+}
+.horizon-dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.horizon-dp-title { font-weight: var(--font-medium); }
+.horizon-dp-nav { display: inline-flex; gap: 2px; }
+.horizon-dp-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: var(--radius-s);
+}
+.horizon-dp-btn:hover { background: var(--background-modifier-hover); }
+.horizon-dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.horizon-dp-weekday {
+  text-align: center;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  padding-bottom: 4px;
+}
+.horizon-dp-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-s);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  position: relative;
+}
+.horizon-dp-day:hover { background: var(--background-modifier-hover); }
+.horizon-dp-day.is-out { color: var(--text-faint); }
+.horizon-dp-day.is-current { background: var(--background-modifier-hover); font-weight: var(--font-bold); }
+.horizon-dp-day.is-today { box-shadow: inset 0 0 0 1px var(--interactive-accent); }
+.horizon-dp-day.has-note::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--interactive-accent);
+}
+
+/* Mobile: header is cramped — trim padding, hide the pill background */
+.is-phone .horizon-daybar { background: transparent; margin-right: 2px; }
+.is-phone .horizon-daybar-label { padding: 2px 4px; }
