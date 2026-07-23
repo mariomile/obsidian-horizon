@@ -79,3 +79,8 @@ pnpm lint
 ```
 
 Architecture: a pure per-day index (`src/index/`) fed by `metadataCache` events, consumed by two `ItemView`s (`src/ui/`). All date math is UTC-immune (`src/dates.ts`); file writes go through guarded line edits (`src/edits/`). Pure modules never import the Obsidian runtime, so the whole read/write logic tests headless.
+
+## Try it
+
+See it running in the [Obsidianverse sample vault](https://github.com/mariomile/obsidianverse-sample-vault) — a small, fictional vault with the whole plugin suite pre-configured.
+
