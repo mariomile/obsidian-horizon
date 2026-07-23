@@ -1300,10 +1300,17 @@
   cursor: pointer;
   transition: background-color 80ms ease, color 80ms ease;
 }
-.horizon-daybar-arrow .svg-icon,
-.horizon-daybar-create .svg-icon {
+/* The pill arrows and picker nav are flex buttons. Outside a .clickable-icon
+   context --icon-size is unset, so app.css's `svg.svg-icon { width: var(--icon-size) }`
+   yields no width and flex-shrink collapses the icon to 0px wide (an explicit
+   width alone is still overridden by the flex min-size). Pin the box AND stop
+   the shrink so the chevrons actually render. */
+.horizon-daybar .svg-icon,
+.horizon-datepicker .horizon-cal__nav-btn .svg-icon {
   width: 16px;
   height: 16px;
+  min-width: 16px;
+  flex-shrink: 0;
 }
 
 .horizon-daybar-label {
