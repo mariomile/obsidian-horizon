@@ -16,6 +16,7 @@ import { UiState } from './state.ts';
 import { BASES_CALENDAR_VIEW_TYPE, HorizonBasesView } from './ui/bases-view.ts';
 import { CALENDAR_VIEW_TYPE, HorizonCalendarView } from './ui/calendar-view.ts';
 import type { HorizonContext } from './ui/context.ts';
+import { DaybarManager } from './ui/daybar.ts';
 import { HorizonSidebarView, SIDEBAR_VIEW_TYPE } from './ui/sidebar-view.ts';
 
 // Huge Icons (hugeicons.com, free/MIT, Stroke Rounded, 24x24 grid) — addIcon()
@@ -38,6 +39,7 @@ export default class HorizonPlugin extends Plugin {
   preview!: NotePreviewService;
   uiState!: UiState;
   api!: HorizonApi;
+  private daybar!: DaybarManager;
   private exportTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly basesViews = new Set<HorizonBasesView>();
 
@@ -168,6 +170,11 @@ export default class HorizonPlugin extends Plugin {
     this.dayIndex.start(this);
     this.proposals.start(this);
     this.api = new HorizonApi(ctx, () => this.writeAgendaExport());
+    this.daybar = new DaybarManager(ctx);
+    const syncDaybar = (): void => this.daybar.syncAll();
+    this.registerEvent(this.app.workspace.on('active-leaf-change', syncDaybar));
+    this.registerEvent(this.app.workspace.on('file-open', syncDaybar));
+    this.registerEvent(this.app.workspace.on('layout-change', syncDaybar));
     this.register(this.dayIndex.subscribe(() => this.queueAgendaExport()));
     this.register(() => {
       if (this.exportTimer !== null) clearTimeout(this.exportTimer);
@@ -185,10 +192,12 @@ export default class HorizonPlugin extends Plugin {
 
     this.app.workspace.onLayoutReady(() => {
       void this.activateSidebar(false);
+      this.daybar.syncAll();
     });
   }
 
   onunload(): void {
+    this.daybar?.destroy();
     this.app.workspace.detachLeavesOfType(SIDEBAR_VIEW_TYPE);
     this.app.workspace.detachLeavesOfType(CALENDAR_VIEW_TYPE);
   }
@@ -252,6 +261,7 @@ export default class HorizonPlugin extends Plugin {
    * numbers) take effect immediately instead of only on reopen.
    */
   private refreshViews(): void {
+    this.daybar?.syncAll();
     for (const view of this.basesViews) view.refresh();
     for (const leaf of this.app.workspace.getLeavesOfType(SIDEBAR_VIEW_TYPE)) {
       if (leaf.view instanceof HorizonSidebarView) leaf.view.refresh();
