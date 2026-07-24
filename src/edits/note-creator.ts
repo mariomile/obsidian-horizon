@@ -29,7 +29,8 @@ class ConfirmCreateModal extends Modal {
     this.titleEl.setText('Horizon');
     this.contentEl.createEl('p', { text: this.message });
     const buttons = this.contentEl.createDiv({ cls: 'modal-button-container' });
-    const create = buttons.createEl('button', { cls: 'mod-cta', text: 'Crea' });
+    // mv-kit §5 MUST NOT: no plugin button carries mod-cta.
+    const create = buttons.createEl('button', { text: 'Crea' });
     create.addEventListener('click', () => {
       this.confirmed = true;
       this.close();
