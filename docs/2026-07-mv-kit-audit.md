@@ -125,3 +125,92 @@ transition: background-color          :root {
   plugins); phone changes (touch targets, press-scale, motion tokens) are
   verified by reading the resulting CSS values against the kit's phone
   column, not by rendering on-device.
+
+---
+
+## §6 — wave 2026-07 dinamica
+
+Audit of `styles.css` (1338 lines pre-wave-6, 1431 post-fix) + `src/ui/dnd.ts`,
+`src/ui/day-cell.ts`, `src/ui/daybar.ts`, `src/ui/calendar-view.ts`,
+`src/ui/popover.ts`, `src/ui/hover-card.ts`, `src/ui/date-picker.ts` against
+`obsidian-cosmos-theme/docs/mv-kit.md` §6 "Elevation & motion depth" (commit
+`10f5ddc`, cantiere 2 — "Dinamica & profondità"). Scope: motion/elevation
+coherence only — no layout redesign, no new components, per the same
+non-goals as wave 5. Model commits consulted: obsidian-portal `389d564` +
+`133c93d` + `4b95bf2`, obsidian-tabx `cc65cd4` + `a792752` + `662d11a`.
+
+Per-rule verdict: **pass** (already compliant, nothing to do) / **fixed**
+(this wave) / **waived** (kit rule doesn't literally apply to this surface,
+with reason) / **N/A** (no surface of this type exists in the plugin).
+
+### Elevation hierarchy
+
+| Surface | Desktop | Phone | Verdict |
+|---|---|---|---|
+| `.horizon-popover` / `.horizon-hovercard` (Pop-tier candidates — day-detail popover, month-chip hover card; both close on outside interaction / pointer-leave) | `box-shadow: var(--shadow-l)`, native token, no ad-hoc rgba | same | **pass, waived — native-token equivalent**, carried forward from wave 5's §1 verdict on the same three surfaces (unchanged this wave; no new violation to fix). The kit's MUST is "never hand-pick a shadow" — Horizon already consumes Obsidian's own elevation scale rather than a hardcoded value, the same class of theme-derived value the kit's other `pass` verdicts accept. Migrating the literal token to `--cosmos-pop-shadow` specifically is a visual change outside this wave's minimal-fix mandate (flagged, not required — see "Not touched" below). |
+| `.horizon-datepicker` (Pop-tier candidate — daybar's date picker, closes on outside-click) | `box-shadow: var(--shadow-s)`, native token | same | **pass, waived — same reasoning as above.** |
+| Stacked tiers | 0 surfaces combine two shadow declarations (`box-shadow` + `--cosmos-glass-*`, or two elevation tokens) on one element — every floating surface has exactly one `box-shadow` line | same | **pass** — grepped all 10 `box-shadow` declarations in the file; none stack. |
+| `.horizon-cell--today`, `.horizon-agenda__day--today`, `.horizon-week__col--today`, drop-target highlight (`.horizon-drop`) | `box-shadow: inset 0 0 0 …` rings | same | **pass, not an elevation case** — inset rings are state indicators (today/active/drop-target), not depth shadows; nothing to stack against, same verdict class as Portal's kb-cursor ring. |
+
+### Hover richness
+
+| Rule | Desktop | Phone | Verdict |
+|---|---|---|---|
+| Colour **and** lift on card-shaped surfaces, never colour alone | **was a violation on 2 of 2 card surfaces**: `.horizon-chip--card` (note mini-card) and `.horizon-journal__card` (journal entry card) both had border-color/box-shadow richness on `:hover` but zero `transform` — same pre-fix gap TabX found on `.tabx-card:hover` | same fix applies (no phone hover exists — see gating row below) | **fixed** — added `transform: translateY(-1px)` to both cards' `:hover` rule (inside the new `@media (hover: hover)` gate), plus a `transform` leg on each card's base `transition` using its own `--mv-lift` alias (`var(--cosmos-t-fast, 80ms) var(--mv-lift, cubic-bezier(0.22, 1, 0.36, 1))`) — kept separate from `--horizon-ease` (`--mv-wash`) per the kit's "not interchangeable" rule. Guarded by a new style-contract test. |
+| Colour-only hover on row/list surfaces (never mixed with a lift) | 19 of 21 `:hover` rules are colour/opacity/border washes on row-shaped or glyph-shaped surfaces (`.horizon-cal__nav-btn`, `.horizon-cal__weeknum`, `.horizon-cell--mini`, `.horizon-view__mode-btn`, `.horizon-view__today-btn`, `.horizon-cell--full`, `.horizon-chip`, `.horizon-chip__check`, `.horizon-chip--more`, `.horizon-cell__overdue-badge`, `.horizon-agenda__batch-btn`, `.horizon-chip--ghost`, `.horizon-ghost__accept`/`__dismiss`, `.horizon-week__head`, `.horizon-agenda__head`, `.horizon-journal__open`/`__expand`, `.horizon-daybar-label`) — none of these have a transform lift | same | **pass, waived** — same row-vs-card reasoning as obsidian-portal's wave-2 §6 verdict: mv-kit's own code example shows `.row:hover` (colour-only) and `.card:hover` (lift-only) as two distinct patterns, not one rule both must satisfy. These 19 surfaces are dense list rows, inline chips, and glyph-scale controls, not card-shaped content blocks — adding a lift to a calendar day cell or a 12px checkbox glyph would read as jitter, not the kit's "hint." |
+| `--mv-wash` for colour transitions, `--mv-lift` for transform transitions (not interchangeable) | Was already correct pre-wave-6: `--horizon-ease` (wired to `--mv-wash` since wave 5) is used exclusively on `background-color`/`color`/`border-color`/`box-shadow` transitions — grepped all 17 uses, zero pair it with a `transform`. The two new card-lift `transition` legs (this wave) use a separate, non-shared `--mv-lift` inline expression, never `--horizon-ease` | same | **pass** — no mixing existed before this wave (wave 5 built `--horizon-ease` narrowly, coincidentally already §6-clean), and the new lift transitions this wave correctly use their own easing rather than repointing `--horizon-ease`. |
+| `transform` lift never exceeds 2px | `.horizon-chip--card`/`.horizon-journal__card` lifts are `translateY(-1px)` | same | **pass** — under the 2px cap. |
+| Hover gated to `@media (hover: hover)` on phone-reachable elements | **was a violation**: 0 of the file's 21 `:hover` rules were wrapped — every surface (calendar cells, chips, buttons, cards) is phone-reachable (the whole calendar view renders full-width on a phone per the file's own existing `@media (max-width: 480px)`/`@media (pointer: coarse)` blocks) | same rule, now fixed | **fixed** — wrapped all 21 `:hover` rules (19 `@media (hover: hover)` blocks; two group two selectors each — `.horizon-ghost__accept`/`__dismiss` and `.horizon-journal__open`/`__expand`) in `@media (hover: hover)`. No reveal-only hover pattern exists in the file (checked: the only `opacity: 0` base states are the async excerpt/thumb fades, driven by an `.is-loaded` class from JS, not `:hover`; `.horizon-chip--ghost`'s base opacity is `0.75`, not `0`, so its hover-only opacity-to-1 bump never strands a control fully invisible on touch) — so no phone always-visible fallback was needed anywhere, unlike Portal's `.portal-collection-open` case. `:focus-visible` rules (the shared `[class^="horizon-"] … :focus-visible` block) were left untouched and ungated. Guarded by a new style-contract test. |
+
+### Drag polish
+
+| Surface | Desktop | Phone | Verdict |
+|---|---|---|---|
+| Drag positioning via `transform`, never `left`/`top`/`margin` | Horizon uses native HTML5 drag-and-drop exclusively (`el.draggable = true` in `src/ui/day-cell.ts`; `dragover`/`drop`/`dragleave` listeners in `src/ui/dnd.ts`, delegated per-container) — confirmed by reading both files in full: no `setDragImage`, no `.is-dragging`/`.is-dropped` class pair, no synthetic drag-ghost element anywhere in `src/` | same, native DnD has no phone equivalent gesture in Horizon (no long-press-to-drag implemented; phone task-move happens through the day-popover instead) | **N/A** — the browser's native drag-ghost paints itself; Horizon has no transform-driven dragged element for this rule to govern. `.horizon-chip--dragging { opacity: 0.4 }` is a static opacity dim toggled via class add/remove on `dragstart`/`dragend` (not a per-frame `left`/`top` reposition), the standard idiom for "this is the thing being dragged," not the anti-pattern the rule targets. `.horizon-drop`'s `box-shadow`/`background-color` (drop-target highlight) is likewise a static toggle on `dragover`/`dragleave`, not a repositioned element. |
+| Drop settle via `--cosmos-native` | n/a — no drop-settle animation exists; native browser drag-end has no Horizon-owned settle transition (the dropped task simply re-renders via the day/week/agenda's normal data refresh) | same | **N/A** |
+
+### Panel & tab transitions
+
+| Surface | Desktop | Phone | Verdict |
+|---|---|---|---|
+| `.horizon-view__mode-btn--active` switch (Month/Week/Agenda/Journal — a genuine tab-content-swap: `calendar-view.ts`'s `mountMode()` calls `modeHostEl.empty()` then mounts the new mode's component) | Instant DOM swap (`.empty()` + re-mount), no transition, no slide | same | **waived, flagged not fixed** — this IS the kit's "tab switch (content swap)" surface, and the kit's MUST is a crossfade over `--cosmos-t-base`/`--cosmos-native`, explicitly never a slide-in. Horizon's current instant swap doesn't violate the MUST NOT (no slide-in exists — the worse anti-pattern), but it also doesn't implement the MUST (no crossfade). Fixing it correctly means adding an opacity-transition wrapper around `mountMode()`'s DOM-replace in `calendar-view.ts` (JS lifecycle, not a CSS-only token substitution), the same class of gap wave 5 already flagged for the popover/hover-card/date-picker entrance animation (§3) and explicitly declined to fix under a coherence-only mandate to avoid touching render-timing code. Flagged here as a genuine, unaddressed §6 gap for a dedicated follow-up wave — not silently waived as compliant. |
+| `.horizon-daybar` pill's pending→confirmed state swap (`buildPill()`'s `render()` in `daybar.ts`: `pill.empty()` + rebuild on every step/create) | Instant swap, no transition | same | **waived, not a panel/tab case** — a 3-element inline pill (prev/label/create/next) re-rendering its icon set on date-step is not a "persistent panel" (nothing opens/closes structurally) nor a content-area tab-swap; it's the same class of instant micro-update as a button's icon change, outside §6's two named categories. |
+| Section/collapse or sidebar open-close chrome of Horizon's own | Horizon owns no collapsible section or sidebar-toggle chrome — the sidebar mini-calendar (`.horizon-sidebar`) is Obsidian's native sidedock, not a Horizon-authored collapse/expand | same | **N/A** — nothing to animate; Horizon doesn't own this surface class (same verdict shape as Portal's/TabX's own "no floating chrome of our own" N/A rows for surfaces outside their scope). |
+
+### Not touched (explicit non-goals, confirmed out of scope)
+
+- No layout/DOM changes anywhere — every fix in this wave is a CSS-only
+  addition (a `@media (hover: hover)` wrapper, or a `transform` +
+  `transition` leg on two already-existing card selectors).
+- Tab-content-swap crossfade for Month/Week/Agenda/Journal mode switching
+  (see Panel & tab transitions above) — flagged as a genuine gap, not
+  fixed; implementing it correctly requires wrapping `mountMode()`'s
+  DOM-replace in `calendar-view.ts` with an opacity transition, which is a
+  JS render-timing change outside a CSS-only coherence pass, same class of
+  deferral as wave 5's popover-entrance-animation flag.
+- `--cosmos-pop-shadow` migration for `.horizon-popover`/`.horizon-hovercard`/
+  `.horizon-datepicker` (see Elevation hierarchy above) — carried forward
+  unchanged from wave 5's §1 "Not touched" entry; native `--shadow-l`/
+  `--shadow-s` tokens already avoid hardcoded elevation values, exact
+  suite-shadow-recipe parity remains deferred.
+- Row/chip/glyph-scale hover surfaces kept colour-only, no lift added (see
+  Hover richness above) — outside the kit's card-lift vocabulary per its
+  own row/card example.
+
+### Verification
+
+- `pnpm test` — `src/style-contract.test.ts`: 6 tests passing (4
+  pre-existing wave-5 assertions + 2 new §6 assertions added this wave:
+  "every `:hover` selector is gated behind `@media (hover: hover)`" and
+  "card-shaped hover surfaces pair colour richness with a lift transform").
+  Both new assertions were verified red-green: written against the
+  pre-fix file (confirmed failing — 22/21 ungated `:hover` occurrences for
+  the first, 2/2 missing-lift card surfaces for the second), then the
+  minimal fix applied, then re-run to confirm green.
+- Full `pnpm release:check` numbers reported in the wave's landing commit.
+- Desktop/phone verification: same constraint as wave 5 —
+  `EmulateMobile` never enabled (kills Node-based plugins); phone
+  hover-gate correctness is verified by reading the resulting CSS
+  (`@media (hover: hover)` wrapper present, no reveal-only pattern
+  stranded behind it) against the kit's phone column. Phone sign-off
+  remains Mario's, on-device.
