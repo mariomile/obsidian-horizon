@@ -24,7 +24,7 @@ async function editTaskLine(
 ): Promise<boolean> {
   const file = ctx.app.vault.getFileByPath(ref.path);
   if (!file) {
-    if (!options?.silent) new Notice('Horizon: file non trovato.');
+    if (!options?.silent) new Notice('Horizon: file not found.');
     return false;
   }
   let changed = false;
@@ -34,7 +34,7 @@ async function editTaskLine(
     return result.content;
   });
   if (!changed && !options?.silent) {
-    new Notice('Horizon: il task è cambiato nel frattempo — riprova.');
+    new Notice('Horizon: the task changed in the meantime — try again.');
   }
   return changed;
 }
@@ -54,7 +54,7 @@ export async function toggleTaskDone(ctx: HorizonContext, ref: TaskRef): Promise
   const parsed = parseTaskLine(ref.rawText);
   if (!parsed) return;
   if (parsed.recurring) {
-    new Notice('Horizon: i task ricorrenti si completano dal file — te lo apro.');
+    new Notice('Horizon: recurring tasks are completed from the file — opening it for you.');
     await openAtLine(ctx, ref);
     return;
   }
@@ -83,7 +83,7 @@ export async function rescheduleTask(
   return changed;
 }
 
-/** Success Notice with a 10s "Annulla" that re-applies the old date through the same guards. */
+/** Success Notice with a 10s "Undo" that re-applies the old date through the same guards. */
 function noticeWithUndo(
   ctx: HorizonContext,
   ref: TaskRef,
@@ -92,15 +92,15 @@ function noticeWithUndo(
   oldKey: DayKey | undefined,
 ): void {
   const fragment = document.createDocumentFragment();
-  fragment.createSpan({ text: `Horizon: task spostato al ${newKey}. ` });
+  fragment.createSpan({ text: `Horizon: task moved to ${newKey}. ` });
   if (oldKey !== undefined) {
-    const undo = fragment.createEl('a', { text: 'Annulla' });
+    const undo = fragment.createEl('a', { text: 'Undo' });
     const notice = new Notice(fragment, 10_000);
     undo.addEventListener('click', () => {
       notice.hide();
       const movedRef: TaskRef = { ...ref, rawText: rewriteDate(ref.rawText, kind, newKey) };
       void rescheduleTask(ctx, movedRef, kind, oldKey, { silent: true }).then((ok) => {
-        new Notice(ok ? `Horizon: ripristinato al ${oldKey}.` : 'Horizon: annullamento non riuscito.');
+        new Notice(ok ? `Horizon: restored to ${oldKey}.` : 'Horizon: undo failed.');
       });
     });
     return;
@@ -118,6 +118,6 @@ export async function rescheduleAll(
   for (const { ref, kind } of refs) {
     if (await rescheduleTask(ctx, ref, kind, targetKey, { silent: true })) moved += 1;
   }
-  new Notice(`Horizon: spostati ${moved}/${refs.length} task al ${targetKey}.`);
+  new Notice(`Horizon: moved ${moved}/${refs.length} tasks to ${targetKey}.`);
   return moved;
 }

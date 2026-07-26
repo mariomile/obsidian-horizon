@@ -21,21 +21,21 @@ export async function acceptProposal(ctx: HorizonContext, proposal: Proposal): P
     );
     new Notice(
       ok
-        ? `Horizon: proposta accettata — task al ${proposal.targetKey}.`
-        : 'Horizon: il task della proposta è cambiato — proposta scartata.',
+        ? `Horizon: proposal accepted — task moved to ${proposal.targetKey}.`
+        : 'Horizon: the proposal task has changed — proposal discarded.',
     );
     return ok;
   }
 
   const file = await ensurePeriodicNote(ctx, 'daily', proposal.targetKey);
   if (!file) {
-    new Notice('Horizon: impossibile creare la nota del giorno per la proposta.');
+    new Notice('Horizon: could not create the day note for the proposal.');
     return false;
   }
   await ctx.app.vault.process(file, (content) => {
     const line = `- [ ] ${proposal.text} 📅 ${proposal.targetKey}`;
     return content.endsWith('\n') ? `${content}${line}\n` : `${content}\n${line}\n`;
   });
-  new Notice(`Horizon: task creato il ${proposal.targetKey}.`);
+  new Notice(`Horizon: task created on ${proposal.targetKey}.`);
   return true;
 }

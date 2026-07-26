@@ -70,8 +70,8 @@ export function renderWeekDigest(
   );
 
   const sections: string[] = [];
-  if (done.length > 0) sections.push(`### Fatto\n${done.join('\n')}`);
-  if (happenings.length > 0) sections.push(`### Meeting e note\n${happenings.join('\n')}`);
-  if (next.length > 0) sections.push(`### In arrivo\n${next.join('\n')}`);
+  if (done.length > 0) sections.push(`### Done\n${done.join('\n')}`);
+  if (happenings.length > 0) sections.push(`### Meetings and notes\n${happenings.join('\n')}`);
+  if (next.length > 0) sections.push(`### Coming up\n${next.join('\n')}`);
   return sections.join('\n\n');
 }

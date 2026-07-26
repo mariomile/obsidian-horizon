@@ -67,7 +67,7 @@ export class HorizonApi {
       // A concurrent first writer may have created it after our existence check.
     }
     const raced = vault.getFileByPath(path);
-    if (!raced) throw new Error(`Horizon: impossibile creare ${path}`);
+    if (!raced) throw new Error(`Horizon: could not create ${path}`);
     await vault.process(raced, (raw) => appendProposal(raw, proposal));
   }
 

@@ -79,11 +79,11 @@ describe('renderWeekDigest', () => {
     ];
     const upcoming = [task({ description: 'Prossimo task', due: '2026-07-06' })];
     const result = renderWeekDigest(moment, days, upcoming);
-    assert.ok(result.includes('### Fatto'));
+    assert.ok(result.includes('### Done'));
     assert.ok(result.includes('Shipped feature'));
-    assert.ok(result.includes('### Meeting e note'));
+    assert.ok(result.includes('### Meetings and notes'));
     assert.ok(result.includes('10:00 · [[Kickoff]]'));
-    assert.ok(result.includes('### In arrivo'));
+    assert.ok(result.includes('### Coming up'));
     assert.ok(result.includes('Prossimo task'));
   });
 

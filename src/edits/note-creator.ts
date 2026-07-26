@@ -8,10 +8,10 @@ import { renderDayAgenda, renderWeekDigest } from './agenda-render.ts';
 import { applyTemplate } from './template.ts';
 
 const PERIOD_LABEL: Record<Period, string> = {
-  daily: 'giornaliera',
-  weekly: 'settimanale',
-  monthly: 'mensile',
-  yearly: 'annuale',
+  daily: 'daily',
+  weekly: 'weekly',
+  monthly: 'monthly',
+  yearly: 'yearly',
 };
 
 class ConfirmCreateModal extends Modal {
@@ -30,12 +30,12 @@ class ConfirmCreateModal extends Modal {
     this.contentEl.createEl('p', { text: this.message });
     const buttons = this.contentEl.createDiv({ cls: 'modal-button-container' });
     // mv-kit §5 MUST NOT: no plugin button carries mod-cta.
-    const create = buttons.createEl('button', { text: 'Crea' });
+    const create = buttons.createEl('button', { text: 'Create' });
     create.addEventListener('click', () => {
       this.confirmed = true;
       this.close();
     });
-    const cancel = buttons.createEl('button', { text: 'Annulla' });
+    const cancel = buttons.createEl('button', { text: 'Cancel' });
     cancel.addEventListener('click', () => this.close());
   }
 
@@ -63,7 +63,7 @@ async function templateContent(
     ctx.app.vault.getFileByPath(`${templatePath}.md`) ??
     ctx.app.metadataCache.getFirstLinkpathDest(templatePath, '');
   if (!file) {
-    new Notice(`Horizon: template "${templatePath}" non trovato — creo una nota vuota.`);
+    new Notice(`Horizon: template "${templatePath}" not found — creating an empty note.`);
     return '';
   }
   const source = await ctx.app.vault.cachedRead(file);
@@ -112,7 +112,7 @@ export async function ensurePeriodicNote(
     const content = await templateContent(ctx, config.template, key, basename);
     return await ctx.app.vault.create(ctx.periodic.pathFor(period, key), content);
   } catch (error) {
-    console.error('Horizon: creazione nota fallita', error);
+    console.error('Horizon: note creation failed', error);
     return null;
   }
 }
@@ -129,7 +129,7 @@ export async function openPeriodicNote(
 ): Promise<void> {
   const config = ctx.settings.periods[period];
   if (!config.enabled) {
-    new Notice(`Horizon: le note ${PERIOD_LABEL[period]} sono disattivate nelle impostazioni.`);
+    new Notice(`Horizon: ${PERIOD_LABEL[period]} notes are disabled in settings.`);
     return;
   }
   const existing = ctx.periodic.noteFor(period, key);
@@ -142,7 +142,7 @@ export async function openPeriodicNote(
   if (ctx.settings.confirmBeforeCreate) {
     const ok = await confirmCreate(
       ctx.app,
-      `Creare la nota ${PERIOD_LABEL[period]} "${basename}"?`,
+      `Create the ${PERIOD_LABEL[period]} note "${basename}"?`,
     );
     if (!ok) return;
   }
@@ -151,7 +151,7 @@ export async function openPeriodicNote(
   if (file) {
     await openFile(ctx, file, paneType);
   } else {
-    new Notice(`Horizon: impossibile creare "${basename}".`);
+    new Notice(`Horizon: could not create "${basename}".`);
   }
 }
 
