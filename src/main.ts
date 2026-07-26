@@ -88,28 +88,28 @@ export default class HorizonPlugin extends Plugin {
       options: HorizonBasesView.getViewOptions,
     });
 
-    this.addRibbonIcon('hi-calendar', 'Apri Horizon', () => {
+    this.addRibbonIcon('hi-calendar', 'Open Horizon', () => {
       void this.activateCalendar();
     });
     this.addCommand({
       id: 'open-calendar',
-      name: 'Apri il calendario',
+      name: 'Open calendar',
       callback: () => {
         void this.activateCalendar();
       },
     });
     this.addCommand({
       id: 'open-sidebar',
-      name: 'Apri il calendario in sidebar',
+      name: 'Open calendar in sidebar',
       callback: () => {
         void this.activateSidebar(true);
       },
     });
     const modeLabels: Record<string, string> = {
-      month: 'Vista mese',
-      week: 'Vista settimana',
-      agenda: 'Vista agenda',
-      journal: 'Vista diario',
+      month: 'Month view',
+      week: 'Week view',
+      agenda: 'Agenda view',
+      journal: 'Journal view',
     };
     for (const mode of ['month', 'week', 'agenda', 'journal'] as const) {
       this.addCommand({
@@ -122,35 +122,35 @@ export default class HorizonPlugin extends Plugin {
     }
     this.addCommand({
       id: 'next-period',
-      name: 'Periodo successivo',
+      name: 'Next period',
       callback: () => {
         void this.withCalendarView((view) => view.stepActive(1));
       },
     });
     this.addCommand({
       id: 'prev-period',
-      name: 'Periodo precedente',
+      name: 'Previous period',
       callback: () => {
         void this.withCalendarView((view) => view.stepActive(-1));
       },
     });
     this.addCommand({
       id: 'go-today',
-      name: 'Vai a oggi',
+      name: 'Go to today',
       callback: () => {
         void this.withCalendarView((view) => view.goTodayActive());
       },
     });
     this.addCommand({
       id: 'open-today-note',
-      name: 'Apri la nota di oggi',
+      name: "Open today's note",
       callback: () => {
         void openPeriodicNote(ctx, 'daily', todayKey(), false);
       },
     });
     this.addCommand({
       id: 'open-active-day-in-runway',
-      name: 'Apri il giorno attivo in Runway',
+      name: 'Open active day in Runway',
       callback: () => {
         const runway = (
           this.app as unknown as {
@@ -160,7 +160,7 @@ export default class HorizonPlugin extends Plugin {
           }
         ).plugins.plugins.runway;
         if (!runway?.api?.openForDay) {
-          new Notice('Horizon: Runway non è attivo.');
+          new Notice('Horizon: Runway is not active.');
           return;
         }
         void runway.api.openForDay(this.uiState.activeDate);
@@ -181,10 +181,10 @@ export default class HorizonPlugin extends Plugin {
     });
     this.addCommand({
       id: 'export-agenda',
-      name: 'Esporta agenda per gli agenti adesso',
+      name: 'Export agenda for agents now',
       callback: () => {
         void this.writeAgendaExport().then((path) => {
-          new Notice(`Horizon: agenda esportata in ${path}.`);
+          new Notice(`Horizon: agenda exported to ${path}.`);
         });
       },
     });

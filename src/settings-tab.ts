@@ -5,10 +5,10 @@ import { PERIODS } from './settings.ts';
 import type { Period } from './types.ts';
 
 const PERIOD_LABELS: Record<Period, string> = {
-  daily: 'Note giornaliere',
-  weekly: 'Note settimanali',
-  monthly: 'Note mensili',
-  yearly: 'Note annuali',
+  daily: 'Daily notes',
+  weekly: 'Weekly notes',
+  monthly: 'Monthly notes',
+  yearly: 'Yearly notes',
 };
 
 export class HorizonSettingTab extends PluginSettingTab {
@@ -24,18 +24,18 @@ export class HorizonSettingTab extends PluginSettingTab {
     containerEl.empty();
     containerEl.createEl('h2', { text: 'Horizon' });
     containerEl.createEl('p', {
-      text: 'Calendario del vault: note periodiche, tasks con date e note datate.',
+      text: 'Calendar for your vault: periodic notes, tasks with dates, and dated notes.',
     });
 
     for (const period of PERIODS) {
       this.periodSection(period);
     }
 
-    containerEl.createEl('h3', { text: 'Vista' });
+    containerEl.createEl('h3', { text: 'View' });
 
     new Setting(containerEl)
-      .setName('Giorni in agenda')
-      .setDesc('Quanti giorni futuri mostra la vista Agenda.')
+      .setName('Days in agenda')
+      .setDesc('How many future days the Agenda view shows.')
       .addSlider((slider) =>
         slider
           .setLimits(7, 60, 1)
@@ -48,8 +48,8 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Numeri di settimana')
-      .setDesc('Mostra la colonna con i numeri di settimana ISO.')
+      .setName('Week numbers')
+      .setDesc('Show the column with ISO week numbers.')
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.showWeekNumbers).onChange(async (value) => {
           this.plugin.settings.showWeekNumbers = value;
@@ -58,8 +58,8 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Barra data nelle note giornaliere')
-      .setDesc('Mostra il selettore ‹ data › nell’intestazione delle note giornaliere.')
+      .setName('Date bar in daily notes')
+      .setDesc('Show the ‹ date › picker in the header of daily notes.')
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.daybar).onChange(async (value) => {
           this.plugin.settings.daybar = value;
@@ -68,10 +68,10 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     const visibility: Array<{ key: 'showDue' | 'showScheduled' | 'showDone' | 'showNotes'; name: string; desc: string }> = [
-      { key: 'showDue', name: 'Tasks in scadenza', desc: 'Mostra i tasks con data 📅 due.' },
-      { key: 'showScheduled', name: 'Tasks pianificati', desc: 'Mostra i tasks con data ⏳ scheduled.' },
-      { key: 'showDone', name: 'Tasks completati', desc: 'Mostra i tasks con data ✅ done.' },
-      { key: 'showNotes', name: 'Note datate', desc: 'Mostra le note con proprietà `date` nel frontmatter.' },
+      { key: 'showDue', name: 'Due tasks', desc: 'Show tasks with a 📅 due date.' },
+      { key: 'showScheduled', name: 'Scheduled tasks', desc: 'Show tasks with a ⏳ scheduled date.' },
+      { key: 'showDone', name: 'Done tasks', desc: 'Show tasks with a ✅ done date.' },
+      { key: 'showNotes', name: 'Dated notes', desc: 'Show notes with a `date` property in frontmatter.' },
     ];
     for (const item of visibility) {
       new Setting(containerEl)
@@ -85,11 +85,11 @@ export class HorizonSettingTab extends PluginSettingTab {
         );
     }
 
-    containerEl.createEl('h3', { text: 'Anteprime' });
+    containerEl.createEl('h3', { text: 'Previews' });
 
     new Setting(containerEl)
-      .setName('Mini-card con anteprima')
-      .setDesc('Le note in Agenda, Settimana, popover e viste Bases mostrano excerpt e immagine.')
+      .setName('Mini-cards with preview')
+      .setDesc('Notes in Agenda, Week, popovers, and Bases views show an excerpt and image.')
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.richCards).onChange(async (value) => {
           this.plugin.settings.richCards = value;
@@ -98,8 +98,8 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Lunghezza anteprima')
-      .setDesc('Caratteri di testo per card (la hover-card ne usa il doppio).')
+      .setName('Preview length')
+      .setDesc('Characters of text per card (the hover-card uses double this).')
       .addSlider((slider) =>
         slider
           .setLimits(100, 600, 20)
@@ -111,11 +111,11 @@ export class HorizonSettingTab extends PluginSettingTab {
           }),
       );
 
-    containerEl.createEl('h3', { text: 'Agenti' });
+    containerEl.createEl('h3', { text: 'Agents' });
 
     new Setting(containerEl)
-      .setName('Esporta agenda per gli agenti')
-      .setDesc('Scrive periodicamente un JSON con agenda e task in ritardo, leggibile da skill e agenti.')
+      .setName('Export agenda for agents')
+      .setDesc('Periodically writes a JSON with agenda and overdue tasks, readable by skills and agents.')
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.agentExport.enabled).onChange(async (value) => {
           this.plugin.settings.agentExport.enabled = value;
@@ -124,7 +124,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Percorso export agenda')
+      .setName('Agenda export path')
       .addText((text) =>
         text
           .setPlaceholder('.horizon/agenda.json')
@@ -136,8 +136,8 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Percorso proposte agenti')
-      .setDesc('File JSON dove gli agenti propongono task e spostamenti (ghost chips).')
+      .setName('Agent proposals path')
+      .setDesc('JSON file where agents propose tasks and moves (ghost chips).')
       .addText((text) =>
         text
           .setPlaceholder('.horizon/proposals.json')
@@ -149,8 +149,8 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Conferma prima di creare')
-      .setDesc('Chiedi conferma prima di creare una nuova nota periodica.')
+      .setName('Confirm before creating')
+      .setDesc('Ask for confirmation before creating a new periodic note.')
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.confirmBeforeCreate).onChange(async (value) => {
           this.plugin.settings.confirmBeforeCreate = value;
@@ -165,8 +165,8 @@ export class HorizonSettingTab extends PluginSettingTab {
     containerEl.createEl('h3', { text: PERIOD_LABELS[period] });
 
     new Setting(containerEl)
-      .setName('Attiva')
-      .setDesc('Includi questo periodo nel calendario.')
+      .setName('Enable')
+      .setDesc('Include this period in the calendar.')
       .addToggle((toggle) =>
         toggle.setValue(config.enabled).onChange(async (value) => {
           config.enabled = value;
@@ -175,7 +175,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Cartella')
+      .setName('Folder')
       .addText((text) =>
         text
           .setPlaceholder('Daily')
@@ -187,8 +187,8 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Formato')
-      .setDesc('Formato moment del nome file (es. DD-MM-YYYY, GGGG-[W]WW).')
+      .setName('Format')
+      .setDesc('Moment format for the file name (e.g. DD-MM-YYYY, GGGG-[W]WW).')
       .addText((text) =>
         text
           .setPlaceholder('DD-MM-YYYY')
@@ -201,7 +201,7 @@ export class HorizonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Template')
-      .setDesc('Percorso del template per le nuove note (opzionale).')
+      .setDesc('Path to the template for new notes (optional).')
       .addText((text) =>
         text
           .setPlaceholder('Templates/Daily Note')
