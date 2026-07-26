@@ -66,9 +66,11 @@
   transition: background-color var(--horizon-ease), color var(--horizon-ease);
 }
 
-.horizon-cal__nav-btn:hover {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
+@media (hover: hover) {
+  .horizon-cal__nav-btn:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
 }
 
 .horizon-cal__nav-btn:focus-visible {
@@ -129,9 +131,11 @@
   transition: color var(--horizon-ease), background-color var(--horizon-ease);
 }
 
-.horizon-cal__weeknum:hover {
-  color: var(--text-accent);
-  background-color: var(--background-modifier-hover);
+@media (hover: hover) {
+  .horizon-cal__weeknum:hover {
+    color: var(--text-accent);
+    background-color: var(--background-modifier-hover);
+  }
 }
 
 .horizon-cal__weeknum--has-note {
@@ -155,8 +159,10 @@
   transition: background-color var(--horizon-ease);
 }
 
-.horizon-cell--mini:hover {
-  background-color: var(--background-modifier-hover);
+@media (hover: hover) {
+  .horizon-cell--mini:hover {
+    background-color: var(--background-modifier-hover);
+  }
 }
 
 .horizon-cell--mini:focus-visible {
@@ -289,8 +295,10 @@
   transition: color var(--horizon-ease), background-color var(--horizon-ease);
 }
 
-.horizon-view__mode-btn:hover {
-  color: var(--text-normal);
+@media (hover: hover) {
+  .horizon-view__mode-btn:hover {
+    color: var(--text-normal);
+  }
 }
 
 .horizon-view__mode-btn--active {
@@ -327,9 +335,11 @@
   transition: color var(--horizon-ease), border-color var(--horizon-ease);
 }
 
-.horizon-view__today-btn:hover {
-  color: var(--text-normal);
-  border-color: var(--background-modifier-border-hover);
+@media (hover: hover) {
+  .horizon-view__today-btn:hover {
+    color: var(--text-normal);
+    border-color: var(--background-modifier-border-hover);
+  }
 }
 
 .horizon-view__body {
@@ -404,8 +414,10 @@
   overflow: hidden;
 }
 
-.horizon-cell--full:hover {
-  background-color: var(--background-secondary-alt);
+@media (hover: hover) {
+  .horizon-cell--full:hover {
+    background-color: var(--background-secondary-alt);
+  }
 }
 
 .horizon-cell--full.horizon-cell--other-month {
@@ -430,8 +442,10 @@
   cursor: pointer;
 }
 
-.horizon-cell--full .horizon-cell__num:hover {
-  background-color: var(--background-modifier-hover);
+@media (hover: hover) {
+  .horizon-cell--full .horizon-cell__num:hover {
+    background-color: var(--background-modifier-hover);
+  }
 }
 
 .horizon-cell--full.horizon-cell--has-note .horizon-cell__num {
@@ -466,9 +480,11 @@
   transition: background-color var(--horizon-ease), color var(--horizon-ease);
 }
 
-.horizon-chip:hover {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
+@media (hover: hover) {
+  .horizon-chip:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
 }
 
 .horizon-chip__marker {
@@ -490,8 +506,10 @@
   transition: background-color var(--horizon-ease), border-color var(--horizon-ease);
 }
 
-.horizon-chip__check:hover {
-  border-color: var(--interactive-accent);
+@media (hover: hover) {
+  .horizon-chip__check:hover {
+    border-color: var(--interactive-accent);
+  }
 }
 
 .horizon-chip--due .horizon-chip__check {
@@ -551,8 +569,10 @@
   font-weight: var(--font-medium);
 }
 
-.horizon-chip--more:hover {
-  color: var(--text-accent);
+@media (hover: hover) {
+  .horizon-chip--more:hover {
+    color: var(--text-accent);
+  }
 }
 
 .horizon-chip--dragging {
@@ -581,8 +601,10 @@
   transition: background-color var(--horizon-ease);
 }
 
-.horizon-cell__overdue-badge:hover {
-  background-color: rgba(var(--color-red-rgb), 0.3);
+@media (hover: hover) {
+  .horizon-cell__overdue-badge:hover {
+    background-color: rgba(var(--color-red-rgb), 0.3);
+  }
 }
 
 .horizon-cell__mini-badge {
@@ -621,8 +643,10 @@
   transition: background-color var(--horizon-ease);
 }
 
-.horizon-agenda__batch-btn:hover {
-  background-color: rgba(var(--color-red-rgb), 0.12);
+@media (hover: hover) {
+  .horizon-agenda__batch-btn:hover {
+    background-color: rgba(var(--color-red-rgb), 0.12);
+  }
 }
 
 /* ============================== Note mini-cards ============================== */
@@ -635,12 +659,22 @@
   background-color: var(--background-primary);
   border: var(--border-width) solid var(--background-modifier-border);
   min-height: 44px;
+  /* mv-kit §6: the border-color/box-shadow wash below eases with --mv-wash
+     (via --horizon-ease); the transform lift is its own physical-settling
+     curve, --mv-lift — the two easings are not interchangeable. */
+  transition: border-color var(--horizon-ease), box-shadow var(--horizon-ease),
+    transform var(--cosmos-t-fast, 80ms) var(--mv-lift, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.horizon-chip--card:hover {
-  background-color: var(--background-primary);
-  border-color: var(--background-modifier-border-hover);
-  box-shadow: var(--shadow-s);
+@media (hover: hover) {
+  .horizon-chip--card:hover {
+    background-color: var(--background-primary);
+    border-color: var(--background-modifier-border-hover);
+    box-shadow: var(--shadow-s);
+    /* mv-kit §6: hover richness is colour AND a subtle physical lift, never
+       colour alone — this card had the wash, not the lift. Capped at 1px. */
+    transform: translateY(-1px);
+  }
 }
 
 .horizon-card__body {
@@ -714,8 +748,10 @@
   opacity: 0.75;
 }
 
-.horizon-chip--ghost:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .horizon-chip--ghost:hover {
+    opacity: 1;
+  }
 }
 
 .horizon-chip__marker--ghost {
@@ -747,14 +783,16 @@
   margin-left: auto;
 }
 
-.horizon-ghost__accept:hover {
-  background-color: rgba(var(--color-green-rgb), 0.2);
-  color: var(--color-green);
-}
+@media (hover: hover) {
+  .horizon-ghost__accept:hover {
+    background-color: rgba(var(--color-green-rgb), 0.2);
+    color: var(--color-green);
+  }
 
-.horizon-ghost__dismiss:hover {
-  background-color: rgba(var(--color-red-rgb), 0.2);
-  color: var(--color-red);
+  .horizon-ghost__dismiss:hover {
+    background-color: rgba(var(--color-red-rgb), 0.2);
+    color: var(--color-red);
+  }
 }
 
 .horizon-dot--ghost {
@@ -827,8 +865,10 @@
   transition: background-color var(--horizon-ease);
 }
 
-.horizon-week__head:hover {
-  background-color: var(--background-modifier-hover);
+@media (hover: hover) {
+  .horizon-week__head:hover {
+    background-color: var(--background-modifier-hover);
+  }
 }
 
 .horizon-week__dow {
@@ -899,8 +939,10 @@
   transition: background-color var(--horizon-ease);
 }
 
-.horizon-agenda__head:hover {
-  background-color: var(--background-modifier-hover);
+@media (hover: hover) {
+  .horizon-agenda__head:hover {
+    background-color: var(--background-modifier-hover);
+  }
 }
 
 .horizon-agenda__date {
@@ -993,12 +1035,21 @@
   border-radius: var(--radius-m);
   background-color: var(--background-primary);
   box-shadow: var(--shadow-s);
-  transition: border-color var(--horizon-ease), box-shadow var(--horizon-ease);
+  /* mv-kit §6: the border-color/box-shadow wash below eases with --mv-wash
+     (via --horizon-ease); the transform lift is its own physical-settling
+     curve, --mv-lift — the two easings are not interchangeable. */
+  transition: border-color var(--horizon-ease), box-shadow var(--horizon-ease),
+    transform var(--cosmos-t-fast, 80ms) var(--mv-lift, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.horizon-journal__card:hover {
-  border-color: var(--background-modifier-border-hover);
-  box-shadow: var(--shadow-m);
+@media (hover: hover) {
+  .horizon-journal__card:hover {
+    border-color: var(--background-modifier-border-hover);
+    box-shadow: var(--shadow-m);
+    /* mv-kit §6: hover richness is colour AND a subtle physical lift, never
+       colour alone — this card had the wash, not the lift. Capped at 1px. */
+    transform: translateY(-1px);
+  }
 }
 
 .horizon-journal__head {
@@ -1040,10 +1091,12 @@
   margin-left: auto;
 }
 
-.horizon-journal__open:hover,
-.horizon-journal__expand:hover {
-  background-color: var(--background-modifier-hover);
-  color: var(--text-normal);
+@media (hover: hover) {
+  .horizon-journal__open:hover,
+  .horizon-journal__expand:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
 }
 
 .horizon-journal__content {
@@ -1340,8 +1393,10 @@
   border-radius: var(--radius-s);
   transition: background-color var(--horizon-ease), color var(--horizon-ease);
 }
-.horizon-daybar-label:hover {
-  background-color: var(--background-modifier-hover);
+@media (hover: hover) {
+  .horizon-daybar-label:hover {
+    background-color: var(--background-modifier-hover);
+  }
 }
 .horizon-daybar.is-pending .horizon-daybar-label {
   color: var(--text-faint);
