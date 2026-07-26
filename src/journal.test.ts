@@ -2,7 +2,12 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import moment from 'moment';
 
-import { cleanJournalMarkdown, createJournalPreview, listJournalEntries } from './journal.ts';
+import {
+  cleanJournalMarkdown,
+  createJournalPreview,
+  journalCountLabel,
+  listJournalEntries,
+} from './journal.ts';
 
 const daily = { enabled: true, folder: 'Journal/Daily', format: 'DD-MM-YYYY', template: '' };
 
@@ -42,5 +47,17 @@ describe('journal preview', () => {
     const preview = createJournalPreview('# Titolo\n\nUna prima riga.\nUna seconda riga molto lunga.', 28);
     assert.equal(preview.markdown, '# Titolo\n\nUna prima riga.');
     assert.equal(preview.truncated, true);
+  });
+});
+
+describe('journalCountLabel', () => {
+  it('pluralizes the count label in English', () => {
+    assert.equal(journalCountLabel(1), '1 note');
+    assert.equal(journalCountLabel(2), '2 notes');
+    assert.equal(journalCountLabel(37), '37 notes');
+  });
+
+  it('uses the plural for an empty journal', () => {
+    assert.equal(journalCountLabel(0), '0 notes');
   });
 });

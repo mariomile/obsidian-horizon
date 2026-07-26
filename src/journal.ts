@@ -38,6 +38,11 @@ export function listJournalEntries<TFile extends DailyFileLike>(
   return entries.sort((a, b) => b.key.localeCompare(a.key));
 }
 
+/** English count label for the Journal header — "1 note" / "N notes". */
+export function journalCountLabel(count: number): string {
+  return `${count} ${count === 1 ? 'note' : 'notes'}`;
+}
+
 /** Markdown suitable for a fast, text-first reader: no metadata or heavy embeds. */
 export function cleanJournalMarkdown(markdown: string): string {
   return stripFrontmatter(markdown)

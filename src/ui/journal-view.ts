@@ -1,7 +1,12 @@
 import { Component, MarkdownRenderer, type TFile } from 'obsidian';
 
 import { todayKey } from '../dates.ts';
-import { createJournalPreview, listJournalEntries, type JournalEntry } from '../journal.ts';
+import {
+  createJournalPreview,
+  journalCountLabel,
+  listJournalEntries,
+  type JournalEntry,
+} from '../journal.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 
@@ -89,7 +94,7 @@ export class JournalView extends Component {
     });
     context.createSpan({
       cls: 'horizon-journal__count',
-      text: `${this.entries.length} note`,
+      text: journalCountLabel(this.entries.length),
     });
   }
 
