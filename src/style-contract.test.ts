@@ -99,4 +99,81 @@ describe('mv-kit style contract', () => {
       `!important count ${importantCount} exceeds the frozen ceiling of 5`,
     );
   });
+
+  // mv-kit §6 (2026-07 dynamics wave, obsidian-cosmos-theme commit 10f5ddc):
+  // every `:hover` selector must be gated behind `@media (hover: hover)` —
+  // Horizon's calendar cells, chips, and buttons are all phone-reachable
+  // (the whole calendar view renders full-width on a phone), and a bare
+  // `:hover` rule leaves a stuck hover wash after a tap on touch browsers
+  // (no pointer-leave event to clear it). `:focus-visible` is exempt
+  // (keyboard-only, must never be hover-gated). Brace-depth tracking (not
+  // line-shape guessing), ported verbatim from obsidian-portal's wave-2 §6
+  // assertion (commit 133c93d): each open `@media` records the CSS nesting
+  // depth it was opened at plus whether it is a hover:hover query; it's
+  // only popped when depth unwinds back to that level, so a rule block's
+  // own closing `}` inside the @media doesn't falsely pop the @media itself.
+  it('every :hover selector is gated behind @media (hover: hover)', () => {
+    const lines = stripComments(css).split('\n');
+    const violations: string[] = [];
+
+    let depth = 0;
+    const mediaStack: { openedAtDepth: number; isHoverGate: boolean }[] = [];
+
+    lines.forEach((rawLine, idx) => {
+      const line = rawLine.trim();
+      const mediaOpen = /^@media\s*\(([^)]*)\)\s*\{/.exec(line);
+      if (mediaOpen) {
+        mediaStack.push({ openedAtDepth: depth, isHoverGate: /hover:\s*hover/.test(mediaOpen[1] ?? '') });
+      }
+
+      if (/:hover\b/.test(line)) {
+        const insideHoverGate = mediaStack.some((m) => m.isHoverGate);
+        if (!insideHoverGate) {
+          violations.push(`line ${idx + 1}: "${line}"`);
+        }
+      }
+
+      const opens = (line.match(/\{/g) ?? []).length;
+      const closes = (line.match(/\}/g) ?? []).length;
+      depth += opens - closes;
+
+      let top = mediaStack.at(-1);
+      while (top !== undefined && depth <= top.openedAtDepth) {
+        mediaStack.pop();
+        top = mediaStack.at(-1);
+      }
+    });
+
+    assert.deepEqual(violations, []);
+  });
+
+  // mv-kit §6: hover richness on a card-shaped surface is colour AND a
+  // subtle physical lift, never colour alone — the kit's own code example
+  // pairs `.card:hover` with a `transform: translateY(-1px)` lift alongside
+  // any colour/shadow richness. `.horizon-chip--card` (note mini-card) and
+  // `.horizon-journal__card` (journal entry card) are Horizon's only two
+  // card-shaped (rounded, bordered, elevated) hover surfaces — both had
+  // border-color/box-shadow richness but no transform, same pre-fix gap
+  // TabX's wave found on `.tabx-card:hover` (commit cc65cd4). List/row
+  // surfaces (`.horizon-chip`, `.horizon-cal__weeknum`, etc.) are
+  // deliberately excluded — the kit's own example treats row=colour-only
+  // and card=lift as two distinct patterns, not one rule both must satisfy
+  // (see docs/2026-07-mv-kit-audit.md §6 "Hover richness" for the full
+  // row-vs-card reasoning, carried over from obsidian-portal's wave-2 §6).
+  it('card-shaped hover surfaces pair colour richness with a lift transform', () => {
+    const cardHoverSelectors = ['.horizon-chip--card:hover', '.horizon-journal__card:hover'];
+    const code = stripComments(css);
+
+    for (const selector of cardHoverSelectors) {
+      const escaped = selector.replace(/[.#]/g, '\\$&');
+      const ruleMatch = new RegExp(`${escaped}[^{]*\\{([^}]*)\\}`).exec(code);
+      assert.ok(ruleMatch, `rule block for ${selector} not found`);
+      const body = ruleMatch[1] ?? '';
+      assert.match(
+        body,
+        /transform:\s*translateY\(-(0\.5|1|1\.5|2)px\)/,
+        `${selector} is missing a ≤2px translateY lift`,
+      );
+    }
+  });
 });
