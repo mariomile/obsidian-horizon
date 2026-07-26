@@ -25,7 +25,7 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     // primitive they skin — and it defines --icon-size so the svg renders.
     const prev = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
     setIcon(prev, 'chevron-left');
-    prev.setAttribute('aria-label', 'Giorno precedente');
+    prev.setAttribute('aria-label', 'Previous day');
     prev.onclick = () => void step(-1);
 
     const label = pill.createDiv({
@@ -46,13 +46,13 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     if (pending) {
       const create = pill.createDiv({ cls: 'clickable-icon horizon-daybar-create' });
       setIcon(create, 'plus');
-      create.setAttribute('aria-label', 'Crea questa nota');
+      create.setAttribute('aria-label', 'Create this note');
       create.onclick = () => void createAndOpen(pending as DayKey);
     }
 
     const next = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
     setIcon(next, 'chevron-right');
-    next.setAttribute('aria-label', 'Giorno successivo');
+    next.setAttribute('aria-label', 'Next day');
     next.onclick = () => void step(1);
   };
 

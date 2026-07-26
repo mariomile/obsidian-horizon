@@ -118,7 +118,7 @@ export class WeekView extends Component {
           cls: 'horizon-cell__overdue-badge',
           text: `\u21a9 ${overdueCount}`,
         });
-        badge.setAttribute('aria-label', `${overdueCount} task in ritardo`);
+        badge.setAttribute('aria-label', `${overdueCount} overdue tasks`);
         badge.addEventListener('click', (event) => {
           event.stopPropagation();
           this.callbacks.onOverdueClick();

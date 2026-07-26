@@ -79,9 +79,9 @@ export class MonthGrid extends Component {
     const title = header.createSpan({ cls: 'horizon-cal__title' });
     title.setText(this.ctx.moment(firstOfMonth, 'YYYY-MM-DD', true).format('MMMM YYYY'));
     const nav = header.createDiv({ cls: 'horizon-cal__nav' });
-    this.navButton(nav, 'chevron-left', 'Mese precedente', () => this.step(-1));
-    this.navButton(nav, 'circle-dot', 'Oggi', () => this.goToday());
-    this.navButton(nav, 'chevron-right', 'Mese successivo', () => this.step(1));
+    this.navButton(nav, 'chevron-left', 'Previous month', () => this.step(-1));
+    this.navButton(nav, 'circle-dot', 'Today', () => this.goToday());
+    this.navButton(nav, 'chevron-right', 'Next month', () => this.step(1));
 
     const grid = el.createDiv({
       cls: `horizon-cal__grid${showWeeks ? ' horizon-cal__grid--weeks' : ''}`,
@@ -109,7 +109,7 @@ export class MonthGrid extends Component {
         weekEl.dataset.week = weekStart;
         weekEl.tabIndex = 0;
         weekEl.setAttribute('role', 'button');
-        weekEl.setAttribute('aria-label', `Nota settimanale W${info.week}`);
+        weekEl.setAttribute('aria-label', `Weekly note W${info.week}`);
         if (this.ctx.periodic.noteFor('weekly', weekStart)) {
           weekEl.addClass('horizon-cal__weeknum--has-note');
         }

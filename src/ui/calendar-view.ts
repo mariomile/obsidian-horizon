@@ -21,10 +21,10 @@ import { WeekView } from './week-view.ts';
 export const CALENDAR_VIEW_TYPE = 'horizon-calendar';
 
 const MODE_LABELS: Record<CalendarMode, string> = {
-  month: 'Mese',
-  week: 'Settimana',
+  month: 'Month',
+  week: 'Week',
   agenda: 'Agenda',
-  journal: 'Diario',
+  journal: 'Journal',
 };
 
 /** A mode component mounted inside the calendar tab. */
@@ -81,16 +81,16 @@ export class HorizonCalendarView extends ItemView {
     }
 
     const nav = header.createDiv({ cls: 'horizon-view__nav' });
-    this.periodButtons.push(this.navButton(nav, 'chevron-left', 'Precedente', () => {
+    this.periodButtons.push(this.navButton(nav, 'chevron-left', 'Previous', () => {
       this.active?.step(-1);
       this.refreshTitle();
     }));
-    const todayBtn = nav.createEl('button', { cls: 'horizon-view__today-btn', text: 'Oggi' });
+    const todayBtn = nav.createEl('button', { cls: 'horizon-view__today-btn', text: 'Today' });
     todayBtn.addEventListener('click', () => {
       this.active?.goToday();
       this.refreshTitle();
     });
-    this.periodButtons.push(this.navButton(nav, 'chevron-right', 'Successivo', () => {
+    this.periodButtons.push(this.navButton(nav, 'chevron-right', 'Next', () => {
       this.active?.step(1);
       this.refreshTitle();
     }));

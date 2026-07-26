@@ -65,7 +65,7 @@ export class AgendaView extends Component {
   }
 
   title(): string {
-    if (this.start === todayKey()) return `Prossimi ${this.horizonDays} giorni`;
+    if (this.start === todayKey()) return `Next ${this.horizonDays} days`;
     const from = this.ctx.moment(this.start, 'YYYY-MM-DD', true).format('D MMM');
     const to = this.ctx
       .moment(addDays(this.start, this.horizonDays - 1), 'YYYY-MM-DD', true)
@@ -114,14 +114,14 @@ export class AgendaView extends Component {
         cls: 'horizon-agenda__date',
         text: this.ctx.moment(key, 'YYYY-MM-DD', true).format('dddd D MMMM'),
       });
-      if (isToday) head.createSpan({ cls: 'horizon-agenda__badge', text: 'Oggi' });
+      if (isToday) head.createSpan({ cls: 'horizon-agenda__badge', text: 'Today' });
       if (this.ctx.periodic.noteFor('daily', key)) {
         head.createSpan({ cls: 'horizon-agenda__note-dot' });
       }
 
       const chipsEl = dayEl.createDiv({ cls: 'horizon-agenda__chips' });
       if (chips.length === 0) {
-        chipsEl.createDiv({ cls: 'horizon-week__blank', text: 'Nessun elemento.' });
+        chipsEl.createDiv({ cls: 'horizon-week__blank', text: 'No items.' });
       } else {
         for (const chip of chips) renderChipOrCard(this.ctx, chipsEl, chip);
       }
@@ -129,7 +129,7 @@ export class AgendaView extends Component {
     if (shown === 0) {
       el.createDiv({
         cls: 'horizon-view__empty',
-        text: `Nessun elemento nei prossimi ${this.horizonDays} giorni.`,
+        text: `No items in the next ${this.horizonDays} days.`,
       });
     }
   }
@@ -139,10 +139,10 @@ export class AgendaView extends Component {
     if (overdue.length === 0) return;
     const section = el.createDiv({ cls: 'horizon-agenda__day horizon-agenda__overdue' });
     const head = section.createDiv({ cls: 'horizon-agenda__head horizon-agenda__head--overdue' });
-    head.createSpan({ cls: 'horizon-agenda__date', text: `In ritardo (${overdue.length})` });
+    head.createSpan({ cls: 'horizon-agenda__date', text: `Overdue (${overdue.length})` });
     const batch = head.createEl('button', {
       cls: 'horizon-agenda__batch-btn',
-      text: 'Porta tutto a oggi',
+      text: 'Bring all to today',
     });
     batch.addEventListener('click', (event) => {
       event.stopPropagation();

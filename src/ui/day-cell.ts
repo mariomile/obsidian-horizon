@@ -20,10 +20,10 @@ function miniDots(ctx: HorizonContext, key: DayKey, bucket: DayBucket | null, to
   const dots: DotSpec[] = [];
   const { settings } = ctx;
   if (ctx.periodic.noteFor('daily', key)) {
-    dots.push({ cls: 'horizon-dot--note', title: 'Nota giornaliera' });
+    dots.push({ cls: 'horizon-dot--note', title: 'Daily note' });
   }
   if (ctx.proposals.forDay(key).length > 0) {
-    dots.push({ cls: 'horizon-dot--ghost', title: 'Proposte degli agenti' });
+    dots.push({ cls: 'horizon-dot--ghost', title: 'Agent proposals' });
   }
   if (!bucket) return dots;
   const openDue = bucket.due.filter((t) => !t.done && t.status !== '-');
@@ -31,17 +31,17 @@ function miniDots(ctx: HorizonContext, key: DayKey, bucket: DayBucket | null, to
     const overdue = compareDayKeys(key, today) < 0;
     dots.push({
       cls: overdue ? 'horizon-dot--overdue' : 'horizon-dot--due',
-      title: overdue ? `${openDue.length} task in ritardo` : `${openDue.length} task in scadenza`,
+      title: overdue ? `${openDue.length} overdue tasks` : `${openDue.length} due tasks`,
     });
   }
   if (settings.showScheduled && bucket.scheduled.some((t) => !t.done)) {
-    dots.push({ cls: 'horizon-dot--scheduled', title: 'Task pianificati' });
+    dots.push({ cls: 'horizon-dot--scheduled', title: 'Scheduled tasks' });
   }
   if (settings.showDone && bucket.done.length > 0) {
-    dots.push({ cls: 'horizon-dot--done', title: 'Task completati' });
+    dots.push({ cls: 'horizon-dot--done', title: 'Done tasks' });
   }
   if (settings.showNotes && bucket.notes.length > 0) {
-    dots.push({ cls: 'horizon-dot--notes', title: 'Note datate' });
+    dots.push({ cls: 'horizon-dot--notes', title: 'Dated notes' });
   }
   return dots;
 }
@@ -120,7 +120,7 @@ export function chipsForDay(
   for (const proposal of ctx.proposals.forDay(key)) {
     chips.push({
       cls: 'horizon-chip--ghost',
-      label: proposal.kind === 'new-task' ? proposal.text : `sposta qui: ${proposal.rawText.slice(0, 60)}`,
+      label: proposal.kind === 'new-task' ? proposal.text : `move here: ${proposal.rawText.slice(0, 60)}`,
       path: proposal.kind === 'reschedule' ? proposal.path : '',
       line: proposal.kind === 'reschedule' ? proposal.line : -1,
       rawText: '',
@@ -166,10 +166,10 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
     el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
     const accept = el.createSpan({ cls: 'horizon-ghost__accept', text: '\u2713' });
     accept.setAttribute('role', 'button');
-    accept.setAttribute('aria-label', 'Accetta proposta');
+    accept.setAttribute('aria-label', 'Accept proposal');
     const dismiss = el.createSpan({ cls: 'horizon-ghost__dismiss', text: '\u2715' });
     dismiss.setAttribute('role', 'button');
-    dismiss.setAttribute('aria-label', 'Scarta proposta');
+    dismiss.setAttribute('aria-label', 'Dismiss proposal');
     el.setAttribute('aria-label', chip.label);
     return el;
   }
@@ -179,7 +179,7 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
     const check = el.createSpan({ cls: 'horizon-chip__check' });
     check.setAttribute('role', 'checkbox');
     check.setAttribute('aria-checked', String(chip.done));
-    check.setAttribute('aria-label', chip.done ? 'Riapri task' : 'Completa task');
+    check.setAttribute('aria-label', chip.done ? 'Reopen task' : 'Complete task');
   }
   el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
   if (chip.recurring) el.createSpan({ cls: 'horizon-chip__badge', text: '🔁' });
@@ -245,7 +245,7 @@ export function renderFullDayCell(
   num.dataset.key = key;
   num.tabIndex = 0;
   num.setAttribute('role', 'button');
-  num.setAttribute('aria-label', `Nota del ${key}`);
+  num.setAttribute('aria-label', `Note for ${key}`);
   if (key === options.today && (options.overdueCount ?? 0) > 0) {
     const badge = head.createSpan({
       cls: 'horizon-cell__overdue-badge',
@@ -253,7 +253,7 @@ export function renderFullDayCell(
     });
     badge.tabIndex = 0;
     badge.setAttribute('role', 'button');
-    badge.setAttribute('aria-label', `${options.overdueCount} task in ritardo`);
+    badge.setAttribute('aria-label', `${options.overdueCount} overdue tasks`);
   }
 
   const chips = chipsForDay(ctx, key, options.today);
@@ -264,7 +264,7 @@ export function renderFullDayCell(
   if (hidden > 0) {
     const more = chipsEl.createDiv({
       cls: 'horizon-chip horizon-chip--more',
-      text: `+${hidden} altri`,
+      text: `+${hidden} more`,
     });
     more.tabIndex = 0;
     more.setAttribute('role', 'button');
@@ -301,7 +301,7 @@ export function renderMiniDayCell(
       cls: 'horizon-cell__mini-badge',
       text: String(options.overdueCount),
     });
-    badge.setAttribute('aria-label', `${options.overdueCount} task in ritardo`);
+    badge.setAttribute('aria-label', `${options.overdueCount} overdue tasks`);
   }
 
   const bucket = ctx.dayIndex.getBucket(key);

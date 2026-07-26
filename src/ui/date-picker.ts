@@ -46,21 +46,21 @@ export function showDatePicker(
     // (which fills plain <button>s) and correct icon sizing via --icon-size.
     const prevBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(prevBtn, 'chevron-left');
-    prevBtn.setAttribute('aria-label', 'Mese precedente');
+    prevBtn.setAttribute('aria-label', 'Previous month');
     prevBtn.onclick = () => {
       month = addMonths(month, -1);
       render();
     };
     const todayBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(todayBtn, 'circle-dot');
-    todayBtn.setAttribute('aria-label', 'Oggi');
+    todayBtn.setAttribute('aria-label', 'Today');
     todayBtn.onclick = () => {
       month = todayKey();
       render();
     };
     const nextBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(nextBtn, 'chevron-right');
-    nextBtn.setAttribute('aria-label', 'Mese successivo');
+    nextBtn.setAttribute('aria-label', 'Next month');
     nextBtn.onclick = () => {
       month = addMonths(month, 1);
       render();

@@ -67,7 +67,7 @@ export class HorizonBasesView extends BasesView {
   static getViewOptions(): BasesAllOptions[] {
     return [
       {
-        displayName: 'Proprietà data',
+        displayName: 'Date property',
         type: 'text',
         key: 'dateProperty',
         default: 'date',
@@ -126,13 +126,13 @@ export class HorizonBasesView extends BasesView {
         .format('MMMM YYYY'),
     });
     const nav = header.createDiv({ cls: 'horizon-cal__nav' });
-    this.navButton(nav, 'chevron-left', 'Mese precedente', () => this.step(-1));
-    this.navButton(nav, 'circle-dot', 'Oggi', () => {
+    this.navButton(nav, 'chevron-left', 'Previous month', () => this.step(-1));
+    this.navButton(nav, 'circle-dot', 'Today', () => {
       const t = parseDayKey(today);
       if (t) this.displayed = { y: t.y, m: t.m };
       this.render();
     });
-    this.navButton(nav, 'chevron-right', 'Mese successivo', () => this.step(1));
+    this.navButton(nav, 'chevron-right', 'Next month', () => this.step(1));
 
     const grid = el.createDiv({
       cls: `horizon-month__grid${showWeeks ? ' horizon-month__grid--weeks' : ''}`,

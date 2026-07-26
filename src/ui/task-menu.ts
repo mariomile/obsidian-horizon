@@ -24,10 +24,10 @@ export function showTaskChipMenu(
     const today = todayKey();
     const currentDay = chipEl.dataset.key ?? today;
     const presets: Array<{ title: string; key: string }> = [
-      { title: 'Sposta a oggi', key: today },
-      { title: 'Domani', key: addDays(today, 1) },
-      { title: 'Lunedì prossimo', key: nextMonday(today) },
-      { title: '+1 settimana', key: addDays(currentDay, 7) },
+      { title: 'Move to today', key: today },
+      { title: 'Tomorrow', key: addDays(today, 1) },
+      { title: 'Next Monday', key: nextMonday(today) },
+      { title: '+1 week', key: addDays(currentDay, 7) },
     ];
     for (const preset of presets) {
       if (preset.key === currentDay) continue;
@@ -45,7 +45,7 @@ export function showTaskChipMenu(
 
   menu.addItem((item) =>
     item
-      .setTitle('Apri al rigo')
+      .setTitle('Open at line')
       .setIcon('file-text')
       .onClick(() => {
         void openAtLine(ctx, ref);

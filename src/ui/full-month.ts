@@ -131,7 +131,7 @@ export class FullMonth extends Component {
         weekEl.dataset.week = weekStart;
         weekEl.tabIndex = 0;
         weekEl.setAttribute('role', 'button');
-        weekEl.setAttribute('aria-label', `Nota settimanale W${info.week}`);
+        weekEl.setAttribute('aria-label', `Weekly note W${info.week}`);
         if (this.ctx.periodic.noteFor('weekly', weekStart)) {
           weekEl.addClass('horizon-cal__weeknum--has-note');
         }

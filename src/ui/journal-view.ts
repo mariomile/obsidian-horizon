@@ -42,7 +42,7 @@ export class JournalView extends Component {
   }
 
   title(): string {
-    return 'Diario';
+    return 'Journal';
   }
 
   step(direction: 1 | -1): void {
@@ -71,7 +71,7 @@ export class JournalView extends Component {
     if (this.entries.length === 0) {
       this.containerEl.createDiv({
         cls: 'horizon-view__empty',
-        text: 'Nessuna daily note disponibile fino a oggi.',
+        text: 'No daily note available up to today.',
       });
       return;
     }
@@ -85,7 +85,7 @@ export class JournalView extends Component {
     copy.createSpan({ cls: 'horizon-journal__eyebrow', text: 'Daily notes' });
     copy.createDiv({
       cls: 'horizon-journal__description',
-      text: 'Parti da oggi e scorri indietro nel tuo diario.',
+      text: 'Start from today and scroll back through your journal.',
     });
     context.createSpan({
       cls: 'horizon-journal__count',
@@ -108,7 +108,7 @@ export class JournalView extends Component {
     const remaining = this.entries.length - this.visibleCount;
     this.containerEl.createDiv({
       cls: 'horizon-journal__end',
-      text: remaining > 0 ? `Scorri per caricare altre ${Math.min(PAGE_SIZE, remaining)} daily` : 'Fine delle daily note.',
+      text: remaining > 0 ? `Scroll to load ${Math.min(PAGE_SIZE, remaining)} more daily notes` : 'End of daily notes.',
     });
   }
 
@@ -149,19 +149,19 @@ class JournalCard extends Component {
       cls: 'horizon-journal__date',
       text: this.ctx.moment(this.entry.key, 'YYYY-MM-DD', true).format('dddd D MMMM YYYY'),
     });
-    const open = head.createEl('button', { cls: 'horizon-journal__open', text: 'Apri' });
-    open.setAttribute('aria-label', `Apri la daily del ${this.entry.key}`);
+    const open = head.createEl('button', { cls: 'horizon-journal__open', text: 'Open' });
+    open.setAttribute('aria-label', `Open the daily note for ${this.entry.key}`);
     open.addEventListener('click', (event) => this.callbacks.onOpen(this.entry.key, event));
 
     this.bodyEl = card.createDiv({ cls: 'horizon-journal__content' });
-    this.bodyEl.createSpan({ cls: 'horizon-journal__loading', text: 'Caricamento…' });
+    this.bodyEl.createSpan({ cls: 'horizon-journal__loading', text: 'Loading…' });
     const actions = card.createDiv({ cls: 'horizon-journal__actions' });
-    const expand = actions.createEl('button', { cls: 'horizon-journal__expand', text: 'Espandi' });
+    const expand = actions.createEl('button', { cls: 'horizon-journal__expand', text: 'Expand' });
     expand.setAttribute('aria-expanded', 'false');
     expand.hidden = true;
     expand.addEventListener('click', () => {
       this.expanded = !this.expanded;
-      expand.setText(this.expanded ? 'Riduci' : 'Espandi');
+      expand.setText(this.expanded ? 'Collapse' : 'Expand');
       expand.setAttribute('aria-expanded', String(this.expanded));
       void this.renderContent();
     });
@@ -175,7 +175,7 @@ class JournalCard extends Component {
       this.bodyEl?.empty();
       this.bodyEl?.createSpan({
         cls: 'horizon-journal__empty',
-        text: 'Impossibile leggere questa daily.',
+        text: 'Could not read this daily note.',
       });
     });
   }
@@ -190,7 +190,7 @@ class JournalCard extends Component {
       ? { markdown: createJournalPreview(this.source, Number.MAX_SAFE_INTEGER).markdown, truncated: false }
       : createJournalPreview(this.source, PREVIEW_CHARACTERS);
     if (preview.markdown === '') {
-      body.createSpan({ cls: 'horizon-journal__empty', text: 'Niente scritto.' });
+      body.createSpan({ cls: 'horizon-journal__empty', text: 'Nothing written.' });
       return;
     }
     this.renderer = this.addChild(new Component());
