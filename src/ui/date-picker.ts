@@ -4,6 +4,7 @@ import { addMonths, parseDayKey, todayKey } from '../dates.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { buildPickerCells } from './daybar-core.ts';
+import { makeButtonLike } from './interactive.ts';
 
 const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
@@ -46,21 +47,21 @@ export function showDatePicker(
     // (which fills plain <button>s) and correct icon sizing via --icon-size.
     const prevBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(prevBtn, 'chevron-left');
-    prevBtn.setAttribute('aria-label', 'Previous month');
+    makeButtonLike(prevBtn, 'Previous month');
     prevBtn.onclick = () => {
       month = addMonths(month, -1);
       render();
     };
     const todayBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(todayBtn, 'circle-dot');
-    todayBtn.setAttribute('aria-label', 'Today');
+    makeButtonLike(todayBtn, 'Today');
     todayBtn.onclick = () => {
       month = todayKey();
       render();
     };
     const nextBtn = nav.createDiv({ cls: 'clickable-icon' });
     setIcon(nextBtn, 'chevron-right');
-    nextBtn.setAttribute('aria-label', 'Next month');
+    makeButtonLike(nextBtn, 'Next month');
     nextBtn.onclick = () => {
       month = addMonths(month, 1);
       render();
@@ -82,6 +83,7 @@ export function showDatePicker(
       el.toggleClass('horizon-cell--active', cell.isCurrent);
       el.toggleClass('horizon-cell--has-note', cell.hasNote);
       el.createDiv({ cls: 'horizon-cell__num', text: String(day?.d ?? '') });
+      makeButtonLike(el, `Choose ${cell.key}`);
       el.onclick = () => {
         onPick(cell.key);
         close();

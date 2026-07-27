@@ -9,6 +9,7 @@ import { registerDropTargets } from './dnd.ts';
 import { attachHoverCard } from './hover-card.ts';
 import { showTaskChipMenu } from './task-menu.ts';
 import type { DragPayload } from './dnd.ts';
+import { makeButtonLike } from './interactive.ts';
 
 export interface FullMonthCallbacks {
   onDayNumberClick: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
@@ -129,9 +130,7 @@ export class FullMonth extends Component {
         const info = isoWeek(weekStart);
         const weekEl = grid.createSpan({ cls: 'horizon-cal__weeknum horizon-month__weeknum', text: String(info.week) });
         weekEl.dataset.week = weekStart;
-        weekEl.tabIndex = 0;
-        weekEl.setAttribute('role', 'button');
-        weekEl.setAttribute('aria-label', `Weekly note W${info.week}`);
+        makeButtonLike(weekEl, `Weekly note W${info.week}`);
         if (this.ctx.periodic.noteFor('weekly', weekStart)) {
           weekEl.addClass('horizon-cal__weeknum--has-note');
         }

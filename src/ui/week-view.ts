@@ -9,6 +9,7 @@ import { renderChipOrCard } from './note-card.ts';
 import { registerDropTargets } from './dnd.ts';
 import { showTaskChipMenu } from './task-menu.ts';
 import type { DragPayload } from './dnd.ts';
+import { makeButtonLike } from './interactive.ts';
 
 export interface WeekViewCallbacks {
   onDayClick: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
@@ -118,7 +119,7 @@ export class WeekView extends Component {
           cls: 'horizon-cell__overdue-badge',
           text: `\u21a9 ${overdueCount}`,
         });
-        badge.setAttribute('aria-label', `${overdueCount} overdue tasks`);
+        makeButtonLike(badge, `${overdueCount} overdue tasks`);
         badge.addEventListener('click', (event) => {
           event.stopPropagation();
           this.callbacks.onOverdueClick();

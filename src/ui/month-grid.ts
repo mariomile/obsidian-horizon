@@ -14,6 +14,7 @@ import type { HorizonContext } from './context.ts';
 import { renderMiniDayCell } from './day-cell.ts';
 import { registerDropTargets } from './dnd.ts';
 import type { DragPayload } from './dnd.ts';
+import { makeButtonLike } from './interactive.ts';
 
 export interface MonthGridCallbacks {
   onDayClick?: (key: DayKey, event: MouseEvent | KeyboardEvent) => void;
@@ -107,9 +108,7 @@ export class MonthGrid extends Component {
           text: String(info.week),
         });
         weekEl.dataset.week = weekStart;
-        weekEl.tabIndex = 0;
-        weekEl.setAttribute('role', 'button');
-        weekEl.setAttribute('aria-label', `Weekly note W${info.week}`);
+        makeButtonLike(weekEl, `Weekly note W${info.week}`);
         if (this.ctx.periodic.noteFor('weekly', weekStart)) {
           weekEl.addClass('horizon-cal__weeknum--has-note');
         }
@@ -135,7 +134,7 @@ export class MonthGrid extends Component {
     // Native clickable-icon div, not a <button>: themes like Cosmos fill plain
     // <button>s with a resting background, reading as opaque bubbles.
     const button = parent.createDiv({ cls: 'clickable-icon horizon-cal__nav-btn' });
-    button.setAttribute('aria-label', label);
+    makeButtonLike(button, label);
     setIcon(button, icon);
     button.addEventListener('click', (event) => {
       event.stopPropagation();

@@ -6,6 +6,7 @@ import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { formatDayLabel, resolveDailyKey } from './daybar-core.ts';
 import { showDatePicker } from './date-picker.ts';
+import { makeButtonLike } from './interactive.ts';
 
 const PILL_CLASS = 'horizon-daybar';
 
@@ -25,13 +26,14 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     // primitive they skin — and it defines --icon-size so the svg renders.
     const prev = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
     setIcon(prev, 'chevron-left');
-    prev.setAttribute('aria-label', 'Previous day');
+    makeButtonLike(prev, 'Previous day');
     prev.onclick = () => void step(-1);
 
     const label = pill.createDiv({
       cls: 'horizon-daybar-label',
       text: formatDayLabel(ctx.moment, shownKey),
     });
+    makeButtonLike(label, pending ? `Create note for ${shownKey}` : 'Choose date');
     label.onclick = () => {
       if (pending) {
         // Confirm: create the pending day and open it.
@@ -46,13 +48,13 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     if (pending) {
       const create = pill.createDiv({ cls: 'clickable-icon horizon-daybar-create' });
       setIcon(create, 'plus');
-      create.setAttribute('aria-label', 'Create this note');
+      makeButtonLike(create, 'Create this note');
       create.onclick = () => void createAndOpen(pending as DayKey);
     }
 
     const next = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
     setIcon(next, 'chevron-right');
-    next.setAttribute('aria-label', 'Next day');
+    makeButtonLike(next, 'Next day');
     next.onclick = () => void step(1);
   };
 

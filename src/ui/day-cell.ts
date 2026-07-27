@@ -2,6 +2,7 @@ import { compareDayKeys, parseDayKey } from '../dates.ts';
 import type { DayBucket, DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { TASK_MIME } from './dnd.ts';
+import { makeButtonLike } from './interactive.ts';
 
 export interface DayCellOptions {
   /** Month currently displayed by the grid, to dim spill-over days. */
@@ -251,9 +252,7 @@ export function renderFullDayCell(
       cls: 'horizon-cell__overdue-badge',
       text: `\u21a9 ${options.overdueCount}`,
     });
-    badge.tabIndex = 0;
-    badge.setAttribute('role', 'button');
-    badge.setAttribute('aria-label', `${options.overdueCount} overdue tasks`);
+    makeButtonLike(badge, `${options.overdueCount} overdue tasks`);
   }
 
   const chips = chipsForDay(ctx, key, options.today);
@@ -266,8 +265,7 @@ export function renderFullDayCell(
       cls: 'horizon-chip horizon-chip--more',
       text: `+${hidden} more`,
     });
-    more.tabIndex = 0;
-    more.setAttribute('role', 'button');
+    makeButtonLike(more, `Show ${hidden} more items`);
     more.addEventListener('click', (event) => {
       event.stopPropagation();
       callbacks.onOverflow(key, more, event);

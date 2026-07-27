@@ -17,6 +17,7 @@ import type { HorizonContext } from './context.ts';
 import { FullMonth } from './full-month.ts';
 import { JournalView } from './journal-view.ts';
 import { WeekView } from './week-view.ts';
+import { makeButtonLike } from './interactive.ts';
 
 export const CALENDAR_VIEW_TYPE = 'horizon-calendar';
 
@@ -224,7 +225,7 @@ export class HorizonCalendarView extends ItemView {
   private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): HTMLElement {
     // Native clickable-icon div, not a <button> (Cosmos fills <button> by tag).
     const button = parent.createDiv({ cls: 'clickable-icon horizon-view__nav-btn' });
-    button.setAttribute('aria-label', label);
+    makeButtonLike(button, label);
     setIcon(button, icon);
     button.addEventListener('click', onClick);
     return button;

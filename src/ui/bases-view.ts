@@ -13,6 +13,7 @@ import { normalizeFrontmatterDate } from '../index/frontmatter-date.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { renderChipOrCard } from './note-card.ts';
+import { makeButtonLike } from './interactive.ts';
 
 export const BASES_CALENDAR_VIEW_TYPE = 'horizon';
 
@@ -198,7 +199,7 @@ export class HorizonBasesView extends BasesView {
   private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): void {
     // Native clickable-icon div, not a <button> (Cosmos fills <button> by tag).
     const button = parent.createDiv({ cls: 'clickable-icon horizon-cal__nav-btn' });
-    button.setAttribute('aria-label', label);
+    makeButtonLike(button, label);
     setIcon(button, icon);
     button.addEventListener('click', (event) => {
       event.stopPropagation();
