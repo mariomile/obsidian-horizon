@@ -1,10 +1,10 @@
 import type { App, TAbstractFile, TFile } from 'obsidian';
-import { normalizeCoverCandidate, stripFrontmatter } from './kit/mdpreview.ts';
+import { createScanText, normalizeCoverCandidate } from './kit/mdpreview.ts';
 
-// stripFrontmatter + normalizeCoverCandidate are shared with masonry via
-// marioverse-kit (vendored in src/kit/mdpreview.ts). createScanText stays local
-// (it had drifted from masonry's copy — see the kit README).
-export { normalizeCoverCandidate, stripFrontmatter } from './kit/mdpreview.ts';
+// Markdown-preview primitives shared with masonry via marioverse-kit
+// (vendored in src/kit/mdpreview.ts). stripFrontmatter is re-exported for
+// journal.ts without a local import (it is not used directly in this module).
+export { createScanText, normalizeCoverCandidate, stripFrontmatter } from './kit/mdpreview.ts';
 
 const IMAGE_EXTENSIONS = new Set(['avif', 'bmp', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp']);
 
@@ -15,46 +15,6 @@ function isImageFile(value: TAbstractFile | null): value is TFile {
     'extension' in value &&
     IMAGE_EXTENSIONS.has((value as TFile).extension.toLocaleLowerCase())
   );
-}
-
-function normalizeText(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLocaleLowerCase();
-}
-
-/** Clean prose excerpt: frontmatter, code, embeds, tables, HTML, list markers out. */
-export function createScanText(markdown: string, title: string, maxCharacters: number): string {
-  const withoutStructure = stripFrontmatter(markdown)
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/!\[\[[^\]]+\]\]/g, ' ')
-    .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
-    .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_match, target, label) =>
-      String(label ?? target).trim(),
-    )
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/^#\s+.*$/m, (heading) => {
-      const headingTitle = heading.replace(/^#\s+/, '').trim();
-      return normalizeText(headingTitle) === normalizeText(title) ? ' ' : headingTitle;
-    })
-    .replace(/^\s*>\s*\[![^\]]+\]\s*/gm, '')
-    .replace(/^\s*>\s?/gm, '')
-    .replace(/^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/gm, ' ')
-    .replace(/\|/g, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
-    .replace(/^\s*- \[[ xX]\]\s*/gm, '')
-    .replace(/^\s*(?:[-*+] |\d+[.)] )/gm, '')
-    .replace(/[`*_~]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  if (withoutStructure.length <= maxCharacters) return withoutStructure;
-  const candidate = withoutStructure.slice(0, maxCharacters + 1);
-  const wordBreak = candidate.lastIndexOf(' ');
-  const end = wordBreak >= Math.floor(maxCharacters * 0.6) ? wordBreak : maxCharacters;
-  return `${candidate.slice(0, end).trim()}…`;
 }
 
 export interface NotePreview {
