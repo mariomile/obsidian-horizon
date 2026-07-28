@@ -1,7 +1,10 @@
 import type { App, TAbstractFile, TFile } from 'obsidian';
+import { normalizeCoverCandidate, stripFrontmatter } from './kit/mdpreview.ts';
 
-// Scan-text and cover logic ported from the sibling masonry plugin
-// (masonry/src/utils.ts, presentation.ts, preview.ts) — keep in sync manually.
+// stripFrontmatter + normalizeCoverCandidate are shared with masonry via
+// marioverse-kit (vendored in src/kit/mdpreview.ts). createScanText stays local
+// (it had drifted from masonry's copy — see the kit README).
+export { normalizeCoverCandidate, stripFrontmatter } from './kit/mdpreview.ts';
 
 const IMAGE_EXTENSIONS = new Set(['avif', 'bmp', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp']);
 
@@ -19,11 +22,6 @@ function normalizeText(value: string): string {
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toLocaleLowerCase();
-}
-
-export function stripFrontmatter(markdown: string): string {
-  if (!markdown.startsWith('---')) return markdown;
-  return markdown.replace(/^---\s*\n[\s\S]*?\n---\s*(?:\n|$)/, '');
 }
 
 /** Clean prose excerpt: frontmatter, code, embeds, tables, HTML, list markers out. */
@@ -57,31 +55,6 @@ export function createScanText(markdown: string, title: string, maxCharacters: n
   const wordBreak = candidate.lastIndexOf(' ');
   const end = wordBreak >= Math.floor(maxCharacters * 0.6) ? wordBreak : maxCharacters;
   return `${candidate.slice(0, end).trim()}…`;
-}
-
-/** Frontmatter cover value → link target or URL (wikilink/markdown-image/plain forms). */
-export function normalizeCoverCandidate(value: unknown): string | undefined {
-  if (Array.isArray(value)) {
-    for (const candidate of value) {
-      const normalized = normalizeCoverCandidate(candidate);
-      if (normalized) return normalized;
-    }
-    return undefined;
-  }
-  if (typeof value !== 'string') return undefined;
-
-  const candidate = value.trim();
-  if (!candidate) return undefined;
-
-  const wikilink = candidate.match(/^!?(?:\[\[)([^\]]+)(?:\]\])$/);
-  if (wikilink?.[1]) return wikilink[1].split('|')[0]?.trim() || undefined;
-
-  const markdownImage = candidate.match(/^!\[[^\]]*\]\(([^)]+)\)$/);
-  if (markdownImage?.[1]) {
-    return markdownImage[1].replace(/\s+["'][^"']*["']$/, '').trim();
-  }
-
-  return candidate.replace(/^['"]|['"]$/g, '').trim() || undefined;
 }
 
 export interface NotePreview {
