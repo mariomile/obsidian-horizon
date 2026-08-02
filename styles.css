@@ -1381,6 +1381,16 @@
   color: var(--interactive-accent);
 }
 
+/* The stepper arrows use a solid caret, whose triangle sits small inside its
+   own 24-unit box — at the default icon size it reads as a speck. Sized up
+   here rather than by picking a different glyph: the shape is right, only its
+   optical weight was wrong. The hit area stays the native one, so the control
+   is no harder to press on a phone than any other. */
+.horizon-daybar-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* The date label is a plain div (not a <button>, which Cosmos fills): a subtle
    text button that opens the calendar picker. */
 .horizon-daybar-label {
