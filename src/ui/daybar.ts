@@ -24,8 +24,12 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     // <button>): themes like Cosmos give plain <button>s a filled resting
     // background, while `.clickable-icon` is the transparent icon-button
     // primitive they skin — and it defines --icon-size so the svg renders.
+    // `caret-*` rather than `chevron-*`: the day stepper wants a solid little
+    // triangle, while a chevron is the expand/collapse affordance used all over
+    // the app. Two different jobs, so two different names — otherwise restyling
+    // one restyles every collapsible section too.
     const prev = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
-    setIcon(prev, 'chevron-left');
+    setIcon(prev, 'caret-left');
     makeButtonLike(prev, 'Previous day');
     prev.onclick = () => void step(-1);
 
@@ -53,7 +57,7 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     }
 
     const next = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
-    setIcon(next, 'chevron-right');
+    setIcon(next, 'caret-right');
     makeButtonLike(next, 'Next day');
     next.onclick = () => void step(1);
   };
