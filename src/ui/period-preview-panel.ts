@@ -13,18 +13,22 @@ export interface PeriodPreviewPanelConfig {
   period: Period;
   keyFor: (activeDate: DayKey) => DayKey;
   heading: (moment: MomentLike, key: DayKey) => string;
+  /** Multiplier on `settings.previewCharacters` — the week card shows more text than the lightweight day snippet. */
+  previewScale: number;
 }
 
 export const DAILY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
   period: 'daily',
   keyFor: (activeDate) => activeDate,
   heading: dailyHeading,
+  previewScale: 1,
 };
 
 export const WEEKLY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
   period: 'weekly',
   keyFor: startOfWeekMonday,
   heading: weeklyHeading,
+  previewScale: 2.5,
 };
 
 /**
@@ -45,12 +49,12 @@ export class PeriodPreviewPanel extends Component {
   }
 
   onload(): void {
-    this.containerEl.addClass('horizon-period-panel');
+    this.containerEl.addClass('horizon-period-panel', `horizon-period-panel--${this.config.period}`);
     this.register(this.ctx.uiState.subscribe(() => this.render()));
     this.register(this.ctx.dayIndex.subscribe(() => this.render()));
     this.register(() => {
       this.containerEl.empty();
-      this.containerEl.removeClass('horizon-period-panel');
+      this.containerEl.removeClass('horizon-period-panel', `horizon-period-panel--${this.config.period}`);
     });
     this.render();
   }
@@ -58,7 +62,7 @@ export class PeriodPreviewPanel extends Component {
   render(): void {
     const el = this.containerEl;
     el.empty();
-    const { period, keyFor, heading } = this.config;
+    const { period, keyFor, heading, previewScale } = this.config;
 
     if (!this.ctx.settings.notePreviewPanels || !this.ctx.settings.periods[period].enabled) {
       el.hide();
@@ -81,7 +85,13 @@ export class PeriodPreviewPanel extends Component {
       const body = card.createDiv({ cls: 'horizon-card__body' });
       body.createDiv({ cls: 'horizon-card__title', text: note.basename });
       const excerptEl = body.createDiv({ cls: 'horizon-card__excerpt' });
-      populatePreviewBody(this.ctx, card, excerptEl, note, this.ctx.settings.previewCharacters);
+      populatePreviewBody(
+        this.ctx,
+        card,
+        excerptEl,
+        note,
+        Math.round(this.ctx.settings.previewCharacters * previewScale),
+      );
     } else {
       const empty = el.createDiv({ cls: 'horizon-period-panel__empty' });
       makeButtonLike(empty, `Create note for ${heading(this.ctx.moment, key)}`);
