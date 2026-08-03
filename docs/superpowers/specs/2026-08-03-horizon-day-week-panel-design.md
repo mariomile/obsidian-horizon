@@ -98,7 +98,7 @@ Re-render triggers (`onload()`): `ctx.uiState.subscribe()` (active date changes)
 │ │ piattaforma deepagent. …     ││
 │ └──────────────────────────────┘│
 ├──────────────────────────────────┤
-│  W31 · 28 Jul – 3 Aug           │  ← PeriodPreviewPanel(weekly)
+│  W32 · 3 Aug – 9 Aug            │  ← PeriodPreviewPanel(weekly)
 │ ┌──────────────────────────────┐│
 │ │ No note yet                  ││
 │ │ Click to create               ││
