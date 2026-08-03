@@ -741,6 +741,47 @@
   }
 }
 
+/* ============================== Period preview panels (sidebar) ============================== */
+
+.horizon-period-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2-2);
+  padding: var(--size-4-1) var(--size-4-1) var(--size-4-2);
+  border-top: var(--border-width) solid var(--background-modifier-border);
+}
+
+.horizon-period-panel__heading {
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
+  color: var(--text-muted);
+}
+
+.horizon-period-panel__empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-2-2);
+  padding: var(--size-2-3);
+  border-radius: var(--radius-m);
+  border: 1px dashed var(--background-modifier-border);
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: var(--font-ui-small);
+  transition: border-color var(--horizon-ease), color var(--horizon-ease);
+}
+
+@media (hover: hover) {
+  .horizon-period-panel__empty:hover {
+    border-color: var(--background-modifier-border-hover);
+    color: var(--text-muted);
+  }
+}
+
+.horizon-period-panel__empty-hint {
+  font-size: var(--font-ui-smaller);
+}
+
 /* ============================== Ghost chips (agent proposals) ============================== */
 
 .horizon-chip--ghost {
