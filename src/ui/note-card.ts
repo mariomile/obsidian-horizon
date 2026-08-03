@@ -1,6 +1,46 @@
+import type { TFile } from 'obsidian';
+
 import type { HorizonContext } from './context.ts';
 import { renderChip } from './day-cell.ts';
 import type { ChipSpec } from './day-cell.ts';
+
+/**
+ * Fetch a note's preview and populate an already-mounted excerpt element,
+ * appending a cover thumbnail to `cardEl` when one resolves. Shared by
+ * `renderNoteCard` (chip cards) and `PeriodPreviewPanel` (sidebar panels) so
+ * the async excerpt/thumb/fade-in dance exists in exactly one place.
+ */
+export function populatePreviewBody(
+  ctx: HorizonContext,
+  cardEl: HTMLElement,
+  excerptEl: HTMLElement,
+  file: TFile,
+  chars: number,
+): void {
+  void ctx.preview
+    .getPreview(file, chars)
+    .then((preview) => {
+      if (!cardEl.isConnected) return;
+      if (preview.excerpt) {
+        excerptEl.setText(preview.excerpt);
+        excerptEl.addClass('is-loaded');
+      } else {
+        excerptEl.addClass('horizon-card__excerpt--empty');
+      }
+      if (preview.imageUrl) {
+        const thumb = cardEl.createDiv({ cls: 'horizon-card__thumb' });
+        thumb.style.backgroundImage = `url("${preview.imageUrl}")`;
+        cardEl.addClass('horizon-chip--card-image');
+        // Next frame, so the browser paints the transparent thumb first —
+        // otherwise the opacity transition has nothing to animate from.
+        requestAnimationFrame(() => thumb.addClass('is-loaded'));
+      }
+    })
+    .catch(() => {
+      if (!cardEl.isConnected) return;
+      excerptEl.addClass('horizon-card__excerpt--empty');
+    });
+}
 
 /**
  * Rich mini-card for a note chip: title now, excerpt + cover hydrated async.
@@ -28,23 +68,7 @@ export function renderNoteCard(
 
   const file = ctx.app.vault.getFileByPath(chip.path);
   if (file) {
-    void ctx.preview.getPreview(file, ctx.settings.previewCharacters).then((preview) => {
-      if (!el.isConnected) return;
-      if (preview.excerpt) {
-        excerptEl.setText(preview.excerpt);
-        excerptEl.addClass('is-loaded');
-      } else {
-        excerptEl.addClass('horizon-card__excerpt--empty');
-      }
-      if (preview.imageUrl) {
-        const thumb = el.createDiv({ cls: 'horizon-card__thumb' });
-        thumb.style.backgroundImage = `url("${preview.imageUrl}")`;
-        el.addClass('horizon-chip--card-image');
-        // Next frame, so the browser paints the transparent thumb first —
-        // otherwise the opacity transition has nothing to animate from.
-        requestAnimationFrame(() => thumb.addClass('is-loaded'));
-      }
-    });
+    populatePreviewBody(ctx, el, excerptEl, file, ctx.settings.previewCharacters);
   } else {
     excerptEl.addClass('horizon-card__excerpt--empty');
   }
