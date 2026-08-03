@@ -7,22 +7,15 @@ import type { DayKey, Period } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { makeButtonLike } from './interactive.ts';
 import { populatePreviewBody } from './note-card.ts';
-import { dailyHeading, weeklyHeading } from './period-preview-core.ts';
+import { weeklyHeading } from './period-preview-core.ts';
 
 export interface PeriodPreviewPanelConfig {
   period: Period;
   keyFor: (activeDate: DayKey) => DayKey;
   heading: (moment: MomentLike, key: DayKey) => string;
-  /** Multiplier on `settings.previewCharacters` — the week card shows more text than the lightweight day snippet. */
+  /** Multiplier on `settings.previewCharacters` — this card shows more text than a chip preview. */
   previewScale: number;
 }
-
-export const DAILY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
-  period: 'daily',
-  keyFor: (activeDate) => activeDate,
-  heading: dailyHeading,
-  previewScale: 1,
-};
 
 export const WEEKLY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
   period: 'weekly',
@@ -32,9 +25,9 @@ export const WEEKLY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
 };
 
 /**
- * Persistent preview of the daily/weekly note for the active date, mounted
- * below the sidebar mini-calendar. Two instances (daily, weekly) share this
- * one implementation, parameterized by `PeriodPreviewPanelConfig`.
+ * Persistent preview of a periodic note for the active date, mounted below
+ * the sidebar mini-calendar. Configured via `PeriodPreviewPanelConfig` so a
+ * future period (e.g. monthly) can reuse it without new plumbing.
  */
 export class PeriodPreviewPanel extends Component {
   private readonly ctx: HorizonContext;

@@ -781,38 +781,6 @@
   font-size: var(--font-ui-smaller);
 }
 
-/* Day: a lightweight text snippet, no card chrome — the week card below carries the visual weight. */
-.horizon-period-panel--daily .horizon-chip--card {
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  min-height: 0;
-}
-
-@media (hover: hover) {
-  .horizon-period-panel--daily .horizon-chip--card:hover {
-    border-color: transparent;
-    box-shadow: none;
-    transform: none;
-  }
-}
-
-.horizon-period-panel--daily .horizon-card__thumb {
-  display: none;
-}
-
-.horizon-period-panel--daily .horizon-card__excerpt {
-  -webkit-line-clamp: 3;
-  min-height: calc(1.35em * 3);
-}
-
-.horizon-period-panel--daily .horizon-period-panel__empty {
-  border: none;
-  background-color: transparent;
-  padding: 0;
-}
-
 /* Week: a real, larger card — more excerpt, a bigger thumbnail, feels open-able. */
 .horizon-period-panel--weekly .horizon-chip--card {
   padding: var(--size-4-2);
