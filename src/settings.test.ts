@@ -59,3 +59,17 @@ describe('daybar setting', () => {
     assert.equal(parseSettings({}).daybar, true);
   });
 });
+
+describe('notePreviewPanels setting', () => {
+  it('defaults to true', () => {
+    assert.equal(DEFAULT_SETTINGS.notePreviewPanels, true);
+  });
+
+  it('round-trips a stored false', () => {
+    assert.equal(parseSettings({ notePreviewPanels: false }).notePreviewPanels, false);
+  });
+
+  it('falls back to true when absent', () => {
+    assert.equal(parseSettings({}).notePreviewPanels, true);
+  });
+});

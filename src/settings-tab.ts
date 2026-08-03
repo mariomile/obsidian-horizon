@@ -67,6 +67,16 @@ export class HorizonSettingTab extends PluginSettingTab {
         }),
       );
 
+    new Setting(containerEl)
+      .setName('Note preview panels')
+      .setDesc('Show a preview of the day and week notes under the sidebar mini-calendar.')
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.notePreviewPanels).onChange(async (value) => {
+          this.plugin.settings.notePreviewPanels = value;
+          await this.plugin.saveSettings();
+        }),
+      );
+
     const visibility: Array<{ key: 'showDue' | 'showScheduled' | 'showDone' | 'showNotes'; name: string; desc: string }> = [
       { key: 'showDue', name: 'Due tasks', desc: 'Show tasks with a 📅 due date.' },
       { key: 'showScheduled', name: 'Scheduled tasks', desc: 'Show tasks with a ⏳ scheduled date.' },
