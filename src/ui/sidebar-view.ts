@@ -4,6 +4,7 @@ import { openPeriodicNote } from '../edits/note-creator.ts';
 import { rescheduleTask } from '../edits/task-edit.ts';
 import type { HorizonContext } from './context.ts';
 import { MonthGrid } from './month-grid.ts';
+import { DAILY_PANEL_CONFIG, PeriodPreviewPanel, WEEKLY_PANEL_CONFIG } from './period-preview-panel.ts';
 
 export const SIDEBAR_VIEW_TYPE = 'horizon-sidebar';
 
@@ -11,6 +12,8 @@ export class HorizonSidebarView extends ItemView {
   hoverPopover: HoverPopover | null = null;
   private readonly ctx: HorizonContext;
   private grid: MonthGrid | null = null;
+  private dayPanel: PeriodPreviewPanel | null = null;
+  private weekPanel: PeriodPreviewPanel | null = null;
 
   constructor(leaf: WorkspaceLeaf, ctx: HorizonContext) {
     super(leaf);
@@ -61,16 +64,28 @@ export class HorizonSidebarView extends ItemView {
         },
       }),
     );
+    this.dayPanel = this.addChild(
+      new PeriodPreviewPanel(this.ctx, this.contentEl.createDiv(), DAILY_PANEL_CONFIG),
+    );
+    this.weekPanel = this.addChild(
+      new PeriodPreviewPanel(this.ctx, this.contentEl.createDiv(), WEEKLY_PANEL_CONFIG),
+    );
   }
 
   /** Re-render on external changes (e.g. plugin settings toggled). */
   refresh(): void {
     this.grid?.render();
+    this.dayPanel?.render();
+    this.weekPanel?.render();
   }
 
   async onClose(): Promise<void> {
     if (this.grid) this.removeChild(this.grid);
     this.grid = null;
+    if (this.dayPanel) this.removeChild(this.dayPanel);
+    this.dayPanel = null;
+    if (this.weekPanel) this.removeChild(this.weekPanel);
+    this.weekPanel = null;
     this.contentEl.removeClass('horizon-sidebar');
   }
 }
