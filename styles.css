@@ -655,22 +655,33 @@
   align-items: stretch;
   gap: var(--size-2-3);
   padding: var(--size-2-3);
-  border-radius: var(--radius-m);
-  background-color: var(--background-primary);
-  border: var(--border-width) solid var(--background-modifier-border);
+  /* mv-kit §1: la card consuma il contratto di elevazione del tema. Il raggio
+     era --radius-m, che deriva alla scala generica e non al raggio card della
+     suite: due card della stessa suite si arrotondavano diversamente.
+     Il fondo era var(--background-primary), cioè LETTERALMENTE il canvas —
+     la card era invisibile, la separazione la faceva il solo bordo. Ora è il
+     piolo elevato della palette, con l'ombra a riposo che lo accompagna. */
+  border-radius: var(--mv-r-card, var(--radius-m));
+  background-color: var(--mv-card-bg, var(--background-primary));
+  border: var(--border-width) solid var(--mv-card-border, var(--background-modifier-border));
+  box-shadow: var(--mv-card-rest, none);
   min-height: 44px;
   /* mv-kit §6: the border-color/box-shadow wash below eases with --mv-wash
      (via --horizon-ease); the transform lift is its own physical-settling
      curve, --mv-lift — the two easings are not interchangeable. */
-  transition: border-color var(--horizon-ease), box-shadow var(--horizon-ease),
+  transition: background-color var(--horizon-ease),
+    border-color var(--horizon-ease), box-shadow var(--horizon-ease),
     transform var(--cosmos-t-fast, 80ms) var(--mv-lift, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 @media (hover: hover) {
   .horizon-chip--card:hover {
-    background-color: var(--background-primary);
+    /* Era var(--background-primary), lo stesso valore del riposo: l'hover non
+       aveva alcun cambio di superficie, malgrado il commento §6 qui sotto lo
+       desse per esistente. Ora sale di un piolo davvero. */
+    background-color: var(--mv-card-bg-hover, var(--background-secondary));
     border-color: var(--background-modifier-border-hover);
-    box-shadow: var(--shadow-s);
+    box-shadow: var(--mv-card-lift, var(--shadow-s));
     /* mv-kit §6: hover richness is colour AND a subtle physical lift, never
        colour alone — this card had the wash, not the lift. Capped at 1px. */
     transform: translateY(-1px);
