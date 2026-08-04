@@ -1,6 +1,6 @@
-import { Component, Keymap, MarkdownRenderer } from 'obsidian';
+import { Component, Keymap, MarkdownRenderer, setIcon } from 'obsidian';
 
-import { startOfWeekMonday } from '../dates.ts';
+import { addDays, parseDayKey, startOfWeekMonday } from '../dates.ts';
 import { openPeriodicNote } from '../edits/note-creator.ts';
 import { createJournalPreview } from '../journal.ts';
 import type { MomentLike } from '../index/periodic.ts';
@@ -15,6 +15,8 @@ export interface PeriodPreviewPanelConfig {
   heading: (moment: MomentLike, key: DayKey) => string;
   /** Multiplier on `settings.previewCharacters` — how much of the note's own markdown to render. */
   previewScale: number;
+  /** Step the shared active date to the previous/next period, e.g. ±7 days for weekly. */
+  step: (activeDate: DayKey, direction: 1 | -1) => DayKey;
 }
 
 export const WEEKLY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
@@ -22,6 +24,7 @@ export const WEEKLY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
   keyFor: startOfWeekMonday,
   heading: weeklyHeading,
   previewScale: 3.5,
+  step: (activeDate, direction) => addDays(activeDate, direction * 7),
 };
 
 /**
@@ -73,7 +76,10 @@ export class PeriodPreviewPanel extends Component {
     el.show();
 
     const key = keyFor(this.ctx.uiState.activeDate);
-    el.createDiv({ cls: 'horizon-period-panel__heading', text: heading(this.ctx.moment, key) });
+    const headingRow = el.createDiv({ cls: 'horizon-period-panel__heading-row' });
+    this.navButton(headingRow, 'chevron-left', 'Previous period', -1);
+    headingRow.createSpan({ cls: 'horizon-period-panel__heading', text: heading(this.ctx.moment, key) });
+    this.navButton(headingRow, 'chevron-right', 'Next period', 1);
 
     const openThis = (event: MouseEvent): void => {
       // Let a real link inside the rendered preview navigate on its own —
@@ -87,7 +93,8 @@ export class PeriodPreviewPanel extends Component {
       const card = el.createDiv({ cls: 'horizon-chip horizon-chip--card' });
       makeButtonLike(card, `Open ${note.basename}`);
       card.addEventListener('click', openThis);
-      const body = card.createDiv({ cls: 'horizon-period-panel__markdown' });
+      const wrap = card.createDiv({ cls: 'horizon-period-panel__markdown-wrap' });
+      const body = wrap.createDiv({ cls: 'horizon-period-panel__markdown' });
       body.createSpan({ cls: 'horizon-period-panel__empty-label', text: 'Loading…' });
 
       const chars = Math.round(this.ctx.settings.previewCharacters * previewScale);
@@ -109,6 +116,10 @@ export class PeriodPreviewPanel extends Component {
               )) {
                 checkbox.disabled = true;
               }
+              // A soft fade only when the text itself was cut (never mid-line —
+              // createJournalPreview always breaks on a whole markdown line) —
+              // the fade never hides fully-shown content.
+              if (preview.truncated) wrap.createDiv({ cls: 'horizon-period-panel__fade' });
             },
           );
         })
@@ -124,5 +135,25 @@ export class PeriodPreviewPanel extends Component {
       empty.createSpan({ cls: 'horizon-period-panel__empty-label', text: 'No note yet' });
       empty.createSpan({ cls: 'horizon-period-panel__empty-hint', text: 'Click to create' });
     }
+  }
+
+  private navButton(parent: HTMLElement, icon: string, label: string, direction: 1 | -1): void {
+    // Native clickable-icon div, not a <button> — matches month-grid.ts's own
+    // nav buttons (themes like Cosmos fill plain <button>s with a resting
+    // background, reading as opaque bubbles).
+    const button = parent.createDiv({ cls: 'clickable-icon horizon-cal__nav-btn' });
+    makeButtonLike(button, label);
+    setIcon(button, icon);
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.step(direction);
+    });
+  }
+
+  private step(direction: 1 | -1): void {
+    const next = this.config.step(this.ctx.uiState.activeDate, direction);
+    const ymd = parseDayKey(next);
+    if (ymd) this.ctx.uiState.setVisibleMonth({ y: ymd.y, m: ymd.m });
+    this.ctx.uiState.setActiveDate(next);
   }
 }

@@ -766,7 +766,14 @@
   padding: 0 var(--size-4-1) var(--size-4-2);
 }
 
+.horizon-period-panel__heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+}
+
 .horizon-period-panel__heading {
+  flex: 1;
   font-size: var(--font-ui-smaller);
   font-weight: var(--font-medium);
   color: var(--text-muted);
@@ -804,14 +811,26 @@
   align-items: stretch;
 }
 
+.horizon-period-panel__markdown-wrap {
+  position: relative;
+}
+
 .horizon-period-panel__markdown {
-  max-height: 240px;
-  overflow: hidden;
   font-size: var(--font-ui-small);
   color: var(--text-muted);
   line-height: 1.4;
-  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+/* Only present when the text was actually cut (see period-preview-panel.ts) —
+   a soft cue that there's more, never a mask over fully-shown content. */
+.horizon-period-panel__fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, var(--background-primary));
+  pointer-events: none;
 }
 
 .horizon-period-panel__markdown > :first-child {
