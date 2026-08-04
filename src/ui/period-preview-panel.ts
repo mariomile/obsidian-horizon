@@ -23,7 +23,7 @@ export const WEEKLY_PANEL_CONFIG: PeriodPreviewPanelConfig = {
   period: 'weekly',
   keyFor: startOfWeekMonday,
   heading: weeklyHeading,
-  previewScale: 3.5,
+  previewScale: 2,
   step: (activeDate, direction) => addDays(activeDate, direction * 7),
 };
 

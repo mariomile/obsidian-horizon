@@ -3,6 +3,7 @@ import { ItemView, Keymap, type HoverPopover, type WorkspaceLeaf } from 'obsidia
 import { openPeriodicNote } from '../edits/note-creator.ts';
 import { rescheduleTask } from '../edits/task-edit.ts';
 import type { HorizonContext } from './context.ts';
+import { DayTasksPanel } from './day-tasks-panel.ts';
 import { MonthGrid } from './month-grid.ts';
 import { PeriodPreviewPanel, WEEKLY_PANEL_CONFIG } from './period-preview-panel.ts';
 
@@ -13,6 +14,7 @@ export class HorizonSidebarView extends ItemView {
   private readonly ctx: HorizonContext;
   private grid: MonthGrid | null = null;
   private weekPanel: PeriodPreviewPanel | null = null;
+  private dayTasks: DayTasksPanel | null = null;
 
   constructor(leaf: WorkspaceLeaf, ctx: HorizonContext) {
     super(leaf);
@@ -66,12 +68,14 @@ export class HorizonSidebarView extends ItemView {
     this.weekPanel = this.addChild(
       new PeriodPreviewPanel(this.ctx, this.contentEl.createDiv(), WEEKLY_PANEL_CONFIG),
     );
+    this.dayTasks = this.addChild(new DayTasksPanel(this.ctx, this.contentEl.createDiv()));
   }
 
   /** Re-render on external changes (e.g. plugin settings toggled). */
   refresh(): void {
     this.grid?.render();
     this.weekPanel?.render();
+    this.dayTasks?.render();
   }
 
   async onClose(): Promise<void> {
@@ -79,6 +83,8 @@ export class HorizonSidebarView extends ItemView {
     this.grid = null;
     if (this.weekPanel) this.removeChild(this.weekPanel);
     this.weekPanel = null;
+    if (this.dayTasks) this.removeChild(this.dayTasks);
+    this.dayTasks = null;
     this.contentEl.removeClass('horizon-sidebar');
   }
 }
