@@ -807,7 +807,7 @@
 
 /* Week: a real, larger card — the note's own markdown, feels open-able. */
 .horizon-period-panel--weekly .horizon-chip--card {
-  padding: var(--size-4-2);
+  padding: var(--size-4-2) 5%;
   min-height: 88px;
   align-items: stretch;
   /* Clip content to the card's own rounded corners — otherwise a large
