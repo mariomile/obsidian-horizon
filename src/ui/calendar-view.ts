@@ -86,7 +86,10 @@ export class HorizonCalendarView extends ItemView {
       this.active?.step(-1);
       this.refreshTitle();
     }));
-    const todayBtn = nav.createEl('button', { cls: 'horizon-view__today-btn', text: 'Today' });
+    // Div, non <button>: su un <button> `.mv-chip` perderebbe sfondo e padding
+    // contro app.css (vedi la nota di specificità in mv-chip.css).
+    const todayBtn = nav.createDiv({ cls: 'mv-chip horizon-view__today-btn', text: 'Today' });
+    makeButtonLike(todayBtn, 'Go to today');
     todayBtn.addEventListener('click', () => {
       this.active?.goToday();
       this.refreshTitle();
@@ -223,8 +226,9 @@ export class HorizonCalendarView extends ItemView {
   }
 
   private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): HTMLElement {
-    // Native clickable-icon div, not a <button> (Cosmos fills <button> by tag).
-    const button = parent.createDiv({ cls: 'clickable-icon horizon-view__nav-btn' });
+    // Div, non <button>: Cosmos riempie i <button> per tag. La classe è
+    // `mv-icon-btn`, il primitivo di suite, non `clickable-icon` di core.
+    const button = parent.createDiv({ cls: 'mv-icon-btn horizon-view__nav-btn' });
     makeButtonLike(button, label);
     setIcon(button, icon);
     button.addEventListener('click', onClick);

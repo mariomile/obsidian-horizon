@@ -133,7 +133,7 @@ export class MonthGrid extends Component {
   ): void {
     // Native clickable-icon div, not a <button>: themes like Cosmos fill plain
     // <button>s with a resting background, reading as opaque bubbles.
-    const button = parent.createDiv({ cls: 'clickable-icon horizon-cal__nav-btn' });
+    const button = parent.createDiv({ cls: 'mv-icon-btn horizon-cal__nav-btn' });
     makeButtonLike(button, label);
     setIcon(button, icon);
     button.addEventListener('click', (event) => {

@@ -44,44 +44,9 @@
   flex-shrink: 0;
 }
 
-/* Icon button: same fixed 28px box + transparent/hover treatment as the
-   equivalent controls in Exo (.mva-icon-btn), Masonry (.masonry-density-button)
-   and SuperBaseTags (.supertags-iconbtn) — the shared house pattern across
-   the plugin suite, authored from scratch rather than leaning on core's
-   `clickable-icon` (whose own padding/hit-area vary just enough to read as
-   a different control next to the rest of Horizon's own chrome). */
-.horizon-cal__nav-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-s);
-  cursor: pointer;
-  box-shadow: none;
-  transition: background-color var(--horizon-ease), color var(--horizon-ease);
-}
-
-@media (hover: hover) {
-  .horizon-cal__nav-btn:hover {
-    background-color: var(--background-modifier-hover);
-    color: var(--text-normal);
-  }
-}
-
-.horizon-cal__nav-btn:focus-visible {
-  outline: 2px solid var(--interactive-accent);
-  outline-offset: 2px;
-}
-
-.horizon-cal__nav-btn .svg-icon {
-  width: 16px;
-  height: 16px;
-}
+/* `.horizon-cal__nav-btn` non ha più stile proprio: la scatola, l'hover, il
+   focus e la misura del glifo arrivano da `.mv-icon-btn` (blocco vendored in
+   fondo al file). Resta come gancio di identità per le regole di posizione. */
 
 /* ============================== Month grid ============================== */
 
@@ -280,26 +245,10 @@
   justify-self: center;
 }
 
-.horizon-view__mode-btn {
-  padding: var(--size-2-2) var(--size-4-3);
-  border: none;
-  border-radius: var(--radius-s);
-  background: transparent;
-  box-shadow: none;
-  color: var(--text-muted);
-  font-size: var(--font-ui-small);
-  cursor: pointer;
-  transition: color var(--horizon-ease), background-color var(--horizon-ease);
-}
-
-@media (hover: hover) {
-  .horizon-view__mode-btn:hover {
-    color: var(--text-normal);
-  }
-}
-
-/* Lo stato attivo viene da .mv-seg via aria-pressed. Prima era una CLASSE, e
-   il controllo non annunciava alcuno stato a uno screen reader. */
+/* `.horizon-view__mode-btn` è senza stile proprio: geometria, hover, pill
+   attivo e focus arrivano tutti da `.mv-seg > .mv-seg-item`. Lo stato attivo
+   viaggia su aria-pressed — prima era una CLASSE, e il controllo non
+   annunciava alcuno stato a uno screen reader. */
 
 .horizon-view__nav {
   display: flex;
@@ -316,24 +265,8 @@
   display: none;
 }
 
-.horizon-view__today-btn {
-  padding: var(--size-2-2) var(--size-4-2);
-  font-size: var(--font-ui-small);
-  border-radius: var(--radius-s);
-  background-color: transparent;
-  box-shadow: none;
-  border: var(--border-width) solid var(--background-modifier-border);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color var(--horizon-ease), border-color var(--horizon-ease);
-}
-
-@media (hover: hover) {
-  .horizon-view__today-btn:hover {
-    color: var(--text-normal);
-    border-color: var(--background-modifier-border-hover);
-  }
-}
+/* `.horizon-view__today-btn` è un `.mv-chip`: bordo hairline, stessa altezza
+   di riga delle frecce che lo circondano. Nessuna regola propria. */
 
 .horizon-view__body {
   flex: 1;
@@ -1307,10 +1240,11 @@
     display: none;
   }
 
+  /* Solo il flex: la pista scorre in orizzontale, quindi i pill non devono
+     restringersi. Misure e padding restano del primitivo — un override qui
+     sarebbe comunque morto, perché `.mv-seg > .mv-seg-item` è (0,2,0). */
   .horizon-view__mode-btn {
     flex: 0 0 auto;
-    min-height: 32px;
-    padding-inline: var(--size-4-2);
   }
 
   .horizon-view__body {
@@ -1456,49 +1390,34 @@
   }
 }
 
-/* MOBILE KIT (pattern suite, nato in masonry 2026-07-10): su pointer coarse
-   i controlli raggiungono 44pt Apple HIG estendendo l'HIT AREA con uno
-   pseudo-elemento trasparente centrato — glifo invariato. */
-@media (pointer: coarse) {
-  .horizon-view__mode-btn,
-  .horizon-view__today-btn,
-  .horizon-journal__open,
-  .horizon-journal__expand {
-    min-height: var(--cosmos-touch-min, 44px);
-  }
+/* MOBILE KIT — 44pt Apple HIG. Il gate è `.is-mobile`, non (pointer: coarse):
+   scelta di suite del 2026-08-04, perché coarse scatta anche su un portatile
+   touch dove il puntatore primario resta il mouse, e lì ingrandire i controlli
+   è sbagliato. `.is-mobile` è il segnale che usa Obsidian stesso.
 
-  .horizon-cal__nav-btn {
-    position: relative;
-  }
-  .horizon-cal__nav-btn::after {
-    content: '';
-    position: absolute;
-    inset: calc((100% - var(--cosmos-touch-min, 44px)) / 2);
-  }
+   Restano qui solo i controlli SENZA primitivo: mode-btn, today-btn e le
+   frecce del calendario ricevono misura di tocco e press-scale dai rispettivi
+   blocchi `.is-mobile` di mv-seg / mv-chip / mv-icon-btn. */
+.is-mobile .horizon-journal__open,
+.is-mobile .horizon-journal__expand {
+  min-height: var(--cosmos-touch-min, 44px);
+}
 
-  /* mv-kit §3 MUST: tap targets confirm press with a transform-only scale —
-     every coarse-pointer target already listed above in this block. */
-  .horizon-view__mode-btn:active,
-  .horizon-view__today-btn:active,
-  .horizon-journal__open:active,
-  .horizon-journal__expand:active,
-  .horizon-cal__nav-btn:active {
-    transform: scale(var(--cosmos-press-scale, 0.98));
-    transition: transform var(--cosmos-t-fast, 80ms) var(--cosmos-native, cubic-bezier(0.32, 0.72, 0, 1));
-  }
+/* mv-kit §3 MUST: un bersaglio tattile conferma la pressione con una scala,
+   che è solo transform e quindi non provoca layout. */
+.is-mobile .horizon-journal__open:active,
+.is-mobile .horizon-journal__expand:active {
+  transform: scale(var(--cosmos-press-scale, 0.98));
+  transition: transform var(--cosmos-t-fast, 80ms) var(--cosmos-native, cubic-bezier(0.32, 0.72, 0, 1));
+}
 
-  /* Belt-and-suspenders with the desktop reduced-motion block above: the
-     tokenized transition already zeroes for free once Cosmos is present
-     (it zeroes --cosmos-t-* at token level), but the literal 80ms fallback
-     stays live without Cosmos, so the no-Cosmos case needs this too. */
-  @media (prefers-reduced-motion: reduce) {
-    .horizon-view__mode-btn:active,
-    .horizon-view__today-btn:active,
-    .horizon-journal__open:active,
-    .horizon-journal__expand:active,
-    .horizon-cal__nav-btn:active {
-      transition: none;
-    }
+/* Ridondante con il blocco reduced-motion desktop quando Cosmos c'è (azzera
+   --cosmos-t-* a livello di token), ma il fallback letterale di 80ms resta
+   vivo senza Cosmos: il caso no-Cosmos ha bisogno anche di questo. */
+@media (prefers-reduced-motion: reduce) {
+  .is-mobile .horizon-journal__open:active,
+  .is-mobile .horizon-journal__expand:active {
+    transition: none;
   }
 }
 
@@ -1580,67 +1499,62 @@
 }
 
 /* >>> VENDORED marioverse-kit/css/mv-seg.css — non editare qui >>> */
-/* marioverse-kit · mv-seg — sorgente canonica del controllo segmentato.
+/* marioverse-kit · mv-seg — controllo segmentato (uno-di-N).
  *
- * Un pill che scorre in una pista incassata: il selettore di densità di
- * Masonry e TabX e quello di viste di Horizon facevano lo stesso lavoro con
- * due aspetti diversi nello stesso vault (pista con bordo contro pill
- * flottante con ombra). Questo è il secondo, che è anche quello che somiglia
- * a Craft.
+ * Un pill che siede in una pista incassata. Masonry, TabX, Horizon e Runway
+ * facevano lo stesso lavoro con quattro aspetti diversi nello stesso vault, e
+ * Runway per giunta con una convenzione di stato divergente (`.is-active`
+ * invece di aria-pressed), quindi non annunciava nulla a uno screen reader.
  *
- * VINCOLI — il blocco viene incollato in repo con contratti di stile diversi,
- * quindi deve soddisfarne l'INTERSEZIONE:
- *   · zero hex: si usano `black`, `transparent`, color-mix()
- *   · ogni ms/cubic-bezier dentro un var(--token, …) sulla STESSA riga fisica
- *     (masonry scandisce per posizione di carattere, non per riga logica)
- *   · zero !important: i ratchet dei plugin scendono soltanto
- *   · ogni :hover dentro @media (hover: hover) — il contratto di portal
- *     controlla OGNI selettore, non solo i suoi
- *   · knob interni con prefisso --mvc-, MAI --mv- o --cosmos-: ogni contratto
- *     verifica che il plugin non DICHIARI quei token
- *   · un blocco prefers-reduced-motion che azzera le durate
+ * CONVENZIONE DI STATO: `aria-pressed` (o `aria-selected`). Mai una classe.
+ * Lo stato di un controllo è informazione, non decorazione: se vive solo in
+ * una classe, esiste soltanto per chi vede.
+ *
+ * VINCOLI (intersezione dei contratti di stile dei consumatori):
+ *   · zero hex — `black`, `transparent`, color-mix()
+ *   · ogni ms/cubic-bezier dentro var(--token, …) sulla STESSA riga fisica
+ *   · zero !important — i ratchet dei plugin scendono soltanto
+ *   · ogni :hover dentro @media (hover: hover)
+ *   · knob interni --mvc-*, MAI --mv- o --cosmos-
+ *   · un blocco prefers-reduced-motion
  *
  * Consumatori: copia vendored in styles.css fra i marcatori, via sync.sh.
  * Si modifica QUI.
  */
 
-/* ── .mv-seg — controllo segmentato: un pill che scorre in una pista incassata.
-   Il selettore FIGLIO non è cosmetico. app.css stila `button:not(.clickable-icon)`
-   a specificità (0,1,1): una classe singola (0,1,0) perde, ed è il motivo per
-   cui masonry pagava tre !important su .masonry-select. `.mv-seg > .mv-seg-item`
-   è (0,2,0) e vince senza !important. Non appiattirlo mai in un selettore solo.
-
-   Il pill attivo usa --mv-card-bg, la superficie elevata del contratto di
-   elevazione, NON --background-primary. Misurato il 2026-08-04 sulla toolbar
-   di Masonry, che poggia sul canvas: --background-primary risolveva a
-   rgb(36,36,36), cioè esattamente il canvas, e contro la pista (un velo
-   chiaro al 6.7%) il pill risultava più SCURO dello sfondo su cui poggiava —
-   incassato invece che sollevato. Stesso difetto misurato sui tab pill nel
-   luglio 2026. --mv-card-bg sta un gradino sopra il canvas per costruzione, su
-   ogni palette; il fallback letterale copre il vault senza Cosmos.
-
-   Nessuna animazione di scorrimento: il pill di Craft slitta davvero, e farlo
-   richiede un backdrop traslato guidato dal JS. Il cross-fade è la versione
-   onesta; lo slittamento è un cantiere a sé. */
+/* Il selettore FIGLIO non è cosmetico: app.css stila
+   `button:not(.clickable-icon)` a specificità (0,1,1), e una classe singola
+   (0,1,0) perde — è il motivo per cui masonry pagava tre !important su
+   .masonry-select. `.mv-seg > .mv-seg-item` è (0,2,0) e vince per peso
+   proprio. Non appiattirlo mai in un selettore solo. */
 .mv-seg {
-  --mvc-seg-pad: 3px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: var(--mvc-seg-pad);
-  /* Concentrico: raggio esterno = interno + padding. */
-  border-radius: calc(var(--mv-r1, 6px) + var(--mvc-seg-pad));
-  background: var(--background-modifier-hover);
+  padding: var(--mv-control-inset, 3px);
+  /* Concentrico: raggio esterno = raggio interno + padding. */
+  border-radius: calc(var(--mv-r1, 6px) + var(--mv-control-inset, 3px));
+  /* La pista è un INCASSO, quindi una velatura di nero: deve stare SOTTO la
+     superficie su cui poggia, qualunque essa sia. Prima usava
+     --background-modifier-hover, che è una velatura di BIANCO — misurato su
+     realcraft, la pista finiva a #2e2e2e e il pill attivo a #282828, cioè il
+     pill era più scuro della pista dentro cui sta. Stessa inversione delle
+     card, in miniatura. Una velatura translucida funziona su ogni palette
+     senza che ognuna debba dichiarare la propria pista. */
+  background: color-mix(in srgb, black 10%, transparent);
 }
 
 .mv-seg > .mv-seg-item {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 var(--size-4-2, 8px);
+  gap: var(--mv-control-gap, 6px);
+  /* Il pill è l'altezza di riga MENO l'inset della pista, non l'altezza di
+     riga: è la pista che deve tornare pari agli altri controlli della toolbar.
+     Vedi la nota sulla scala in cosmos-tokens.css. */
+  min-width: var(--mv-control-item-h, 24px);
+  height: var(--mv-control-item-h, 24px);
+  padding: 0 var(--mv-control-pad, 8px);
   border: 0;
   border-radius: var(--mv-r1, 6px);
   background: transparent;
@@ -1655,6 +1569,10 @@
     color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1));
 }
 
+/* Il pill attivo usa --mv-card-bg, la superficie elevata del contratto, NON
+   --background-primary: su Cosmos dark il canvas È background-primary, e una
+   toolbar poggia sul canvas — misurato, il pill risultava più scuro dello
+   sfondo su cui stava, incassato invece che sollevato. */
 .mv-seg > .mv-seg-item[aria-pressed='true'],
 .mv-seg > .mv-seg-item[aria-selected='true'] {
   background: var(--mv-card-bg, var(--background-primary));
@@ -1679,19 +1597,275 @@
   outline-offset: var(--cosmos-focus-offset, 1px);
 }
 
-@media (pointer: coarse) {
-  .mv-seg > .mv-seg-item {
-    min-width: var(--cosmos-touch-min, 44px);
-    height: var(--cosmos-touch-min, 44px);
-  }
+.mv-seg > .mv-seg-item .svg-icon {
+  width: var(--mv-control-icon, 16px);
+  height: var(--mv-control-icon, 16px);
+}
 
-  .mv-seg > .mv-seg-item:active {
-    transform: scale(var(--cosmos-press-scale, 0.98));
-  }
+/* Touch: `.is-mobile` è il segnale che usa Obsidian stesso, non
+   (pointer: coarse). Scelta di suite del 2026-08-04: coarse scatta anche su un
+   portatile touch dove il mouse resta il puntatore primario, e lì ingrandire i
+   controlli è sbagliato. */
+.is-mobile .mv-seg > .mv-seg-item {
+  min-width: var(--mv-control-h-touch, 44px);
+  height: var(--mv-control-h-touch, 44px);
+}
+
+.is-mobile .mv-seg > .mv-seg-item:active {
+  transform: scale(var(--cosmos-press-scale, 0.98));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mv-seg > .mv-seg-item {
+    transition-duration: 0.01ms;
+  }
+}
+/* <<< fine blocco vendored <<< */
+
+/* >>> VENDORED marioverse-kit/css/mv-icon-btn.css — non editare qui >>> */
+/* marioverse-kit · mv-icon-btn — bottone quadrato, solo icona.
+ *
+ * L'archetipo più ripetuto della suite, e il più divergente: Horizon lo faceva
+ * a 28px con `.horizon-cal__nav-btn`, Runway a 26px con `.runway-iconbtn`, e
+ * il date-picker di Horizon — stesso ruolo, stessa riga di header — usava
+ * `.clickable-icon` nudo, quindi senza box, raggio né hover. Tre trattamenti
+ * per un lavoro solo.
+ *
+ * Deliberatamente NON è `clickable-icon` di core: la sua area di tocco e il
+ * suo padding variano quanto basta a leggersi come un controllo di un'altra
+ * famiglia accanto al resto della chrome della suite.
+ *
+ * ⛔ VA SU UN <div role="button">, MAI SU UN <button>. Misurato il 2026-08-04:
+ * su un <button> una regola a classe singola (0,1,0) perde `background` e
+ * `padding` contro `button:not(.clickable-icon)` di app.css, che è (0,1,1) —
+ * passano solo height, border-color e radius, cioè si ottiene un controllo
+ * mezzo stilato. `.mv-seg` se lo può permettere perché il suo selettore figlio
+ * è (0,2,0); qui non c'è un genitore da cui prendere peso. Usa `makeButtonLike`
+ * (o equivalente) per role/tabIndex/aria-label e la tastiera.
+ *
+ * VINCOLI: vedi mv-seg.css. Consumatori via sync.sh; si modifica QUI.
+ */
+
+.mv-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--mv-control-h, 28px);
+  height: var(--mv-control-h, 28px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--mv-r1, 6px);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: var(--cursor, pointer);
+  transition:
+    background-color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
+    color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.mv-icon-btn .svg-icon {
+  width: var(--mv-control-icon, 16px);
+  height: var(--mv-control-icon, 16px);
+}
+
+@media (hover: hover) {
+  .mv-icon-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
+}
+
+.mv-icon-btn:focus-visible {
+  outline: var(--cosmos-focus-ring, 2px solid var(--interactive-accent));
+  outline-offset: var(--cosmos-focus-offset, 1px);
+}
+
+/* Acceso — es. un filtro attivo, un pannello aperto. */
+.mv-icon-btn.is-on {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* Rivelato all'hover del contenitore (azioni di riga, azioni di gruppo).
+   Su touch non esiste hover: `.is-mobile` le forza visibili più sotto. */
+.mv-icon-btn--reveal {
+  opacity: 0;
+  transition:
+    opacity var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
+    background-color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
+    color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.mv-icon-btn--reveal:focus-visible {
+  opacity: 1;
+}
+
+/* Touch: il bersaglio cresce a 44pt SENZA ingrandire il glifo — un'icona da
+   16px dentro una scatola da 44 resta un'icona, non diventa un cartello.
+   `.is-mobile`, non (pointer: coarse): vedi la nota in mv-seg.css. */
+.is-mobile .mv-icon-btn {
+  width: var(--mv-control-h-touch, 44px);
+  height: var(--mv-control-h-touch, 44px);
+}
+
+.is-mobile .mv-icon-btn--reveal {
+  opacity: 1;
+}
+
+.is-mobile .mv-icon-btn:active {
+  transform: scale(var(--cosmos-press-scale, 0.98));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-icon-btn {
+    transition-duration: 0.01ms;
+  }
+}
+/* <<< fine blocco vendored <<< */
+
+/* >>> VENDORED marioverse-kit/css/mv-chip.css — non editare qui >>> */
+/* marioverse-kit · mv-chip — controllo a etichetta, con stato acceso/spento.
+ *
+ * Il filtro, il preset, il "Oggi", la scelta rapida. Diverso dal segmentato
+ * perché NON è uno-di-N: un chip può essere acceso da solo, o insieme ad altri.
+ * Per questo lo stato è `aria-pressed` su un toggle, mai `aria-selected`.
+ *
+ * Prima di questo file: Runway aveva `.runway-fchip` (bordo + tinta accento),
+ * `.runway-pill` (999px, sfondo secondario) e `.runway-quick-add__chip`
+ * (identico a pill ma dichiarato a parte); Horizon aveva
+ * `.horizon-view__today-btn`. Quattro implementazioni, tre altezze, due raggi.
+ *
+ * ⛔ VA SU UN <div role="button">, MAI SU UN <button> — stessa misura e stessa
+ * ragione documentate in mv-icon-btn.css: a classe singola un <button> perde
+ * `background` e `padding` contro app.css e resta stilato a metà.
+ *
+ * Due varianti, e la differenza è semantica, non estetica:
+ *   · default  — bordo hairline, per un chip che si accende (filtro, preset)
+ *   · --pill   — full-round e pieno, per un'AZIONE in una barra di selezione
+ *
+ * VINCOLI: vedi mv-seg.css. Consumatori via sync.sh; si modifica QUI.
+ */
+
+.mv-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mv-control-gap, 6px);
+  height: var(--mv-control-h, 28px);
+  max-width: 14em;
+  padding: 0 var(--mv-control-pad, 8px);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--mv-r1, 6px);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-family: var(--font-interface);
+  font-size: var(--font-ui-small);
+  white-space: nowrap;
+  cursor: var(--cursor, pointer);
+  transition:
+    background-color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
+    border-color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
+    color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.mv-chip__label {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+
+/* Slot icona a sinistra — dice DI COSA parla il chip. */
+.mv-chip__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--text-faint);
+}
+
+.mv-chip .svg-icon {
+  flex: 0 0 auto;
+  width: var(--mv-control-icon, 16px);
+  height: var(--mv-control-icon, 16px);
+  color: var(--text-faint);
+}
+
+/* Slot caret a destra — dice che il chip APRE un menu. Volutamente più piccolo
+   del glifo di sinistra: è un'indicazione di comportamento, non contenuto, e
+   alla stessa misura i due si leggerebbero come una coppia di icone. */
+.mv-chip__caret {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-right: calc(var(--mv-control-pad, 8px) / -4);
+  color: var(--text-faint);
+}
+
+.mv-chip__caret .svg-icon {
+  width: calc(var(--mv-control-icon, 16px) * 0.75);
+  height: calc(var(--mv-control-icon, 16px) * 0.75);
+}
+
+/* Acceso: l'accento tinge il bordo e vela lo sfondo, non riempie. Un chip
+   pieno di accento urla quanto un bottone primario, e un filtro non è
+   l'azione principale di nessuna schermata. */
+.mv-chip.is-on {
+  border-color: var(--interactive-accent);
+  background: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+  color: var(--text-normal);
+}
+
+.mv-chip.is-on .svg-icon {
+  color: var(--text-muted);
+}
+
+@media (hover: hover) {
+  .mv-chip:hover {
+    border-color: var(--background-modifier-border-hover);
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
+
+  .mv-chip.is-on:hover {
+    background: color-mix(in srgb, var(--interactive-accent) 18%, transparent);
+  }
+}
+
+.mv-chip:focus-visible {
+  outline: var(--cosmos-focus-ring, 2px solid var(--interactive-accent));
+  outline-offset: var(--cosmos-focus-offset, 1px);
+}
+
+/* Variante AZIONE — full-round e piena. Vive nelle barre di selezione, dove
+   un comando deve leggersi come tale e non come un filtro spento. */
+.mv-chip--pill {
+  border-radius: 999px;
+  background: var(--background-secondary);
+}
+
+.mv-chip--pill.is-on {
+  border-color: var(--interactive-accent);
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+@media (hover: hover) {
+  .mv-chip--pill.is-on:hover {
+    background: var(--interactive-accent-hover, var(--interactive-accent));
+  }
+}
+
+/* Touch: vedi la nota in mv-seg.css sul perché `.is-mobile` e non coarse. */
+.is-mobile .mv-chip {
+  height: var(--mv-control-h-touch, 44px);
+}
+
+.is-mobile .mv-chip:active {
+  transform: scale(var(--cosmos-press-scale, 0.98));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-chip {
     transition-duration: 0.01ms;
   }
 }

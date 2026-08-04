@@ -43,23 +43,24 @@ export function showDatePicker(
       text: ctx.moment(month, 'YYYY-MM-DD', true).format('MMMM YYYY'),
     });
     const nav = header.createDiv({ cls: 'horizon-cal__nav' });
-    // Native `.clickable-icon` divs: transparent resting state under Cosmos
-    // (which fills plain <button>s) and correct icon sizing via --icon-size.
-    const prevBtn = nav.createDiv({ cls: 'clickable-icon' });
+    // Div, non <button> (Cosmos riempie i <button> per tag). Erano tre
+    // `.clickable-icon` nudi: stesso ruolo delle frecce del calendario, ma
+    // senza scatola né hover. Ora sono lo stesso primitivo.
+    const prevBtn = nav.createDiv({ cls: 'mv-icon-btn horizon-cal__nav-btn' });
     setIcon(prevBtn, 'chevron-left');
     makeButtonLike(prevBtn, 'Previous month');
     prevBtn.onclick = () => {
       month = addMonths(month, -1);
       render();
     };
-    const todayBtn = nav.createDiv({ cls: 'clickable-icon' });
+    const todayBtn = nav.createDiv({ cls: 'mv-icon-btn horizon-cal__nav-btn' });
     setIcon(todayBtn, 'circle-dot');
     makeButtonLike(todayBtn, 'Today');
     todayBtn.onclick = () => {
       month = todayKey();
       render();
     };
-    const nextBtn = nav.createDiv({ cls: 'clickable-icon' });
+    const nextBtn = nav.createDiv({ cls: 'mv-icon-btn horizon-cal__nav-btn' });
     setIcon(nextBtn, 'chevron-right');
     makeButtonLike(nextBtn, 'Next month');
     nextBtn.onclick = () => {
