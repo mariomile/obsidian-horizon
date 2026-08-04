@@ -81,17 +81,12 @@ export class HorizonCalendarView extends ItemView {
       this.modeButtons.set(mode, button);
     }
 
-    // Capsula UNICA, senza gruppi interni: l'ordine ◀ Oggi ▶ è quello che chi
-    // usa un calendario si aspetta (stessa disposizione di Calendar di macOS).
-    // Separare le frecce dal salto a oggi avrebbe raggruppato meglio in teoria
-    // e spostato un controllo sotto il dito in pratica — non si riordina un
-    // controllo esistente per una ragione estetica.
-    const nav = header.createDiv({ cls: 'mv-cluster horizon-view__nav' });
+    const nav = header.createDiv({ cls: 'horizon-view__nav' });
     this.periodButtons.push(this.navButton(nav, 'chevron-left', 'Previous', () => {
       this.active?.step(-1);
       this.refreshTitle();
     }));
-    const todayBtn = nav.createEl('button', { cls: 'mv-cluster-btn horizon-view__today-btn', text: 'Today' });
+    const todayBtn = nav.createEl('button', { cls: 'horizon-view__today-btn', text: 'Today' });
     todayBtn.addEventListener('click', () => {
       this.active?.goToday();
       this.refreshTitle();
@@ -229,7 +224,7 @@ export class HorizonCalendarView extends ItemView {
 
   private navButton(parent: HTMLElement, icon: string, label: string, onClick: () => void): HTMLElement {
     // Native clickable-icon div, not a <button> (Cosmos fills <button> by tag).
-    const button = parent.createDiv({ cls: 'mv-cluster-btn horizon-view__nav-btn' });
+    const button = parent.createDiv({ cls: 'clickable-icon horizon-view__nav-btn' });
     makeButtonLike(button, label);
     setIcon(button, icon);
     button.addEventListener('click', onClick);

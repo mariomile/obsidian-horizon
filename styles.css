@@ -301,9 +301,10 @@
 /* Lo stato attivo viene da .mv-seg via aria-pressed. Prima era una CLASSE, e
    il controllo non annunciava alcuno stato a uno screen reader. */
 
-/* Geometria e stati vengono da .mv-cluster (blocco vendored in fondo); qui
-   resta il solo posizionamento nella griglia dell'header. */
 .horizon-view__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
   justify-self: end;
 }
 
@@ -1631,131 +1632,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .mv-seg > .mv-seg-item {
-    transition-duration: 0.01ms;
-  }
-}
-/* <<< fine blocco vendored <<< */
-
-/* >>> VENDORED marioverse-kit/css/mv-cluster.css — non editare qui >>> */
-/* marioverse-kit · mv-cluster — sorgente canonica della capsula di controlli.
- *
- * In Craft i controlli non sono bottoni sciolti in fila: sono GRAPPOLI dentro
- * capsule flottanti, separati da hairline interne. Il raggruppamento comunica
- * una gerarchia — questi filtrano, quello cambia vista — che una fila di
- * elementi tutti alla stessa distanza non comunica.
- *
- * ⛔ MAI su una tab bar. La regola "niente sfondo permanente dietro i tab —
- * solo geometria e stati" è precedente e vince: la capsula È uno sfondo
- * permanente. Vale anche quando sembra che starebbe bene.
- *
- * VINCOLI — il blocco viene incollato in repo con contratti di stile diversi,
- * quindi deve soddisfarne l'INTERSEZIONE:
- *   · zero hex: si usano `black`, `transparent`, color-mix()
- *   · ogni ms/cubic-bezier dentro un var(--token, …) sulla STESSA riga fisica
- *     (masonry scandisce per posizione di carattere, non per riga logica)
- *   · zero !important: i ratchet dei plugin scendono soltanto
- *   · ogni :hover dentro @media (hover: hover) — il contratto di portal
- *     controlla OGNI selettore, non solo i suoi
- *   · knob interni con prefisso --mvc-, MAI --mv- o --cosmos-: ogni contratto
- *     verifica che il plugin non DICHIARI quei token
- *   · un blocco prefers-reduced-motion che azzera le durate
- *
- * Consumatori: copia vendored in styles.css fra i marcatori, via sync.sh.
- * Si modifica QUI.
- */
-
-.mv-cluster {
-  --mvc-cluster-pad: 3px;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--mvc-cluster-pad);
-  /* Concentrico: raggio esterno = raggio dei figli + padding. */
-  border-radius: calc(var(--mv-r1, 6px) + var(--mvc-cluster-pad));
-  border: 1px solid var(--mv-card-border, var(--background-modifier-border));
-  /* NON --background-primary: su Cosmos dark il canvas È background-primary, e
-     una toolbar poggia sul canvas — la capsula sparirebbe. È lo stesso difetto
-     misurato sul pill del segmentato il 2026-08-04 (risolveva rgb(36,36,36) su
-     un canvas rgb(36,36,36)). --mv-card-bg sta un gradino sopra per costruzione,
-     su ogni palette. */
-  background: var(--mv-card-bg, var(--background-secondary));
-  box-shadow: var(--mv-card-rest, none);
-}
-
-/* Variante flottante: sopra il contenuto, non nel flusso. */
-.mv-cluster--float {
-  position: absolute;
-  z-index: var(--layer-popover);
-}
-
-.mv-cluster-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-/* Il divisore è INTERNO alla capsula: fra i gruppi corre una hairline, non un
-   vuoto. È ciò che distingue "un grappolo di tre" da "tre bottoni vicini". */
-.mv-cluster-group + .mv-cluster-group {
-  margin-inline-start: 5px;
-  padding-inline-start: 5px;
-  border-inline-start: 1px solid
-    var(--mv-hairline, color-mix(in srgb, var(--text-muted) 14%, transparent));
-}
-
-/* Selettore FIGLIO, non piatto: app.css stila `button:not(.clickable-icon)` a
-   specificità (0,1,1) e una classe singola (0,1,0) perde — è il motivo per cui
-   masonry pagava !important su .masonry-select. Questo è (0,2,0) o (0,3,0) e
-   vince senza. */
-.mv-cluster > .mv-cluster-btn,
-.mv-cluster > .mv-cluster-group > .mv-cluster-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 var(--size-4-2, 8px);
-  border: 0;
-  border-radius: var(--mv-r1, 6px);
-  background: transparent;
-  box-shadow: none;
-  color: var(--text-muted);
-  font-family: var(--font-interface);
-  font-size: var(--font-ui-small);
-  cursor: var(--cursor, pointer);
-  transition:
-    background-color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
-    color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1));
-}
-
-@media (hover: hover) {
-  .mv-cluster .mv-cluster-btn:hover {
-    background: var(--background-modifier-hover);
-    color: var(--text-normal);
-  }
-}
-
-.mv-cluster .mv-cluster-btn:focus-visible {
-  outline: var(--cosmos-focus-ring, 2px solid var(--interactive-accent));
-  outline-offset: var(--cosmos-focus-offset, -1px);
-}
-
-/* Stato acceso — es. un filtro attivo. */
-.mv-cluster .mv-cluster-btn.is-on {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-
-@media (pointer: coarse) {
-  .mv-cluster > .mv-cluster-btn,
-  .mv-cluster > .mv-cluster-group > .mv-cluster-btn {
-    min-width: var(--cosmos-touch-min, 44px);
-    height: var(--cosmos-touch-min, 44px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mv-cluster .mv-cluster-btn {
     transition-duration: 0.01ms;
   }
 }
