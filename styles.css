@@ -816,26 +816,29 @@
   overflow: hidden;
 }
 
-.horizon-period-panel__markdown-wrap {
-  position: relative;
-}
-
 .horizon-period-panel__markdown {
   font-size: var(--font-ui-small);
   color: var(--text-muted);
   line-height: 1.4;
 }
 
-/* Only present when the text was actually cut (see period-preview-panel.ts) —
-   a soft cue that there's more, never a mask over fully-shown content. */
-.horizon-period-panel__fade {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 28px;
-  background: linear-gradient(to bottom, transparent, var(--background-primary));
-  pointer-events: none;
+/* Same recipe as .horizon-card__excerpt (mv-kit "sfuma invece di finire in
+   puntini", d642a89) — --mv-fade-mask with the literal gradient as fallback.
+   No max-height/overflow here: unlike the plain-text excerpt, this box holds
+   rendered markdown (headings, lists, checkboxes); clipping by pixel height
+   independently of createJournalPreview's own line-safe truncation is what
+   cut a checklist mid-item before. The mask just fades this box's own last
+   ~1.5em — real content, not a separate overlay square — only added when
+   the text was actually cut (see period-preview-panel.ts). */
+.horizon-period-panel__markdown--truncated {
+  -webkit-mask-image: var(
+    --mv-fade-mask,
+    linear-gradient(to bottom, black calc(100% - 1.5em), transparent 100%)
+  );
+  mask-image: var(
+    --mv-fade-mask,
+    linear-gradient(to bottom, black calc(100% - 1.5em), transparent 100%)
+  );
 }
 
 .horizon-period-panel__markdown > :first-child {

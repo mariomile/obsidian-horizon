@@ -93,8 +93,7 @@ export class PeriodPreviewPanel extends Component {
       const card = el.createDiv({ cls: 'horizon-chip horizon-chip--card' });
       makeButtonLike(card, `Open ${note.basename}`);
       card.addEventListener('click', openThis);
-      const wrap = card.createDiv({ cls: 'horizon-period-panel__markdown-wrap' });
-      const body = wrap.createDiv({ cls: 'horizon-period-panel__markdown' });
+      const body = card.createDiv({ cls: 'horizon-period-panel__markdown' });
       body.createSpan({ cls: 'horizon-period-panel__empty-label', text: 'Loading…' });
 
       const chars = Math.round(this.ctx.settings.previewCharacters * previewScale);
@@ -116,10 +115,10 @@ export class PeriodPreviewPanel extends Component {
               )) {
                 checkbox.disabled = true;
               }
-              // A soft fade only when the text itself was cut (never mid-line —
-              // createJournalPreview always breaks on a whole markdown line) —
-              // the fade never hides fully-shown content.
-              if (preview.truncated) wrap.createDiv({ cls: 'horizon-period-panel__fade' });
+              // Same mv-kit fade recipe as .horizon-card__excerpt, applied only
+              // when the text itself was cut (never mid-line — createJournalPreview
+              // always breaks on a whole markdown line).
+              if (preview.truncated) body.addClass('horizon-period-panel__markdown--truncated');
             },
           );
         })
