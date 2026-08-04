@@ -69,7 +69,7 @@ export class PeriodPreviewPanel extends Component {
     }
     const { period, keyFor, heading, previewScale } = this.config;
 
-    if (!this.ctx.settings.notePreviewPanels || !this.ctx.settings.periods[period].enabled) {
+    if (!this.ctx.settings.weekNotePreview || !this.ctx.settings.periods[period].enabled) {
       el.hide();
       return;
     }

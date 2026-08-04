@@ -19,7 +19,7 @@ export interface HorizonSettings {
   showNotes: boolean;
   confirmBeforeCreate: boolean;
   daybar: boolean;
-  notePreviewPanels: boolean;
+  weekNotePreview: boolean;
   lastMode: CalendarMode;
 }
 
@@ -65,7 +65,7 @@ export const DEFAULT_SETTINGS: HorizonSettings = {
   showNotes: true,
   confirmBeforeCreate: true,
   daybar: true,
-  notePreviewPanels: true,
+  weekNotePreview: true,
   lastMode: 'month',
 };
 
@@ -98,7 +98,7 @@ export function parseSettings(data: unknown): HorizonSettings {
       DEFAULT_SETTINGS.confirmBeforeCreate,
     ),
     daybar: booleanValue(data.daybar, DEFAULT_SETTINGS.daybar),
-    notePreviewPanels: booleanValue(data.notePreviewPanels, DEFAULT_SETTINGS.notePreviewPanels),
+    weekNotePreview: booleanValue(data.weekNotePreview, DEFAULT_SETTINGS.weekNotePreview),
     lastMode: modeValue(data.lastMode, DEFAULT_SETTINGS.lastMode),
   };
 }

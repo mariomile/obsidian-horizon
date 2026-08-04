@@ -60,16 +60,16 @@ describe('daybar setting', () => {
   });
 });
 
-describe('notePreviewPanels setting', () => {
+describe('weekNotePreview setting', () => {
   it('defaults to true', () => {
-    assert.equal(DEFAULT_SETTINGS.notePreviewPanels, true);
+    assert.equal(DEFAULT_SETTINGS.weekNotePreview, true);
   });
 
   it('round-trips a stored false', () => {
-    assert.equal(parseSettings({ notePreviewPanels: false }).notePreviewPanels, false);
+    assert.equal(parseSettings({ weekNotePreview: false }).weekNotePreview, false);
   });
 
   it('falls back to true when absent', () => {
-    assert.equal(parseSettings({}).notePreviewPanels, true);
+    assert.equal(parseSettings({}).weekNotePreview, true);
   });
 });

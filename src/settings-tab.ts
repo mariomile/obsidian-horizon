@@ -68,11 +68,11 @@ export class HorizonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('Note preview panels')
-      .setDesc('Show a preview of the day and week notes under the sidebar mini-calendar.')
+      .setName('Week note preview')
+      .setDesc('Show a preview card of the week note under the sidebar mini-calendar.')
       .addToggle((toggle) =>
-        toggle.setValue(this.plugin.settings.notePreviewPanels).onChange(async (value) => {
-          this.plugin.settings.notePreviewPanels = value;
+        toggle.setValue(this.plugin.settings.weekNotePreview).onChange(async (value) => {
+          this.plugin.settings.weekNotePreview = value;
           await this.plugin.saveSettings();
         }),
       );
