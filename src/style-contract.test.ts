@@ -70,12 +70,19 @@ describe('mv-kit style contract', () => {
       // --color-red-rgb included) — the contract's requirement is "never a
       // bare value", not "only --cosmos-*/--mv-* tokens may have fallbacks".
       const hasVarFallback = /var\(\s*--[\w-]+\s*,/.test(line);
+      // Unica eccezione: la deroga standard `transition-duration: 0.01ms` di
+      // prefers-reduced-motion. Non è un valore da tokenizzare — è il modo
+      // canonico di azzerare una transizione lasciando che gli eventi
+      // transitionend continuino a scattare. Stessa eccezione già codificata
+      // nel contratto di masonry; qui mancava solo perché il caso non si era
+      // mai presentato prima del blocco mv-seg vendored dal kit.
+      const reducedMotionCarveOut = /^\s*transition-duration:\s*0\.01ms;\s*$/.test(line);
 
       for (const pattern of [rawMsPattern, rawHexPattern, rawCubicBezierPattern]) {
         pattern.lastIndex = 0;
         let match: RegExpExecArray | null;
         while ((match = pattern.exec(line)) !== null) {
-          if (!hasVarFallback) {
+          if (!hasVarFallback && !reducedMotionCarveOut) {
             violations.push(`line ${idx + 1}: "${match[0]}" in "${line.trim()}"`);
           }
         }

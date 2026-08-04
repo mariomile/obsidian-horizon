@@ -71,10 +71,10 @@ export class HorizonCalendarView extends ItemView {
     const header = this.contentEl.createDiv({ cls: 'horizon-view__header' });
     this.periodLabelEl = header.createSpan({ cls: 'horizon-view__title' });
 
-    const modeSwitch = header.createDiv({ cls: 'horizon-view__modes' });
+    const modeSwitch = header.createDiv({ cls: 'mv-seg horizon-view__modes' });
     for (const mode of ['month', 'week', 'agenda', 'journal'] as CalendarMode[]) {
       const button = modeSwitch.createEl('button', {
-        cls: 'horizon-view__mode-btn',
+        cls: 'mv-seg-item horizon-view__mode-btn',
         text: MODE_LABELS[mode],
       });
       button.addEventListener('click', () => this.setMode(mode));
@@ -136,7 +136,7 @@ export class HorizonCalendarView extends ItemView {
     this.unmountMode();
     this.modeHostEl.empty();
     for (const [key, button] of this.modeButtons) {
-      button.toggleClass('horizon-view__mode-btn--active', key === mode);
+      button.setAttribute('aria-pressed', String(key === mode));
     }
     for (const button of this.periodButtons) {
       button.toggleClass('horizon-view__nav-btn--hidden', mode === 'journal');

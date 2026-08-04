@@ -274,13 +274,10 @@
   white-space: nowrap;
 }
 
+/* Pista, pill attivo e focus ring vengono da .mv-seg (blocco vendored in
+   fondo). Qui resta solo il posizionamento nella griglia dell'header. */
 .horizon-view__modes {
-  display: flex;
-  gap: 2px;
   justify-self: center;
-  padding: 2px;
-  border-radius: var(--radius-m);
-  background-color: var(--background-secondary);
 }
 
 .horizon-view__mode-btn {
@@ -301,12 +298,8 @@
   }
 }
 
-.horizon-view__mode-btn--active {
-  background-color: var(--background-primary);
-  color: var(--text-normal);
-  font-weight: var(--font-medium);
-  box-shadow: var(--shadow-s);
-}
+/* Lo stato attivo viene da .mv-seg via aria-pressed. Prima era una CLASSE, e
+   il controllo non annunciava alcuno stato a uno screen reader. */
 
 .horizon-view__nav {
   display: flex;
@@ -1525,3 +1518,121 @@
 .is-phone .horizon-daybar {
   margin-right: var(--size-2-1);
 }
+
+/* >>> VENDORED marioverse-kit/css/mv-seg.css — non editare qui >>> */
+/* marioverse-kit · mv-seg — sorgente canonica del controllo segmentato.
+ *
+ * Un pill che scorre in una pista incassata: il selettore di densità di
+ * Masonry e TabX e quello di viste di Horizon facevano lo stesso lavoro con
+ * due aspetti diversi nello stesso vault (pista con bordo contro pill
+ * flottante con ombra). Questo è il secondo, che è anche quello che somiglia
+ * a Craft.
+ *
+ * VINCOLI — il blocco viene incollato in repo con contratti di stile diversi,
+ * quindi deve soddisfarne l'INTERSEZIONE:
+ *   · zero hex: si usano `black`, `transparent`, color-mix()
+ *   · ogni ms/cubic-bezier dentro un var(--token, …) sulla STESSA riga fisica
+ *     (masonry scandisce per posizione di carattere, non per riga logica)
+ *   · zero !important: i ratchet dei plugin scendono soltanto
+ *   · ogni :hover dentro @media (hover: hover) — il contratto di portal
+ *     controlla OGNI selettore, non solo i suoi
+ *   · knob interni con prefisso --mvc-, MAI --mv- o --cosmos-: ogni contratto
+ *     verifica che il plugin non DICHIARI quei token
+ *   · un blocco prefers-reduced-motion che azzera le durate
+ *
+ * Consumatori: copia vendored in styles.css fra i marcatori, via sync.sh.
+ * Si modifica QUI.
+ */
+
+/* ── .mv-seg — controllo segmentato: un pill che scorre in una pista incassata.
+   Il selettore FIGLIO non è cosmetico. app.css stila `button:not(.clickable-icon)`
+   a specificità (0,1,1): una classe singola (0,1,0) perde, ed è il motivo per
+   cui masonry pagava tre !important su .masonry-select. `.mv-seg > .mv-seg-item`
+   è (0,2,0) e vince senza !important. Non appiattirlo mai in un selettore solo.
+
+   Il pill attivo usa --mv-card-bg, la superficie elevata del contratto di
+   elevazione, NON --background-primary. Misurato il 2026-08-04 sulla toolbar
+   di Masonry, che poggia sul canvas: --background-primary risolveva a
+   rgb(36,36,36), cioè esattamente il canvas, e contro la pista (un velo
+   chiaro al 6.7%) il pill risultava più SCURO dello sfondo su cui poggiava —
+   incassato invece che sollevato. Stesso difetto misurato sui tab pill nel
+   luglio 2026. --mv-card-bg sta un gradino sopra il canvas per costruzione, su
+   ogni palette; il fallback letterale copre il vault senza Cosmos.
+
+   Nessuna animazione di scorrimento: il pill di Craft slitta davvero, e farlo
+   richiede un backdrop traslato guidato dal JS. Il cross-fade è la versione
+   onesta; lo slittamento è un cantiere a sé. */
+.mv-seg {
+  --mvc-seg-pad: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--mvc-seg-pad);
+  /* Concentrico: raggio esterno = interno + padding. */
+  border-radius: calc(var(--mv-r1, 6px) + var(--mvc-seg-pad));
+  background: var(--background-modifier-hover);
+}
+
+.mv-seg > .mv-seg-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--size-4-2, 8px);
+  border: 0;
+  border-radius: var(--mv-r1, 6px);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-family: var(--font-interface);
+  font-size: var(--font-ui-small);
+  font-weight: var(--font-normal, 400);
+  cursor: var(--cursor, pointer);
+  transition:
+    background-color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1)),
+    color var(--cosmos-t-fast, 140ms) var(--mv-wash, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.mv-seg > .mv-seg-item[aria-pressed='true'],
+.mv-seg > .mv-seg-item[aria-selected='true'] {
+  background: var(--mv-card-bg, var(--background-primary));
+  box-shadow: var(--shadow-tactile);
+  color: var(--text-normal);
+  font-weight: var(--font-medium, 500);
+}
+
+@media (hover: hover) {
+  .mv-seg > .mv-seg-item:hover {
+    color: var(--text-normal);
+  }
+
+  .mv-seg > .mv-seg-item[aria-pressed='true']:hover,
+  .mv-seg > .mv-seg-item[aria-selected='true']:hover {
+    background: var(--mv-card-bg-hover, var(--background-primary));
+  }
+}
+
+.mv-seg > .mv-seg-item:focus-visible {
+  outline: var(--cosmos-focus-ring, 2px solid var(--interactive-accent));
+  outline-offset: var(--cosmos-focus-offset, 1px);
+}
+
+@media (pointer: coarse) {
+  .mv-seg > .mv-seg-item {
+    min-width: var(--cosmos-touch-min, 44px);
+    height: var(--cosmos-touch-min, 44px);
+  }
+
+  .mv-seg > .mv-seg-item:active {
+    transform: scale(var(--cosmos-press-scale, 0.98));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-seg > .mv-seg-item {
+    transition-duration: 0.01ms;
+  }
+}
+/* <<< fine blocco vendored <<< */
