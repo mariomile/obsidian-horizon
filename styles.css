@@ -774,6 +774,7 @@
 
 .horizon-period-panel__heading {
   flex: 1;
+  text-align: center;
   font-size: var(--font-ui-smaller);
   font-weight: var(--font-medium);
   color: var(--text-muted);
@@ -809,6 +810,10 @@
   padding: var(--size-4-2);
   min-height: 88px;
   align-items: stretch;
+  /* Clip content to the card's own rounded corners — otherwise a large
+     radius scale (e.g. Cosmos "Craft") can leave the last rendered line
+     visually poking past the curve, into the sidebar background. */
+  overflow: hidden;
 }
 
 .horizon-period-panel__markdown-wrap {
