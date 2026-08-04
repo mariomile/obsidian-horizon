@@ -797,20 +797,46 @@
   font-size: var(--font-ui-smaller);
 }
 
-/* Week: a real, larger card — more excerpt, a bigger thumbnail, feels open-able. */
+/* Week: a real, larger card — the note's own markdown, feels open-able. */
 .horizon-period-panel--weekly .horizon-chip--card {
   padding: var(--size-4-2);
   min-height: 88px;
+  align-items: stretch;
 }
 
-.horizon-period-panel--weekly .horizon-card__excerpt {
-  -webkit-line-clamp: 5;
-  min-height: calc(1.35em * 5);
+.horizon-period-panel__markdown {
+  max-height: 240px;
+  overflow: hidden;
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  line-height: 1.4;
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
 }
 
-.horizon-period-panel--weekly .horizon-card__thumb {
-  width: 72px;
-  height: 72px;
+.horizon-period-panel__markdown > :first-child {
+  margin-top: 0;
+}
+
+.horizon-period-panel__markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.horizon-period-panel__markdown :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--font-ui-medium);
+  font-weight: var(--font-semibold);
+  color: var(--text-normal);
+  margin: var(--size-2-3) 0 var(--size-2-1);
+}
+
+.horizon-period-panel__markdown p {
+  margin: 0 0 var(--size-2-2);
+}
+
+.horizon-period-panel__markdown ul,
+.horizon-period-panel__markdown ol {
+  margin: 0 0 var(--size-2-2);
+  padding-left: var(--size-4-3);
 }
 
 .horizon-period-panel--weekly .horizon-period-panel__empty {
