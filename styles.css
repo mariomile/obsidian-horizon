@@ -880,26 +880,6 @@
   justify-content: center;
 }
 
-/* ============================== Day tasks (sidebar) ============================== */
-
-.horizon-day-tasks {
-  display: flex;
-  flex-direction: column;
-  gap: var(--size-2-2);
-  padding: 0 var(--size-4-1) var(--size-4-2);
-}
-
-.horizon-day-tasks__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--size-2-1);
-  align-items: stretch;
-}
-
-.horizon-day-tasks__list .horizon-chip {
-  width: 100%;
-}
-
 /* ============================== Ghost chips (agent proposals) ============================== */
 
 .horizon-chip--ghost {
