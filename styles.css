@@ -1422,11 +1422,10 @@
 }
 
 /* ============================== Daybar ============================== */
-/* Date-stepper pill in the daily-note view-header. Transparent chrome — no
-   decorative surface behind the tab bar. The arrows and ＋ are native
-   `.clickable-icon` divs (see daybar.ts), so themes like Cosmos skin them as
-   transparent-at-rest icon buttons instead of filled <button>s — and
-   `.clickable-icon` defines --icon-size so the chevron svg sizes correctly. */
+/* Date-stepper pill in la view-header della nota giornaliera. Frecce e ＋ sono
+   `.mv-icon-btn`, l'etichetta è `.mv-chip` — i primitivi di suite, non più
+   `.clickable-icon` nudo. Il pill in sé resta trasparente: nessuna superficie
+   decorativa dietro la tab bar. */
 .horizon-daybar {
   display: inline-flex;
   align-items: center;
@@ -1434,37 +1433,31 @@
   margin-right: var(--size-4-1);
 }
 
-/* Tint only the create affordance; the arrows keep the native icon color. */
+/* Tinge solo l'affordance di creazione; le frecce restano nel colore neutro
+   del primitivo. */
 .horizon-daybar-create {
   color: var(--interactive-accent);
 }
 
-/* The stepper arrows use a solid caret, whose triangle sits small inside its
-   own 24-unit box — at the default icon size it reads as a speck. Sized up
-   here rather than by picking a different glyph: the shape is right, only its
-   optical weight was wrong. The hit area stays the native one, so the control
-   is no harder to press on a phone than any other. */
-.horizon-daybar-arrow svg {
+/* Il caret pieno delle frecce sta piccolo dentro la sua scatola da 24 unità —
+   alla misura di default del primitivo (16px) resta una scheggia. Ingrandito
+   qui invece di cambiare glifo: la forma è giusta, era solo il peso ottico
+   sbagliato. Selettore a tre classi (0,3,0): batte `.mv-icon-btn .svg-icon`
+   del blocco vendored per peso proprio, non per ordine di sorgente. */
+.horizon-daybar .horizon-daybar-arrow .svg-icon {
   width: 20px;
   height: 20px;
 }
 
-/* The date label is a plain div (not a <button>, which Cosmos fills): a subtle
-   text button that opens the calendar picker. */
-.horizon-daybar-label {
-  cursor: pointer;
-  color: var(--text-normal);
-  font-size: var(--font-ui-small);
-  font-weight: var(--font-medium);
+/* L'etichetta è un `.mv-chip` senza bordo: un bottone di testo discreto che
+   apre il calendario, non un filtro — qui il bordo hairline del primitivo
+   affollerebbe un pill che ha già le frecce come cornice visiva.
+   Selettore a due classi, non una: il blocco vendored sta più in basso nel
+   file e la sua `border: 1px solid …` è uno shorthand che riscriverebbe anche
+   il colore a parità di specificità — stessa leva del fix sull'svg qui sopra. */
+.horizon-daybar .horizon-daybar-label {
+  border-color: transparent;
   font-variant-numeric: tabular-nums;
-  padding: var(--size-2-1) var(--size-2-3);
-  border-radius: var(--radius-s);
-  transition: background-color var(--horizon-ease), color var(--horizon-ease);
-}
-@media (hover: hover) {
-  .horizon-daybar-label:hover {
-    background-color: var(--background-modifier-hover);
-  }
 }
 .horizon-daybar.is-pending .horizon-daybar-label {
   color: var(--text-faint);

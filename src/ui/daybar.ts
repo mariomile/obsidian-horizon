@@ -2,6 +2,7 @@ import { MarkdownView, setIcon, type TFile } from 'obsidian';
 
 import { addDays } from '../dates.ts';
 import { ensurePeriodicNote, openPeriodicNote } from '../edits/note-creator.ts';
+import { createIconButton } from '../kit/controls.ts';
 import type { DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { formatDayLabel, resolveDailyKey } from './daybar-core.ts';
@@ -20,23 +21,17 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     pill.toggleClass('is-pending', pending !== null);
     const shownKey = pending ?? key;
 
-    // Icon controls use Obsidian's native `.clickable-icon` div (not a
-    // <button>): themes like Cosmos give plain <button>s a filled resting
-    // background, while `.clickable-icon` is the transparent icon-button
-    // primitive they skin — and it defines --icon-size so the svg renders.
-    // `caret-*` rather than `chevron-*`: the day stepper wants a solid little
-    // triangle, while a chevron is the expand/collapse affordance used all over
-    // the app. Two different jobs, so two different names — otherwise restyling
-    // one restyles every collapsible section too.
-    const prev = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
+    // `.mv-icon-btn`/`.mv-chip`, i primitivi di suite — non più `.clickable-icon`
+    // nudo. `caret-*` rather than `chevron-*`: the day stepper wants a solid
+    // little triangle, while a chevron is the expand/collapse affordance used
+    // all over the app. Two different jobs, so two different names —
+    // otherwise restyling one restyles every collapsible section too.
+    const prev = createIconButton(pill, 'Previous day', 'horizon-daybar-arrow');
     setIcon(prev, 'caret-left');
-    makeButtonLike(prev, 'Previous day');
     prev.onclick = () => void step(-1);
 
-    const label = pill.createDiv({
-      cls: 'horizon-daybar-label',
-      text: formatDayLabel(ctx.moment, shownKey),
-    });
+    const label = pill.createDiv({ cls: 'mv-chip horizon-daybar-label' });
+    label.createSpan({ cls: 'mv-chip__label', text: formatDayLabel(ctx.moment, shownKey) });
     makeButtonLike(label, pending ? `Create note for ${shownKey}` : 'Choose date');
     label.onclick = () => {
       if (pending) {
@@ -50,15 +45,13 @@ function buildPill(ctx: HorizonContext, key: DayKey): HTMLElement {
     };
 
     if (pending) {
-      const create = pill.createDiv({ cls: 'clickable-icon horizon-daybar-create' });
+      const create = createIconButton(pill, 'Create this note', 'horizon-daybar-create');
       setIcon(create, 'plus');
-      makeButtonLike(create, 'Create this note');
       create.onclick = () => void createAndOpen(pending as DayKey);
     }
 
-    const next = pill.createDiv({ cls: 'clickable-icon horizon-daybar-arrow' });
+    const next = createIconButton(pill, 'Next day', 'horizon-daybar-arrow');
     setIcon(next, 'caret-right');
-    makeButtonLike(next, 'Next day');
     next.onclick = () => void step(1);
   };
 
