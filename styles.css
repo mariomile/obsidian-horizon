@@ -857,10 +857,17 @@
   margin: 0 0 var(--size-2-2);
 }
 
-.horizon-period-panel__markdown ul,
+.horizon-period-panel__markdown ul:not(.contains-task-list),
 .horizon-period-panel__markdown ol {
   margin: 0 0 var(--size-2-2);
   padding-left: var(--size-4-3);
+}
+
+/* Task lists keep Obsidian's own checkbox-to-text indent untouched — a
+   generic padding-left override here breaks the checkbox's calibrated
+   offset (the fix for the misaligned checkboxes Mario flagged). */
+.horizon-period-panel__markdown .contains-task-list {
+  margin: 0 0 var(--size-2-2);
 }
 
 .horizon-period-panel--weekly .horizon-period-panel__empty {
