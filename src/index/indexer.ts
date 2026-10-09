@@ -78,8 +78,8 @@ export class DayIndexService {
   private readonly app: App;
   private readonly isPeriodicPath: (path: string) => boolean;
   private readonly core = new DayIndexCore();
-  private timer: ReturnType<typeof setTimeout> | null = null;
-  private sourceCheckTimer: ReturnType<typeof setTimeout> | null = null;
+  private timer: number | null = null;
+  private sourceCheckTimer: number | null = null;
   private runwaySource: RunwayTaskSource | null = null;
   private runwayUnsubscribe: (() => void) | null = null;
   private configured = false;
@@ -156,8 +156,8 @@ export class DayIndexService {
       this.app.workspace.on('layout-change', () => this.queueSourceCheck()),
     );
     plugin.register(() => {
-      if (this.timer !== null) clearTimeout(this.timer);
-      if (this.sourceCheckTimer !== null) clearTimeout(this.sourceCheckTimer);
+      if (this.timer !== null) window.clearTimeout(this.timer);
+      if (this.sourceCheckTimer !== null) window.clearTimeout(this.sourceCheckTimer);
       this.runwayUnsubscribe?.();
       this.runwayUnsubscribe = null;
     });
@@ -197,8 +197,8 @@ export class DayIndexService {
   }
 
   private queueSourceCheck(): void {
-    if (this.sourceCheckTimer !== null) clearTimeout(this.sourceCheckTimer);
-    this.sourceCheckTimer = setTimeout(() => {
+    if (this.sourceCheckTimer !== null) window.clearTimeout(this.sourceCheckTimer);
+    this.sourceCheckTimer = window.setTimeout(() => {
       this.sourceCheckTimer = null;
       void this.configureTaskSource();
     }, SOURCE_CHECK_DEBOUNCE_MS);
@@ -284,8 +284,8 @@ export class DayIndexService {
   }
 
   private queueNotify(): void {
-    if (this.timer !== null) clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
+    if (this.timer !== null) window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(() => {
       this.timer = null;
       this.core.notify();
     }, EMIT_DEBOUNCE_MS);
