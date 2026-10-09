@@ -95,7 +95,7 @@ export class NotePreviewService {
 
   private prune(): void {
     while (this.cache.size > this.maxCacheEntries) {
-      const oldestKey = this.cache.keys().next().value as string | undefined;
+      const oldestKey = this.cache.keys().next().value;
       if (!oldestKey) return;
       this.cache.delete(oldestKey);
     }

@@ -40,7 +40,7 @@ export default class HorizonPlugin extends Plugin {
   uiState!: UiState;
   api!: HorizonApi;
   private daybar!: DaybarManager;
-  private exportTimer: ReturnType<typeof setTimeout> | null = null;
+  private exportTimer: number | null = null;
   private readonly basesViews = new Set<HorizonBasesView>();
 
   async onload(): Promise<void> {
@@ -50,7 +50,7 @@ export default class HorizonPlugin extends Plugin {
       await this.seedFromDailyNotesConfig();
     }
 
-    this.momentLike = moment as unknown as MomentLike;
+    this.momentLike = moment;
     this.periodic = new PeriodicService(
       this.app,
       this.momentLike,
@@ -85,7 +85,7 @@ export default class HorizonPlugin extends Plugin {
         this.basesViews.add(view);
         return view;
       },
-      options: HorizonBasesView.getViewOptions,
+      options: () => HorizonBasesView.getViewOptions(),
     });
 
     this.addRibbonIcon('hi-calendar', 'Open Horizon', () => {
@@ -177,7 +177,7 @@ export default class HorizonPlugin extends Plugin {
     this.registerEvent(this.app.workspace.on('layout-change', syncDaybar));
     this.register(this.dayIndex.subscribe(() => this.queueAgendaExport()));
     this.register(() => {
-      if (this.exportTimer !== null) clearTimeout(this.exportTimer);
+      if (this.exportTimer !== null) window.clearTimeout(this.exportTimer);
     });
     this.addCommand({
       id: 'export-agenda',
@@ -198,8 +198,6 @@ export default class HorizonPlugin extends Plugin {
 
   onunload(): void {
     this.daybar?.destroy();
-    this.app.workspace.detachLeavesOfType(SIDEBAR_VIEW_TYPE);
-    this.app.workspace.detachLeavesOfType(CALENDAR_VIEW_TYPE);
   }
 
   /** Run an action on the calendar tab view, opening it first when absent. */
@@ -275,7 +273,7 @@ export default class HorizonPlugin extends Plugin {
   private queueAgendaExport(): void {
     if (!this.settings.agentExport.enabled) return;
     if (this.exportTimer !== null) return;
-    this.exportTimer = setTimeout(() => {
+    this.exportTimer = window.setTimeout(() => {
       this.exportTimer = null;
       void this.writeAgendaExport();
     }, 5 * 60 * 1000);
