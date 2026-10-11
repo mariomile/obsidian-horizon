@@ -32,6 +32,8 @@ export interface NoteEntry {
   title: string;
   /** Wall-clock 'HH:mm' from the frontmatter date, when present (e.g. meetings). */
   time?: string;
+  /** Google Calendar event this note was created for (`gcal_event` property). */
+  eventId?: string;
 }
 
 export interface DayBucket {
@@ -49,4 +51,4 @@ export interface PeriodConfig {
   template: string;
 }
 
-export type CalendarMode = 'month' | 'week' | 'agenda' | 'journal';
+export type CalendarMode = 'month' | 'week' | 'day' | 'agenda' | 'journal';

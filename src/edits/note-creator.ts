@@ -1,6 +1,7 @@
 import { Modal, Notice, type App, type PaneType, type TFile } from 'obsidian';
 
 import { addDays, weekDays } from '../dates.ts';
+import type { CalEvent } from '../gcal/events.ts';
 import { dateToBasename } from '../index/periodic.ts';
 import type { DayKey, Period, TaskEntry } from '../types.ts';
 import type { HorizonContext } from '../ui/context.ts';
@@ -72,13 +73,18 @@ async function templateContent(
   const pad = (n: number): string => String(n).padStart(2, '0');
   const localNow = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   const now = ctx.moment(localNow, 'YYYY-MM-DDTHH:mm:ss', true);
-  return applyTemplate(source, ctx.moment, key, title, (fmt) => now.format(fmt), dataTokens(ctx, key));
+  const events = /{{agenda}}/i.test(source) ? await ctx.gcal.eventsFor(key) : [];
+  return applyTemplate(source, ctx.moment, key, title, (fmt) => now.format(fmt), dataTokens(ctx, key, events));
 }
 
 /** Horizon data tokens available to every periodic template. */
-function dataTokens(ctx: HorizonContext, key: DayKey): Record<string, () => string> {
+function dataTokens(
+  ctx: HorizonContext,
+  key: DayKey,
+  events: CalEvent[],
+): Record<string, () => string> {
   return {
-    agenda: () => renderDayAgenda(ctx.dayIndex.getBucket(key)),
+    agenda: () => renderDayAgenda(ctx.dayIndex.getBucket(key), events),
     'week-digest': () => {
       const days = weekDays(key).map((k) => ({ key: k, bucket: ctx.dayIndex.getBucket(k) }));
       const upcoming: TaskEntry[] = [];

@@ -1,3 +1,4 @@
+import type { CalEvent } from '../gcal/events.ts';
 import type { MomentLike } from '../index/periodic.ts';
 import type { DayBucket, DayKey, TaskEntry } from '../types.ts';
 
@@ -15,12 +16,22 @@ function openTasks(tasks: TaskEntry[]): TaskEntry[] {
  * Tasks render as plain bullets with a source link — NEVER as `- [ ]` lines,
  * which would duplicate the real task for the Tasks plugin.
  */
-export function renderDayAgenda(bucket: DayBucket | null): string {
-  if (!bucket) return '';
+export function renderDayAgenda(bucket: DayBucket | null, events: CalEvent[] = []): string {
   const lines: string[] = [];
-  const notes = [...bucket.notes].sort((a, b) =>
-    (a.time ?? '99:99').localeCompare(b.time ?? '99:99'),
-  );
+  const noteByEvent = new Map<string, string>();
+  for (const note of bucket?.notes ?? []) {
+    if (note.eventId !== undefined) noteByEvent.set(note.eventId, note.title);
+  }
+  for (const event of events) {
+    const linked = noteByEvent.get(event.id);
+    const label = linked !== undefined ? `[[${linked}|${event.title}]]` : event.title;
+    lines.push(event.startTime ? `- ${event.startTime} · ${label}` : `- ${label}`);
+  }
+  if (!bucket) return lines.join('\n');
+  const shown = new Set(events.map((e) => e.id));
+  const notes = [...bucket.notes]
+    .filter((note) => note.eventId === undefined || !shown.has(note.eventId))
+    .sort((a, b) => (a.time ?? '99:99').localeCompare(b.time ?? '99:99'));
   for (const note of notes) {
     lines.push(note.time ? `- ${note.time} · [[${note.title}]]` : `- [[${note.title}]]`);
   }

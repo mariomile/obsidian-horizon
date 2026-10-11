@@ -1,7 +1,9 @@
 import { compareDayKeys, parseDayKey } from '../dates.ts';
+import type { CalEvent } from '../gcal/events.ts';
 import type { DayBucket, DayKey } from '../types.ts';
 import type { HorizonContext } from './context.ts';
 import { TASK_MIME } from './dnd.ts';
+import { showEventMenu } from './event-menu.ts';
 import { makeButtonLike } from './interactive.ts';
 
 export interface DayCellOptions {
@@ -47,18 +49,61 @@ function miniDots(ctx: HorizonContext, key: DayKey, bucket: DayBucket | null, to
   return dots;
 }
 
+function withEventDot(ctx: HorizonContext, key: DayKey, dots: DotSpec[]): DotSpec[] {
+  if (ctx.gcal.eventsOn(key).length > 0) {
+    dots.push({ cls: 'horizon-dot--event', title: 'Calendar events' });
+  }
+  return dots;
+}
+
 export interface ChipSpec {
   cls: string;
   label: string;
   path: string;
   line: number;
   rawText: string;
-  kind: 'due' | 'scheduled' | 'done' | 'note' | 'ghost';
+  kind: 'due' | 'scheduled' | 'done' | 'note' | 'ghost' | 'event';
   dayKey: DayKey;
   done: boolean;
   recurring: boolean;
   proposalId?: string;
   reason?: string;
+  event?: CalEvent;
+  /** Event chips: a meeting note already exists for it. */
+  hasNote?: boolean;
+  /** Own activation handler (event chips), instead of the view's delegated one. */
+  onActivate?: (el: HTMLElement, event: MouseEvent | KeyboardEvent) => void;
+}
+
+/** Event ids that already have a meeting note on `key`. */
+export function linkedEventIds(ctx: HorizonContext, key: DayKey): Set<string> {
+  const ids = new Set<string>();
+  for (const note of ctx.dayIndex.getBucket(key)?.notes ?? []) {
+    if (note.eventId !== undefined) ids.add(note.eventId);
+  }
+  return ids;
+}
+
+/** Chip label for an event: time prefix for timed events. */
+export function eventLabel(event: CalEvent): string {
+  return event.startTime ? `${event.startTime} · ${event.title}` : event.title;
+}
+
+export function eventChip(ctx: HorizonContext, key: DayKey, event: CalEvent, hasNote: boolean): ChipSpec {
+  return {
+    cls: `horizon-chip--event${event.allDay ? ' horizon-chip--allday' : ''}`,
+    label: eventLabel(event),
+    path: '',
+    line: -1,
+    rawText: '',
+    kind: 'event',
+    dayKey: key,
+    done: false,
+    recurring: false,
+    event,
+    hasNote,
+    onActivate: (el, domEvent) => showEventMenu(ctx, event, el, domEvent),
+  };
 }
 
 /** Chips for the full-density cell, in display order: due, scheduled, notes, done. */
@@ -70,6 +115,10 @@ export function chipsForDay(
   const bucket = ctx.dayIndex.getBucket(key) ?? { due: [], scheduled: [], done: [], notes: [] };
   const { settings } = ctx;
   const chips: ChipSpec[] = [];
+  const events = ctx.gcal.eventsOn(key);
+  const linked = linkedEventIds(ctx, key);
+  const shownEvents = new Set(events.map((e) => e.id));
+  for (const event of events) chips.push(eventChip(ctx, key, event, linked.has(event.id)));
   if (settings.showDue) {
     for (const task of bucket.due) {
       if (task.done || task.status === '-') continue;
@@ -105,6 +154,8 @@ export function chipsForDay(
   }
   if (settings.showNotes) {
     for (const note of bucket.notes) {
+      // A meeting note rides on its event chip instead of showing twice.
+      if (note.eventId !== undefined && shownEvents.has(note.eventId)) continue;
       chips.push({
         cls: 'horizon-chip--note',
         label: note.time ? `${note.time} · ${note.title}` : note.title,
@@ -174,6 +225,10 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
     el.setAttribute('aria-label', chip.label);
     return el;
   }
+  if (chip.kind === 'event' && chip.event) {
+    renderEventChipBody(el, chip, chip.event);
+    return el;
+  }
   if (chip.kind === 'note') {
     el.createSpan({ cls: 'horizon-chip__marker' });
   } else {
@@ -205,6 +260,34 @@ export function renderChip(parent: HTMLElement, chip: ChipSpec): HTMLElement {
     el.addEventListener('dragend', () => el.removeClass('horizon-chip--dragging'));
   }
   return el;
+}
+
+function renderEventChipBody(el: HTMLElement, chip: ChipSpec, event: CalEvent): void {
+  if (event.color !== '') el.setCssProps({ '--horizon-event-color': event.color });
+  el.createSpan({ cls: 'horizon-chip__marker horizon-chip__marker--event' });
+  el.createSpan({ cls: 'horizon-chip__label', text: chip.label });
+  if (chip.hasNote) {
+    el.createSpan({ cls: 'horizon-chip__badge horizon-chip__badge--note', attr: { 'aria-label': 'Has a meeting note' } });
+  }
+  el.setAttribute('aria-label', chip.label);
+  el.setAttribute('aria-haspopup', 'menu');
+  attachActivation(el, chip);
+}
+
+/** Wire a chip's own activation handler, keeping it out of the view's delegated handlers. */
+export function attachActivation(el: HTMLElement, chip: ChipSpec): void {
+  const activate = chip.onActivate;
+  if (!activate) return;
+  el.addEventListener('click', (event) => {
+    event.stopPropagation();
+    activate(el, event);
+  });
+  el.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    event.stopPropagation();
+    activate(el, event);
+  });
 }
 
 /** Rebuild the guarded task reference carried by a chip's data attributes. */
@@ -303,7 +386,7 @@ export function renderMiniDayCell(
   }
 
   const bucket = ctx.dayIndex.getBucket(key);
-  const dots = miniDots(ctx, key, bucket, options.today);
+  const dots = withEventDot(ctx, key, miniDots(ctx, key, bucket, options.today));
   if (dots.length > 0) {
     const dotsEl = cell.createDiv({ cls: 'horizon-cell__dots' });
     for (const dot of dots) {

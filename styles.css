@@ -903,37 +903,37 @@
   gap: 2px;
 }
 
-/* ============================== Week mode ============================== */
+/* ============================== Week / day mode ============================== */
 
+/* One column template for header, all-day lane and hour grid, so the three
+   rows always line up: a time gutter, then one track per day. */
 .horizon-week {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--size-2-2);
-  height: 100%;
-}
-
-.horizon-week__col {
+  --horizon-gutter-w: 48px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  height: 100%;
   min-height: 0;
-  border-radius: var(--radius-m);
-  background-color: var(--background-secondary);
-  overflow: hidden;
 }
 
-.horizon-week__col--today {
-  box-shadow: inset 0 0 0 1.5px var(--interactive-accent);
+.horizon-week__row {
+  display: grid;
+  grid-template-columns: var(--horizon-gutter-w) repeat(var(--horizon-week-days, 7), minmax(0, 1fr));
+  column-gap: var(--size-2-1);
+}
+
+.horizon-week__header {
+  flex-shrink: 0;
+  padding-bottom: var(--size-2-2);
 }
 
 .horizon-week__head {
   display: flex;
   align-items: center;
-  gap: var(--size-2-2);
-  padding: var(--size-2-3) var(--size-4-2);
-  border-bottom: var(--border-width) solid var(--background-modifier-border);
+  gap: var(--size-2-1);
+  min-width: 0;
+  padding: var(--size-2-3) var(--size-2-3);
+  border-radius: var(--radius-m);
   cursor: pointer;
-  flex-shrink: 0;
   transition: background-color var(--horizon-ease);
 }
 
@@ -957,6 +957,14 @@
 
 .horizon-week__num {
   margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Narrow columns: the weekday clips instead of running into the number. */
+.horizon-week__head .horizon-week__dow {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .horizon-week__num--today {
@@ -965,19 +973,172 @@
   font-weight: var(--font-semibold);
 }
 
-.horizon-week__chips {
+.horizon-week__lanes {
+  flex-shrink: 0;
+  max-height: 30%;
+  overflow-y: auto;
+  padding-bottom: var(--size-2-2);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+}
+
+.horizon-week__lane {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: var(--size-2-2);
-  overflow-y: auto;
+  min-width: 0;
+  min-height: 28px;
+  padding: var(--size-2-1);
+  border-radius: var(--radius-s);
+  background-color: var(--background-secondary);
+}
+
+.horizon-week__lane--today {
+  box-shadow: inset 0 0 0 1px var(--interactive-accent);
+}
+
+.horizon-week__gutter-label {
+  align-self: start;
+  padding-top: var(--size-2-2);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  text-align: right;
+}
+
+.horizon-week__scroller {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
+}
+
+.horizon-week__grid {
+  position: relative;
+  height: calc(24 * var(--horizon-hour-px, 48px));
+}
+
+.horizon-week__hours {
+  position: relative;
+}
+
+.horizon-week__hour {
+  position: absolute;
+  right: var(--size-2-2);
+  transform: translateY(-50%);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+
+.horizon-week__daycol {
+  position: relative;
+  min-width: 0;
+  border-left: var(--border-width) solid var(--background-modifier-border);
+  background-image: linear-gradient(to bottom, var(--background-modifier-border) var(--border-width), transparent var(--border-width));
+  background-size: 100% var(--horizon-hour-px, 48px);
+}
+
+.horizon-week__daycol--today {
+  background-color: var(--background-secondary);
+}
+
+.horizon-week__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-red);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.horizon-week__now::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-red);
+}
+
+/* A timed item on the grid. Event colour comes from its Google calendar. */
+.horizon-block {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 2px var(--size-2-2);
+  border: 1px solid var(--background-primary);
+  border-left: 3px solid var(--horizon-event-color, var(--interactive-accent));
+  border-radius: var(--radius-s);
+  background-color: color-mix(in srgb, var(--horizon-event-color, var(--interactive-accent)) 18%, var(--background-primary));
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.25;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+  transition: background-color var(--horizon-ease);
+}
+
+@media (hover: hover) {
+  .horizon-block:hover {
+    background-color: color-mix(in srgb, var(--horizon-event-color, var(--interactive-accent)) 30%, var(--background-primary));
+  }
+}
+
+.horizon-block--note {
+  --horizon-event-color: var(--text-faint);
+  border-left-style: dashed;
+}
+
+.horizon-block__title {
+  font-weight: var(--font-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.horizon-block__time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.horizon-block--short {
+  padding-block: 0;
+}
+
+/* Too short for two lines: the title alone, the time is in the tooltip/menu. */
+.horizon-block--short .horizon-block__time {
+  display: none;
+}
+
+.horizon-block--has-note .horizon-block__title::after {
+  content: ' \2022';
+  color: var(--text-accent);
+}
+
+/* Event chips (month, agenda, lanes): calendar-coloured marker. */
+.horizon-chip__marker--event {
+  background-color: var(--horizon-event-color, var(--interactive-accent));
+}
+
+.horizon-chip--allday {
+  background-color: color-mix(in srgb, var(--horizon-event-color, var(--interactive-accent)) 16%, transparent);
+  color: var(--text-normal);
+}
+
+.horizon-chip__badge--note::before {
+  content: '\2022';
+  color: var(--text-accent);
 }
 
 .horizon-week__blank {
   color: var(--text-faint);
   font-size: var(--font-ui-smaller);
   padding: var(--size-2-2);
+}
+
+.horizon-dot--event {
+  background-color: var(--text-muted);
 }
 
 /* ============================== Agenda mode ============================== */
@@ -1357,22 +1518,10 @@
       letters. Pinning row height (aspect-ratio: auto) makes the columns purely
       1fr text tracks, so headers and days share identical columns. */
 @media (max-width: 480px) {
-  /* Week mode → vertical stack of day cards (same shape as Agenda). */
+  /* Week mode on phones: the gutter shrinks, the grid keeps its shape.
+     Seven tracks are narrow; day mode is the comfortable one here. */
   .horizon-week {
-    display: flex;
-    flex-direction: column;
-    gap: var(--size-4-2);
-    height: auto;
-  }
-
-  .horizon-week__col {
-    min-height: 60px;
-  }
-
-  /* The view body scrolls as a whole; individual day columns grow to content. */
-  .horizon-week__chips {
-    overflow: visible;
-    min-height: 0;
+    --horizon-gutter-w: 36px;
   }
 
   /* Sidebar mini month: fixed row height instead of width-derived aspect-ratio,
@@ -1863,3 +2012,10 @@
   }
 }
 /* <<< fine blocco vendored <<< */
+
+/* Narrow week heads: the overdue badge must not wrap under the day number. */
+.horizon-week__head .horizon-cell__overdue-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 0 var(--size-2-1);
+}

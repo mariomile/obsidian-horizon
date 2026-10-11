@@ -24,6 +24,7 @@ export const CALENDAR_VIEW_TYPE = 'horizon-calendar';
 const MODE_LABELS: Record<CalendarMode, string> = {
   month: 'Month',
   week: 'Week',
+  day: 'Day',
   agenda: 'Agenda',
   journal: 'Journal',
 };
@@ -72,7 +73,7 @@ export class HorizonCalendarView extends ItemView {
     this.periodLabelEl = header.createSpan({ cls: 'horizon-view__title' });
 
     const modeSwitch = header.createDiv({ cls: 'mv-seg horizon-view__modes' });
-    for (const mode of ['month', 'week', 'agenda', 'journal'] as CalendarMode[]) {
+    for (const mode of ['month', 'week', 'day', 'agenda', 'journal'] as CalendarMode[]) {
       const button = modeSwitch.createEl('button', {
         cls: 'mv-seg-item horizon-view__mode-btn',
         text: MODE_LABELS[mode],
@@ -204,8 +205,8 @@ export class HorizonCalendarView extends ItemView {
         },
         onDayHover: shared.onDayHover,
       });
-    } else if (mode === 'week') {
-      component = new WeekView(this.ctx, this.modeHostEl.createDiv(), shared);
+    } else if (mode === 'week' || mode === 'day') {
+      component = new WeekView(this.ctx, this.modeHostEl.createDiv(), shared, mode === 'day' ? 1 : 7);
     } else if (mode === 'agenda') {
       component = new AgendaView(this.ctx, this.modeHostEl.createDiv(), shared);
     } else {

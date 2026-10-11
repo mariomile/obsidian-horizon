@@ -38,6 +38,7 @@ export class AgendaView extends Component {
 
   onload(): void {
     this.register(this.ctx.dayIndex.subscribe(() => this.render()));
+    this.register(this.ctx.gcal.subscribe(() => this.render()));
     this.register(this.ctx.proposals.subscribe(() => this.render()));
     this.containerEl.addClass('horizon-agenda');
     this.containerEl.addEventListener('click', this.handleClick);

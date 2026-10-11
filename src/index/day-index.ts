@@ -113,6 +113,7 @@ export class DayIndexCore {
           title: contribution.note.title,
         };
         if (contribution.note.time !== undefined) entry.time = contribution.note.time;
+        if (contribution.note.eventId !== undefined) entry.eventId = contribution.note.eventId;
         bucketFor(contribution.note.date).notes.push(entry);
       }
     }
