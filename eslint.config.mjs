@@ -1,8 +1,11 @@
+import eslint from '@eslint/js';
 import obsidianmd from 'eslint-plugin-obsidianmd';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   ...obsidianmd.configs.recommended,
   {
     files: ['src/**/*.ts'],
@@ -23,16 +26,14 @@ export default tseslint.config(
     },
   },
   {
-    // node:test suites run under Node, never inside Obsidian.
+    // node:test's describe()/it() return promises the runner tracks itself.
     files: ['src/**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-floating-promises': 'off',
-      'obsidianmd/no-nodejs-modules': 'off',
-      '@typescript-eslint/no-restricted-imports': 'off',
-      'import/no-nodejs-modules': 'off',
     },
   },
   {
-    ignores: ['main.js', 'node_modules/**', '*.mjs'],
+    ignores: ['main.js', 'node_modules/**'],
   },
 );
+
