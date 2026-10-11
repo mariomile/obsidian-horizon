@@ -91,7 +91,7 @@ function noticeWithUndo(
   newKey: DayKey,
   oldKey: DayKey | undefined,
 ): void {
-  const fragment = document.createDocumentFragment();
+  const fragment = createFragment();
   fragment.createSpan({ text: `Horizon: task moved to ${newKey}. ` });
   if (oldKey !== undefined) {
     const undo = fragment.createEl('a', { text: 'Undo' });

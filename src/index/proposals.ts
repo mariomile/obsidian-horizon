@@ -109,7 +109,7 @@ export function appendProposal(raw: string, proposal: Proposal): string {
   } catch {
     // Missing/corrupt content starts a clean proposal sidecar.
   }
-  const proposals = Array.isArray(value.proposals) ? [...value.proposals] : [];
+  const proposals = Array.isArray(value.proposals) ? [...(value.proposals as unknown[])] : [];
   proposals.push(proposal);
   return JSON.stringify({ ...value, proposals }, null, 2);
 }

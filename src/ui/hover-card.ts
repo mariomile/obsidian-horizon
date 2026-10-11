@@ -8,11 +8,11 @@ const SHOW_DELAY_MS = 300;
  * delegated handler targets `--note` chips that are NOT `--card`.
  */
 export function attachHoverCard(ctx: HorizonContext, containerEl: HTMLElement): () => void {
-  let showTimer: ReturnType<typeof setTimeout> | null = null;
+  let showTimer: number | null = null;
   let cardEl: HTMLElement | null = null;
 
   const clearTimer = (): void => {
-    if (showTimer !== null) clearTimeout(showTimer);
+    if (showTimer !== null) window.clearTimeout(showTimer);
     showTimer = null;
   };
 
@@ -60,7 +60,7 @@ export function attachHoverCard(ctx: HorizonContext, containerEl: HTMLElement): 
     const related = event.relatedTarget;
     if (related instanceof Node && chipEl.contains(related)) return;
     clearTimer();
-    showTimer = setTimeout(() => show(chipEl, chipEl.dataset.path ?? ''), SHOW_DELAY_MS);
+    showTimer = window.setTimeout(() => show(chipEl, chipEl.dataset.path ?? ''), SHOW_DELAY_MS);
   };
 
   const onMouseOut = (event: MouseEvent): void => {

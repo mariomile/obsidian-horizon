@@ -33,7 +33,7 @@ export function populatePreviewBody(
         cardEl.addClass('horizon-chip--card-image');
         // Next frame, so the browser paints the transparent thumb first —
         // otherwise the opacity transition has nothing to animate from.
-        requestAnimationFrame(() => thumb.addClass('is-loaded'));
+        window.requestAnimationFrame(() => thumb.addClass('is-loaded'));
       }
     })
     .catch(() => {

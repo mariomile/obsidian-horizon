@@ -96,9 +96,11 @@ export function showDatePicker(
 
   // Anchor under the pill, right-aligned to it.
   const rect = anchor.getBoundingClientRect();
-  pop.style.position = 'fixed';
-  pop.style.top = `${rect.bottom + 4}px`;
-  pop.style.left = `${Math.max(8, rect.right - pop.offsetWidth)}px`;
+  pop.setCssProps({
+    position: 'fixed',
+    top: `${rect.bottom + 4}px`,
+    left: `${Math.max(8, rect.right - pop.offsetWidth)}px`,
+  });
 
   document.addEventListener('mousedown', onOutside, true);
   document.addEventListener('keydown', onKey, true);
