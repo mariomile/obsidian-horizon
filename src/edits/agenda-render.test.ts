@@ -92,3 +92,37 @@ describe('renderWeekDigest', () => {
     assert.equal(result, '');
   });
 });
+
+describe('renderDayAgenda with calendar events', () => {
+  it('puts events first and folds their meeting notes into the event line', () => {
+    const base = {
+      uid: 'u',
+      calendarId: 'c',
+      calendarName: 'C',
+      allDay: false,
+      startDay: '2026-10-12',
+      endDay: '2026-10-12',
+      start: 0,
+      end: 0,
+      color: '',
+    };
+    const result = renderDayAgenda(
+      bucket({
+        notes: [
+          { path: 'M/Sync 2026-10-12.md', title: 'Sync 2026-10-12', time: '09:00', eventId: 'e1' },
+          { path: 'R/Other.md', title: 'Other' },
+        ],
+      }),
+      [
+        { ...base, id: 'e1', title: 'Sync', startTime: '09:00' },
+        { ...base, id: 'e2', title: 'Holiday', allDay: true },
+      ],
+    );
+    assert.deepEqual(result.split('\n'), [
+      '- 09:00 · [[Sync 2026-10-12|Sync]]',
+      '- Holiday',
+      '- [[Other]]',
+    ]);
+  });
+});
+

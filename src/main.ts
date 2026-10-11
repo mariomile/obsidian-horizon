@@ -4,6 +4,7 @@ import { parseDayKey, todayKey } from './dates.ts';
 import { openPeriodicNote } from './edits/note-creator.ts';
 import { HorizonApi } from './api.ts';
 import { addDays } from './dates.ts';
+import { GoogleCalendarService } from './gcal/service.ts';
 import { DayIndexService } from './index/indexer.ts';
 import { ProposalsService } from './index/proposals-service.ts';
 import { NotePreviewService } from './preview.ts';
@@ -35,6 +36,7 @@ export default class HorizonPlugin extends Plugin {
   momentLike!: MomentLike;
   periodic!: PeriodicService;
   dayIndex!: DayIndexService;
+  gcal!: GoogleCalendarService;
   proposals!: ProposalsService;
   preview!: NotePreviewService;
   uiState!: UiState;
@@ -57,6 +59,7 @@ export default class HorizonPlugin extends Plugin {
       (period) => this.settings.periods[period],
     );
     this.dayIndex = new DayIndexService(this.app, (path) => this.periodic.isPeriodicPath(path));
+    this.gcal = new GoogleCalendarService(this.app, () => this.settings.google);
     this.proposals = new ProposalsService(this.app, () => this.settings.proposalsPath);
     this.preview = new NotePreviewService(this.app);
     this.registerEvent(this.app.vault.on('modify', (file) => this.preview.invalidate(file.path)));
@@ -108,10 +111,11 @@ export default class HorizonPlugin extends Plugin {
     const modeLabels: Record<string, string> = {
       month: 'Month view',
       week: 'Week view',
+      day: 'Day view',
       agenda: 'Agenda view',
       journal: 'Journal view',
     };
-    for (const mode of ['month', 'week', 'agenda', 'journal'] as const) {
+    for (const mode of ['month', 'week', 'day', 'agenda', 'journal'] as const) {
       this.addCommand({
         id: `mode-${mode}`,
         name: modeLabels[mode] ?? mode,
@@ -169,6 +173,7 @@ export default class HorizonPlugin extends Plugin {
 
     this.dayIndex.start(this);
     this.proposals.start(this);
+    this.gcal.start(this);
     this.api = new HorizonApi(ctx, () => this.writeAgendaExport());
     this.daybar = new DaybarManager(ctx);
     const syncDaybar = (): void => this.daybar.syncAll();
@@ -186,6 +191,13 @@ export default class HorizonPlugin extends Plugin {
         void this.writeAgendaExport().then((path) => {
           new Notice(`Horizon: agenda exported to ${path}.`);
         });
+      },
+    });
+    this.addCommand({
+      id: 'refresh-google-calendar',
+      name: 'Refresh Google Calendar',
+      callback: () => {
+        void this.gcal.refresh();
       },
     });
     this.addSettingTab(new HorizonSettingTab(this.app, this));
@@ -229,6 +241,7 @@ export default class HorizonPlugin extends Plugin {
       settings: this.settings,
       periodic: this.periodic,
       dayIndex: this.dayIndex,
+      gcal: this.gcal,
       proposals: this.proposals,
       preview: this.preview,
       uiState: this.uiState,

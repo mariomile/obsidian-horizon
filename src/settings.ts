@@ -5,6 +5,22 @@ export interface AgentExportSettings {
   path: string;
 }
 
+export interface GoogleSettings {
+  /** Show Google Calendar events once connected. */
+  enabled: boolean;
+  /** OAuth client ID of the user's own Google Cloud "Desktop app" client. */
+  clientId: string;
+  /** Name of the Obsidian secret holding that client's secret. */
+  clientSecretId: string;
+  /** Calendar IDs the user switched off in Horizon. */
+  hiddenCalendars: string[];
+  /** Where "Create meeting note" puts new notes. */
+  meetingFolder: string;
+  meetingTemplate: string;
+  /** First hour visible when the day/week grid opens. */
+  dayStartHour: number;
+}
+
 export interface HorizonSettings {
   periods: Record<Period, PeriodConfig>;
   agentExport: AgentExportSettings;
@@ -21,6 +37,7 @@ export interface HorizonSettings {
   daybar: boolean;
   weekNotePreview: boolean;
   lastMode: CalendarMode;
+  google: GoogleSettings;
 }
 
 export const DEFAULT_SETTINGS: HorizonSettings = {
@@ -67,11 +84,20 @@ export const DEFAULT_SETTINGS: HorizonSettings = {
   daybar: true,
   weekNotePreview: true,
   lastMode: 'month',
+  google: {
+    enabled: true,
+    clientId: '',
+    clientSecretId: '',
+    hiddenCalendars: [],
+    meetingFolder: 'Meetings',
+    meetingTemplate: '',
+    dayStartHour: 8,
+  },
 };
 
 export const PERIODS: Period[] = ['daily', 'weekly', 'monthly', 'yearly'];
 
-const MODES: CalendarMode[] = ['month', 'week', 'agenda', 'journal'];
+const MODES: CalendarMode[] = ['month', 'week', 'day', 'agenda', 'journal'];
 
 export function parseSettings(data: unknown): HorizonSettings {
   if (!isRecord(data)) return structuredClone(DEFAULT_SETTINGS);
@@ -100,6 +126,24 @@ export function parseSettings(data: unknown): HorizonSettings {
     daybar: booleanValue(data.daybar, DEFAULT_SETTINGS.daybar),
     weekNotePreview: booleanValue(data.weekNotePreview, DEFAULT_SETTINGS.weekNotePreview),
     lastMode: modeValue(data.lastMode, DEFAULT_SETTINGS.lastMode),
+    google: parseGoogle(data.google),
+  };
+}
+
+function parseGoogle(value: unknown): GoogleSettings {
+  const fallback = DEFAULT_SETTINGS.google;
+  if (!isRecord(value)) return { ...fallback, hiddenCalendars: [] };
+  const hour = numberValue(value.dayStartHour, fallback.dayStartHour);
+  return {
+    enabled: booleanValue(value.enabled, fallback.enabled),
+    clientId: stringValue(value.clientId, fallback.clientId),
+    clientSecretId: stringValue(value.clientSecretId, fallback.clientSecretId),
+    hiddenCalendars: Array.isArray(value.hiddenCalendars)
+      ? value.hiddenCalendars.filter((id): id is string => typeof id === 'string')
+      : [],
+    meetingFolder: stringValue(value.meetingFolder, fallback.meetingFolder),
+    meetingTemplate: stringValue(value.meetingTemplate, fallback.meetingTemplate),
+    dayStartHour: Math.min(23, Math.max(0, Math.round(hour))),
   };
 }
 

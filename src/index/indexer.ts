@@ -173,9 +173,15 @@ export class DayIndexService {
 
   private noteFor(path: string, cache: CachedMetadata): FileContribution['note'] {
     const parsed = normalizeFrontmatterDate(cache.frontmatter?.date);
-    return parsed !== null && !this.isPeriodicPath(path)
-      ? { path, title: noteTitle(path), date: parsed.day, time: parsed.time ?? undefined }
-      : null;
+    if (parsed === null || this.isPeriodicPath(path)) return null;
+    const eventId: unknown = cache.frontmatter?.gcal_event;
+    return {
+      path,
+      title: noteTitle(path),
+      date: parsed.day,
+      time: parsed.time ?? undefined,
+      eventId: typeof eventId === 'string' && eventId !== '' ? eventId : undefined,
+    };
   }
 
   private setNote(path: string, note: FileContribution['note']): void {

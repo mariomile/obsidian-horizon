@@ -72,4 +72,16 @@ describe('weekNotePreview setting', () => {
   it('falls back to true when absent', () => {
     assert.equal(parseSettings({}).weekNotePreview, true);
   });
+
+  it('parses Google settings defensively', () => {
+    const parsed = parseSettings({
+      google: { clientId: 'abc', hiddenCalendars: ['x', 3], dayStartHour: 40, enabled: 'no' },
+    });
+    assert.equal(parsed.google.clientId, 'abc');
+    assert.deepEqual(parsed.google.hiddenCalendars, ['x']);
+    assert.equal(parsed.google.dayStartHour, 23);
+    assert.equal(parsed.google.enabled, true);
+    assert.equal(parsed.google.meetingFolder, DEFAULT_SETTINGS.google.meetingFolder);
+    assert.equal(parseSettings({ lastMode: 'day' }).lastMode, 'day');
+  });
 });

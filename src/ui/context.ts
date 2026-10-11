@@ -1,5 +1,6 @@
 import type { App } from 'obsidian';
 
+import type { GoogleCalendarService } from '../gcal/service.ts';
 import type { DayIndexService } from '../index/indexer.ts';
 import type { ProposalsService } from '../index/proposals-service.ts';
 import type { MomentLike, PeriodicService } from '../index/periodic.ts';
@@ -14,6 +15,7 @@ export interface HorizonContext {
   settings: HorizonSettings;
   periodic: PeriodicService;
   dayIndex: DayIndexService;
+  gcal: GoogleCalendarService;
   proposals: ProposalsService;
   preview: NotePreviewService;
   uiState: UiState;
