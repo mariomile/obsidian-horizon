@@ -7,7 +7,7 @@ Part of the marioverse Obsidian plugin suite.
 <p align="center">
   <img src="docs/month.png" width="900" alt="Horizon — month view" />
 </p>
-<p align="center"><em>The month grid, with daily notes and due tasks shown right on their date.</em></p>
+<p align="center"><em>The month grid, with daily notes and open, done and overdue tasks shown right on their date.</em></p>
 
 ## Views
 
