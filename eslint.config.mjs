@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  ...obsidianmd.configs.recommended,
   {
     files: ['src/**/*.ts'],
     languageOptions: {
@@ -18,13 +19,17 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      obsidianmd,
-    },
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['error', { allow: ['error', 'warn'] }],
+    },
+  },
+  {
+    // node:test's describe()/it() return promises the runner tracks itself.
+    files: ['src/**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'off',
     },
   },
   {

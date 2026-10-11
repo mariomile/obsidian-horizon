@@ -22,7 +22,6 @@ export class HorizonSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl('h2', { text: 'Horizon' });
     containerEl.createEl('p', {
       text: 'Calendar for your vault: periodic notes, tasks with dates, and dated notes.',
     });
@@ -31,7 +30,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       this.periodSection(period);
     }
 
-    containerEl.createEl('h3', { text: 'View' });
+    new Setting(containerEl).setName('View').setHeading();
 
     new Setting(containerEl)
       .setName('Days in agenda')
@@ -95,7 +94,7 @@ export class HorizonSettingTab extends PluginSettingTab {
         );
     }
 
-    containerEl.createEl('h3', { text: 'Previews' });
+    new Setting(containerEl).setName('Previews').setHeading();
 
     new Setting(containerEl)
       .setName('Mini-cards with preview')
@@ -121,7 +120,7 @@ export class HorizonSettingTab extends PluginSettingTab {
           }),
       );
 
-    containerEl.createEl('h3', { text: 'Agents' });
+    new Setting(containerEl).setName('Agents').setHeading();
 
     new Setting(containerEl)
       .setName('Export agenda for agents')
@@ -172,7 +171,7 @@ export class HorizonSettingTab extends PluginSettingTab {
   private periodSection(period: Period): void {
     const { containerEl } = this;
     const config = this.plugin.settings.periods[period];
-    containerEl.createEl('h3', { text: PERIOD_LABELS[period] });
+    new Setting(containerEl).setName(PERIOD_LABELS[period]).setHeading();
 
     new Setting(containerEl)
       .setName('Enable')

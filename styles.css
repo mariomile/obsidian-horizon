@@ -1469,6 +1469,7 @@
    day numbers, today/active/has-note states and any Cosmos/theme overrides
    come for free and match the sidebar mini-calendar exactly. */
 .horizon-datepicker {
+  position: fixed;
   z-index: var(--layer-menu);
   width: 264px;
   padding: var(--size-4-2);
