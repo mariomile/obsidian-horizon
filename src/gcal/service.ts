@@ -54,6 +54,8 @@ export class GoogleCalendarService {
   private calendarList: CalendarInfo[] | null = null;
   private calendarLoad: Promise<CalendarInfo[]> | null = null;
   private errorMessage = '';
+  /** Bumped when the account or calendar selection changes: older fetches are dropped. */
+  private generation = 0;
 
   constructor(app: App, settings: () => GoogleSettings) {
     this.app = app;
@@ -132,11 +134,14 @@ export class GoogleCalendarService {
     this.calendarLoad = null;
     this.failed.clear();
     const loaded = [...this.months.keys()];
-    await Promise.all(loaded.map((month) => this.loadMonth(month)));
+    // One redraw for the whole refresh, and only when something changed.
+    const changed = await Promise.all(loaded.map((month) => this.loadMonth(month, true)));
+    if (changed.some(Boolean)) this.notify();
   }
 
   /** Clear cached events, e.g. after the calendar selection changed. */
   reload(): void {
+    this.generation += 1;
     this.months.clear();
     this.failed.clear();
     this.merged = null;
@@ -226,6 +231,7 @@ export class GoogleCalendarService {
   async disconnect(): Promise<void> {
     const refreshToken = this.app.secretStorage.getSecret(REFRESH_SECRET_ID) ?? '';
     this.app.secretStorage.setSecret(REFRESH_SECRET_ID, '');
+    this.generation += 1;
     this.tokens = null;
     this.errorMessage = '';
     this.months.clear();
@@ -260,19 +266,38 @@ export class GoogleCalendarService {
     return this.merged;
   }
 
-  private async loadMonth(month: string): Promise<void> {
+  /**
+   * Fetch one month from every visible calendar. Returns whether anything
+   * shown changed; `silent` leaves the redraw to the caller.
+   */
+  private async loadMonth(month: string, silent = false): Promise<boolean> {
+    const generation = this.generation;
+    const previousError = this.errorMessage;
     this.inFlight.add(month);
+    let changed = false;
     try {
       const calendars = await this.visibleCalendars();
       const { timeMin, timeMax } = monthBounds(month);
+      // A calendar that fails on its own (a revoked share, a rate limit) is
+      // skipped; only an expired sign-in fails the month.
       const perCalendar = await Promise.all(
-        calendars.map((calendar) => this.fetchEvents(calendar, timeMin, timeMax)),
+        calendars.map((calendar) =>
+          this.fetchEvents(calendar, timeMin, timeMax).catch((error: unknown) => {
+            if (error instanceof AuthError) throw error;
+            console.warn(`Horizon: skipped calendar ${calendar.name}`, error);
+            return [];
+          }),
+        ),
       );
+      if (generation !== this.generation) return false;
       // Primary first, so its copy of a shared meeting wins the dedupe.
-      this.months.set(month, perCalendar.flat());
+      const events = perCalendar.flat();
+      changed = JSON.stringify(this.months.get(month) ?? null) !== JSON.stringify(events);
+      this.months.set(month, events);
       this.failed.delete(month);
       this.errorMessage = '';
     } catch (error) {
+      if (generation !== this.generation) return false;
       this.failed.add(month);
       this.errorMessage =
         error instanceof AuthError
@@ -281,9 +306,13 @@ export class GoogleCalendarService {
       console.warn('Horizon: Google Calendar fetch failed', error);
     } finally {
       this.inFlight.delete(month);
-      this.merged = null;
-      this.notify();
     }
+    changed ||= previousError !== this.errorMessage;
+    if (changed) {
+      this.merged = null;
+      if (!silent) this.notify();
+    }
+    return changed;
   }
 
   private async visibleCalendars(): Promise<CalendarInfo[]> {
@@ -370,8 +399,10 @@ export class GoogleCalendarService {
       body: refreshBody({ clientId, clientSecret, refreshToken }),
       throw: false,
     });
+    // Only a rejected grant means the sign-in is gone; 5xx and 429 are transient.
+    if (response.status === 400 || response.status === 401) throw new AuthError('Refresh rejected');
     const tokens = response.status < 400 ? parseTokenResponse(response.json, Date.now()) : null;
-    if (!tokens) throw new AuthError('Refresh failed');
+    if (!tokens) throw new Error(`Token refresh failed (${response.status})`);
     this.tokens = tokens;
     return tokens.accessToken;
   }

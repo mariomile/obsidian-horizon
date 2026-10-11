@@ -1,6 +1,6 @@
 import { Component } from 'obsidian';
 
-import { addDays, isoWeek, mustParse, parseDayKey, startOfWeekMonday, todayKey, weekDays } from '../dates.ts';
+import { addDays, isoWeek, parseDayKey, startOfWeekMonday, todayKey, weekDays } from '../dates.ts';
 import type { CalEvent } from '../gcal/events.ts';
 import type { DayKey, NoteEntry } from '../types.ts';
 import { acceptProposal } from '../edits/proposal-actions.ts';
@@ -10,7 +10,7 @@ import { registerDropTargets } from './dnd.ts';
 import { showTaskChipMenu } from './task-menu.ts';
 import type { DragPayload } from './dnd.ts';
 import { makeButtonLike } from './interactive.ts';
-import { layoutDay, minutesInDay } from './time-grid-layout.ts';
+import { layoutDay, spanOnDay, wallMinutes } from './time-grid-layout.ts';
 import type { GridItem } from './time-grid-layout.ts';
 
 export interface WeekViewCallbacks {
@@ -30,11 +30,6 @@ const NOTE_MINUTES = 30;
 const NOW_TICK_MS = 60_000;
 
 type Block = { kind: 'event'; event: CalEvent } | { kind: 'note'; note: NoteEntry };
-
-function midnight(key: DayKey): number {
-  const { y, m, d } = mustParse(key);
-  return new Date(y, m - 1, d).getTime();
-}
 
 function hhmmToMinutes(time: string): number {
   return Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
@@ -80,7 +75,7 @@ export class WeekView extends Component {
     this.containerEl.addEventListener('mouseover', this.handleHover);
     this.containerEl.addEventListener('contextmenu', this.handleContextMenu);
     this.register(
-      registerDropTargets(this.containerEl, '.horizon-week__lane', (payload, key) =>
+      registerDropTargets(this.containerEl, '.horizon-week__lane, .horizon-week__daycol', (payload, key) =>
         this.callbacks.onTaskDrop(payload, key),
       ),
     );
@@ -248,16 +243,12 @@ export class WeekView extends Component {
       cls: `horizon-week__daycol${key === today ? ' horizon-week__daycol--today' : ''}`,
     });
     col.dataset.key = key;
-    const dayStart = midnight(key);
     const linked = linkedEventIds(this.ctx, key);
 
     const items: GridItem<Block>[] = blocks.map((block) => {
       if (block.kind === 'event') {
-        return {
-          item: block,
-          startMin: minutesInDay(block.event.start, dayStart),
-          endMin: minutesInDay(block.event.end, dayStart),
-        };
+        const { event } = block;
+        return { item: block, ...spanOnDay(event.start, event.end, event.startDay, event.endDay, key) };
       }
       const startMin = hhmmToMinutes(block.note.time ?? '00:00');
       return { item: block, startMin, endMin: startMin + NOTE_MINUTES };
@@ -310,7 +301,7 @@ export class WeekView extends Component {
       `.horizon-week__daycol[data-key="${today}"]`,
     );
     if (!col) return;
-    const minutes = minutesInDay(Date.now(), midnight(today));
+    const minutes = wallMinutes(new Date());
     const line = col.createDiv({ cls: 'horizon-week__now' });
     line.setCssProps({ top: `${(minutes / 60) * HOUR_PX}px` });
   }

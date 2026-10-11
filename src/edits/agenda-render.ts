@@ -24,7 +24,9 @@ export function renderDayAgenda(bucket: DayBucket | null, events: CalEvent[] = [
   }
   for (const event of events) {
     const linked = noteByEvent.get(event.id);
-    const label = linked !== undefined ? `[[${linked}|${event.title}]]` : event.title;
+    // `|` and brackets in a Google title would break the wikilink alias.
+    const alias = event.title.replace(/[|[\]]/g, ' ').trim();
+    const label = linked !== undefined ? `[[${linked}|${alias}]]` : event.title;
     lines.push(event.startTime ? `- ${event.startTime} · ${label}` : `- ${label}`);
   }
   if (!bucket) return lines.join('\n');

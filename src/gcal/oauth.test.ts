@@ -86,5 +86,6 @@ describe('parseRedirect', () => {
       message: 'access_denied',
     });
     assert.deepEqual(parseRedirect('/favicon.ico', 's1'), { kind: 'ignore' });
+    assert.deepEqual(parseRedirect('/', 's1'), { kind: 'ignore' });
   });
 });

@@ -115,11 +115,13 @@ export function parseRedirect(pathWithQuery: string, expectedState: string): Red
   // Browsers also ask for /favicon.ico and the like.
   if (url.pathname !== '/') return { kind: 'ignore' };
   const error = url.searchParams.get('error');
-  if (error) return { kind: 'error', message: error };
+  const code = url.searchParams.get('code');
+  // Anything that is not Google's redirect (a probe, a prefetch, a bare
+  // visit) must not end the sign-in.
+  if (!error && !code) return { kind: 'ignore' };
   if (url.searchParams.get('state') !== expectedState) {
     return { kind: 'error', message: 'state mismatch' };
   }
-  const code = url.searchParams.get('code');
-  if (!code) return { kind: 'error', message: 'missing code' };
-  return { kind: 'code', code };
+  if (error) return { kind: 'error', message: error };
+  return { kind: 'code', code: code ?? '' };
 }

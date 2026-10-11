@@ -182,6 +182,7 @@ export class HorizonSettingTab extends PluginSettingTab {
       cls: 'setting-item-description',
       text:
         'Read-only. Uses your own Google Cloud OAuth client of type "Desktop app" with the Calendar API enabled. ' +
+        'Publish the consent screen to production: in testing mode Google expires the sign-in every 7 days. ' +
         'The sign-in token stays on this device and is never written to the vault.',
     });
 

@@ -51,10 +51,18 @@ async function templateBody(ctx: HorizonContext, event: CalEvent, title: string)
  */
 export async function createMeetingNote(ctx: HorizonContext, event: CalEvent): Promise<TFile | null> {
   const folder = normalizePath(ctx.settings.google.meetingFolder.replace(/\/+$/, '') || '/');
-  const basename = meetingBasename(event);
-  const path = normalizePath(folder === '/' ? `${basename}.md` : `${folder}/${basename}.md`);
-  const existing = ctx.app.vault.getAbstractFileByPath(path);
-  if (existing instanceof TFile) return existing;
+  const pathFor = (name: string): string =>
+    normalizePath(folder === '/' ? `${name}.md` : `${folder}/${name}.md`);
+  let basename = meetingBasename(event);
+  const existing = ctx.app.vault.getAbstractFileByPath(pathFor(basename));
+  if (existing instanceof TFile) {
+    const owner: unknown = ctx.app.metadataCache.getFileCache(existing)?.frontmatter?.gcal_event;
+    if (owner === event.id) return existing;
+    // Same title, same day, different meeting (two standups): tell them apart.
+    basename = meetingBasename(event, true);
+    if (ctx.app.vault.getAbstractFileByPath(pathFor(basename))) basename = `${basename} ${event.id.slice(0, 6)}`;
+  }
+  const path = pathFor(basename);
   try {
     if (folder !== '/' && !ctx.app.vault.getFolderByPath(folder)) {
       await ctx.app.vault.createFolder(folder);

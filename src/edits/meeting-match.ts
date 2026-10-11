@@ -3,9 +3,11 @@ import type { CalEvent } from '../gcal/events.ts';
 /** Characters Obsidian refuses in file names, plus link-breaking ones. */
 const UNSAFE_NAME_RE = /[\\/:*?"<>|#^[\]]/g;
 
-export function meetingBasename(event: CalEvent): string {
+/** `<title> <day>`, or `<title> <day> <HHmm>` to tell same-titled meetings apart. */
+export function meetingBasename(event: CalEvent, withTime = false): string {
   const title = event.title.replace(UNSAFE_NAME_RE, ' ').replace(/\s+/g, ' ').trim() || 'Meeting';
-  return `${title} ${event.startDay}`;
+  const time = withTime && event.startTime ? ` ${event.startTime.replace(':', '')}` : '';
+  return `${title} ${event.startDay}${time}`;
 }
 
 /** Same title once case, spacing and punctuation are ignored. */

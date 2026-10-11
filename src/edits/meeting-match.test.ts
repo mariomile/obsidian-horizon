@@ -24,6 +24,7 @@ describe('meetingBasename', () => {
   it('strips characters that break file names and links', () => {
     assert.equal(meetingBasename(event('Sync: Q4 / roadmap [draft]')), 'Sync Q4 roadmap draft 2026-10-12');
     assert.equal(meetingBasename(event('???')), 'Meeting 2026-10-12');
+    assert.equal(meetingBasename({ ...event('Standup'), startTime: '15:00' }, true), 'Standup 2026-10-12 1500');
   });
 });
 
