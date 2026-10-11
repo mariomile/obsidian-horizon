@@ -14,7 +14,8 @@ Part of the marioverse Obsidian plugin suite.
 - **Sidebar mini calendar** — month at a glance with content dots: daily note (accent), due tasks (orange), overdue (red), scheduled (cyan), done (green), dated notes (gray). ISO week numbers open weekly notes.
 - **Calendar tab** (ribbon icon or `Horizon: Apri il calendario`) with three modes:
   - **Mese** — 7-column grid with content chips per day; "+N altri" jumps to the week view
-  - **Settimana** — seven full-height columns, every chip visible
+  - **Settimana** — hour grid for the week: an all-day lane per day (all-day events, tasks, untimed notes) above timed events and timed notes placed by time, with a current-time line
+  - **Giorno** — the same grid for a single day
   - **Agenda** — chronological list of the upcoming days that have content
   - **Diario** — a text-first feed of existing daily notes, newest first, with expandable previews
 
@@ -23,6 +24,21 @@ Part of the marioverse Obsidian plugin suite.
 1. **Daily / weekly / monthly / yearly notes** — existence resolved live from the per-period folder + filename format configured in settings (monthly/yearly are off by default)
 2. **Tasks** with obsidian-tasks-plugin emoji dates: 📅 due, ⏳ scheduled, ✅ done. Cancelled tasks (status `-`) are hidden
 3. **Notes with a `date` frontmatter property** (periodic notes are excluded to avoid duplicates)
+4. **Google Calendar events** (read-only, optional) — see below
+
+## Google Calendar
+
+Horizon reads your Google calendars and shows their events in every view. It never writes to Google.
+
+Setup (once, on desktop):
+
+1. In Google Cloud Console create a project, enable the **Google Calendar API**, configure the OAuth consent screen (External, add yourself as a test user, then **publish** it: tokens of an app left in Testing expire after 7 days).
+2. Create an OAuth client of type **Desktop app**.
+3. In Horizon settings → Google Calendar paste the client ID, store the client secret as an Obsidian secret, and press **Connect**. Sign-in happens in the browser and returns to a one-shot local port.
+
+The refresh token lives in Obsidian's secret storage on that device, never in the vault. Calendars follow your Google Calendar selection; switch single ones off in settings. Events refresh every 5 minutes, or with *Refresh Google Calendar*.
+
+Click an event for: **Join call** (Meet, Zoom or Teams link), **Open/Create meeting note**, **Open daily note**, **Open in Google Calendar**. A meeting note gets `date`, `gcal_event` and a `daily` link; a Granola note with the same title on the same day is reused instead of creating a new one. On phones events show only after connecting there, which needs the desktop sign-in flow, so mobile stays without events for now.
 
 ## Rich mini-cards
 
@@ -40,7 +56,7 @@ Horizon registers as a **Bases view**: any `.base` gains a month calendar. The B
 
 Beyond `{{title}}` / `{{date:FMT}}` / `{{time:FMT}}`, periodic-note templates can use:
 
-- `{{agenda}}` — the target day's meetings (with times) and open tasks, as plain bullets with source links (never `- [ ]` lines: no task duplication)
+- `{{agenda}}` — the target day's calendar events and meetings (with times) and open tasks, as plain bullets with source links (never `- [ ]` lines: no task duplication)
 - `{{week-digest}}` — pre-compiled weekly review: *Fatto* (done per day), *Meeting e note*, *In arrivo* (due next week).
 
 ## Agents
