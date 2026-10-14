@@ -9,6 +9,7 @@ import {
   eventsOnDay,
   monthBounds,
   monthsBetween,
+  monthsToEvict,
   parseCalendar,
   parseEvent,
 } from './events.ts';
@@ -39,7 +40,8 @@ class AuthError extends Error {}
 /**
  * Read-only Google Calendar layer. Events are fetched per month on demand
  * (the first time a view asks for a day in that month), kept in memory, and
- * refetched every few minutes for the months already loaded.
+ * refetched every few minutes for the months near today or on screen; the
+ * rest are dropped and fetched fresh if the user navigates back.
  */
 export class GoogleCalendarService {
   private readonly app: App;
@@ -47,6 +49,10 @@ export class GoogleCalendarService {
   private readonly listeners = new Set<() => void>();
   private readonly months = new Map<string, CalEvent[]>();
   private readonly inFlight = new Set<string>();
+  /** Months views asked for since the last refresh: what is on screen. */
+  private readonly shown = new Set<string>();
+  /** The periodic refresh was skipped while the window was hidden. */
+  private refreshSkipped = false;
   /** Months whose last fetch failed: retried on the next refresh, not on every render. */
   private readonly failed = new Set<string>();
   private merged: CalEvent[] | null = null;
@@ -63,7 +69,17 @@ export class GoogleCalendarService {
   }
 
   start(plugin: Plugin): void {
-    plugin.registerInterval(window.setInterval(() => void this.refresh(), REFRESH_INTERVAL_MS));
+    plugin.registerInterval(
+      window.setInterval(() => {
+        if (document.hidden) this.refreshSkipped = true;
+        else void this.refresh();
+      }, REFRESH_INTERVAL_MS),
+    );
+    plugin.registerDomEvent(document, 'visibilitychange', () => {
+      if (document.hidden || !this.refreshSkipped) return;
+      this.refreshSkipped = false;
+      void this.refresh();
+    });
     if (this.isActive()) this.ensureRange(addDays(todayKey(), -7), addDays(todayKey(), 31));
   }
 
@@ -123,6 +139,7 @@ export class GoogleCalendarService {
   ensureRange(from: DayKey, to: DayKey): void {
     if (!this.isActive()) return;
     for (const month of monthsBetween(from, to)) {
+      this.shown.add(month);
       if (this.months.has(month) || this.inFlight.has(month) || this.failed.has(month)) continue;
       void this.loadMonth(month);
     }
@@ -133,6 +150,14 @@ export class GoogleCalendarService {
     this.calendarList = null;
     this.calendarLoad = null;
     this.failed.clear();
+    // Views re-render and ask again for what they show, so `shown` is current
+    // before anything is evicted.
+    this.shown.clear();
+    this.notify();
+    for (const month of monthsToEvict(this.months.keys(), todayKey(), this.shown)) {
+      this.months.delete(month);
+      this.merged = null;
+    }
     const loaded = [...this.months.keys()];
     // One redraw for the whole refresh, and only when something changed.
     const changed = await Promise.all(loaded.map((month) => this.loadMonth(month, true)));

@@ -224,3 +224,12 @@ export function monthBounds(month: string): { timeMin: string; timeMax: string }
     timeMax: new Date(y, m, 1).toISOString(),
   };
 }
+
+/**
+ * Loaded months a refresh should drop: those outside the window around
+ * `today` (the one the service prefetches) that no view is showing.
+ */
+export function monthsToEvict(loaded: Iterable<string>, today: DayKey, shown: ReadonlySet<string>): string[] {
+  const keep = new Set(monthsBetween(addDays(today, -7), addDays(today, 31)));
+  return [...loaded].filter((month) => !keep.has(month) && !shown.has(month));
+}
