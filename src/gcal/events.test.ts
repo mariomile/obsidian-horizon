@@ -6,6 +6,7 @@ import {
   eventsOnDay,
   findCallUrl,
   monthsBetween,
+  monthsToEvict,
   parseCalendar,
   parseEvent,
 } from './events.ts';
@@ -180,5 +181,25 @@ describe('monthsBetween', () => {
   it('spans year boundaries inclusively', () => {
     assert.deepEqual(monthsBetween('2026-11-20', '2027-01-03'), ['2026-11', '2026-12', '2027-01']);
     assert.deepEqual(monthsBetween('2026-10-01', '2026-10-31'), ['2026-10']);
+  });
+});
+
+describe('monthsToEvict', () => {
+  const loaded = ['2025-01', '2026-02', '2026-09', '2026-10', '2026-11', '2026-12', '2027-03'];
+
+  it('keeps the prefetch window around today', () => {
+    assert.deepEqual(monthsToEvict(loaded, '2026-10-14', new Set()), ['2025-01', '2026-02', '2026-09', '2026-12', '2027-03']);
+  });
+
+  it('keeps months a view is showing', () => {
+    assert.deepEqual(monthsToEvict(loaded, '2026-10-14', new Set(['2026-02', '2027-03'])), ['2025-01', '2026-09', '2026-12']);
+  });
+
+  it('treats the window edges across a year boundary', () => {
+    assert.deepEqual(monthsToEvict(['2026-12', '2027-01', '2027-02', '2027-03'], '2026-12-30', new Set()), ['2027-02', '2027-03']);
+  });
+
+  it('evicts nothing when everything is near', () => {
+    assert.deepEqual(monthsToEvict(['2026-10'], '2026-10-14', new Set()), []);
   });
 });
