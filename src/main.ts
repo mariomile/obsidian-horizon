@@ -5,6 +5,7 @@ import { openPeriodicNote } from './edits/note-creator.ts';
 import { HorizonApi } from './api.ts';
 import { addDays } from './dates.ts';
 import { GoogleCalendarService } from './gcal/service.ts';
+import { agendaExportUnchanged } from './index/agenda-export.ts';
 import { DayIndexService } from './index/indexer.ts';
 import { ProposalsService } from './index/proposals-service.ts';
 import { NotePreviewService } from './preview.ts';
@@ -310,14 +311,8 @@ export default class HorizonPlugin extends Plugin {
       }
     }
     if (onlyIfChanged && (await this.app.vault.adapter.exists(path))) {
-      try {
-        const previous = JSON.parse(await this.app.vault.adapter.read(path)) as typeof data;
-        if (JSON.stringify({ ...previous, generatedAt: '' }) === JSON.stringify({ ...data, generatedAt: '' })) {
-          return path;
-        }
-      } catch {
-        // Unreadable or malformed previous export: rewrite it.
-      }
+      const previous = await this.app.vault.adapter.read(path).catch(() => null);
+      if (agendaExportUnchanged(previous, data)) return path;
     }
     await this.app.vault.adapter.write(path, JSON.stringify(data, null, 2));
     return path;

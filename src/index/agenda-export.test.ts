@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildAgendaExport } from './agenda-export.ts';
+import { agendaExportUnchanged, buildAgendaExport } from './agenda-export.ts';
 import { DayIndexCore } from './day-index.ts';
 import type { TaskEntry } from '../types.ts';
 
@@ -77,5 +77,29 @@ describe('buildAgendaExport', () => {
     });
     assert.deepEqual(result.days, []);
     assert.deepEqual(result.overdue, []);
+  });
+});
+
+describe('agendaExportUnchanged', () => {
+  const options = { today: '2026-07-02', from: '2026-06-25', to: '2026-07-09' };
+  const previous = buildAgendaExport(coreWithData(), { ...options, generatedAt: '2026-07-02T10:00:00.000Z' });
+  const previousText = JSON.stringify(previous, null, 2);
+
+  it('ignores a different generatedAt', () => {
+    const next = buildAgendaExport(coreWithData(), { ...options, generatedAt: '2026-07-02T10:05:00.000Z' });
+    assert.equal(agendaExportUnchanged(previousText, next), true);
+  });
+
+  it('detects a change in days, overdue, from or to', () => {
+    const base = { ...previous, generatedAt: 'later' };
+    assert.equal(agendaExportUnchanged(previousText, { ...base, days: base.days.slice(1) }), false);
+    assert.equal(agendaExportUnchanged(previousText, { ...base, overdue: [] }), false);
+    assert.equal(agendaExportUnchanged(previousText, { ...base, from: '2026-06-26' }), false);
+    assert.equal(agendaExportUnchanged(previousText, { ...base, to: '2026-07-10' }), false);
+  });
+
+  it('asks for a write when the previous file is missing or unparsable', () => {
+    assert.equal(agendaExportUnchanged(null, previous), false);
+    assert.equal(agendaExportUnchanged('{ not json', previous), false);
   });
 });

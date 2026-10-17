@@ -90,3 +90,18 @@ export function buildAgendaExport(core: DayIndexCore, options: AgendaExportOptio
     days,
   };
 }
+
+/**
+ * Whether `previous` (the export file's text, or null when missing or
+ * unreadable) already holds `next` apart from `generatedAt`.
+ */
+export function agendaExportUnchanged(previous: string | null, next: AgendaExport): boolean {
+  if (previous === null) return false;
+  try {
+    const parsed = JSON.parse(previous) as AgendaExport;
+    return JSON.stringify({ ...parsed, generatedAt: '' }) === JSON.stringify({ ...next, generatedAt: '' });
+  } catch {
+    // Malformed previous export: rewrite it.
+    return false;
+  }
+}

@@ -111,7 +111,7 @@ describe('DayIndexService initial scan', () => {
     const reference = new DayIndexService(clean.app, () => false);
     await configure(reference);
     assert.deepEqual(snapshot(service), snapshot(reference));
-    assert.deepEqual(snapshot(service)[2].due, ['runway task']);
+    assert.deepEqual(snapshot(service)[2]?.due, ['runway task']);
   });
 
   it('fills the index in one synchronous pass after the yield', async () => {
@@ -137,6 +137,6 @@ describe('DayIndexService initial scan', () => {
     assert.equal(interleaved, false);
     // Every task-free note is in before the first await; b.md waits for its content.
     assert.deepEqual(notesAtFirstRead, ['a.md', 'd.md']);
-    assert.deepEqual(snapshot(service)[2].due, ['local task', 'other task']);
+    assert.deepEqual(snapshot(service)[2]?.due, ['local task', 'other task']);
   });
 });
