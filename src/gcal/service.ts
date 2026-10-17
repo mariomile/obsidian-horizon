@@ -62,6 +62,8 @@ export class GoogleCalendarService {
   private errorMessage = '';
   /** Bumped when the account or calendar selection changes: older fetches are dropped. */
   private generation = 0;
+  private plugin: Plugin | null = null;
+  private refreshArmed = false;
 
   constructor(app: App, settings: () => GoogleSettings) {
     this.app = app;
@@ -69,18 +71,28 @@ export class GoogleCalendarService {
   }
 
   start(plugin: Plugin): void {
-    plugin.registerInterval(
-      window.setInterval(() => {
-        if (document.hidden) this.refreshSkipped = true;
-        else void this.refresh();
-      }, REFRESH_INTERVAL_MS),
-    );
+    this.plugin = plugin;
     plugin.registerDomEvent(document, 'visibilitychange', () => {
       if (document.hidden || !this.refreshSkipped) return;
       this.refreshSkipped = false;
       void this.refresh();
     });
-    if (this.isActive()) this.ensureRange(addDays(todayKey(), -7), addDays(todayKey(), 31));
+    // No secret lookup or fetch before the workspace is ready.
+    this.app.workspace.onLayoutReady(() => {
+      if (this.isActive()) this.ensureRange(addDays(todayKey(), -7), addDays(todayKey(), 31));
+    });
+  }
+
+  /** The periodic refresh only reloads fetched months, so it starts with the first fetch. */
+  private armRefresh(): void {
+    if (this.refreshArmed || !this.plugin) return;
+    this.refreshArmed = true;
+    this.plugin.registerInterval(
+      window.setInterval(() => {
+        if (document.hidden) this.refreshSkipped = true;
+        else void this.refresh();
+      }, REFRESH_INTERVAL_MS),
+    );
   }
 
   get status(): GoogleStatus {
@@ -296,6 +308,7 @@ export class GoogleCalendarService {
    * shown changed; `silent` leaves the redraw to the caller.
    */
   private async loadMonth(month: string, silent = false): Promise<boolean> {
+    this.armRefresh();
     const generation = this.generation;
     const previousError = this.errorMessage;
     this.inFlight.add(month);
