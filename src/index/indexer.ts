@@ -10,6 +10,7 @@ import type { TaskListItem } from './task-scanner.ts';
 import type { DayBucket, DayKey, TaskEntry } from '../types.ts';
 
 const SCAN_CHUNK = 32;
+const SCAN_SLICE_MS = 8;
 const EMIT_DEBOUNCE_MS = 300;
 const SOURCE_CHECK_DEBOUNCE_MS = 250;
 
@@ -226,11 +227,20 @@ export class DayIndexService {
 
   private async initialScan(useRunway: boolean): Promise<void> {
     const generation = ++this.scanGeneration;
+    // Yield first so the scan never runs inside onload or the layout-ready frame.
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    if (generation !== this.scanGeneration) return;
     this.core.clear();
     this.notes.clear();
     const taskFiles: TFile[] = [];
 
+    let sliceStart = performance.now();
     for (const file of this.app.vault.getMarkdownFiles()) {
+      if (performance.now() - sliceStart > SCAN_SLICE_MS) {
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        if (generation !== this.scanGeneration) return;
+        sliceStart = performance.now();
+      }
       const cache = this.app.metadataCache.getFileCache(file);
       if (!cache) continue;
       const note = this.noteFor(file.path, cache);
