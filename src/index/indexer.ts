@@ -10,7 +10,6 @@ import type { TaskListItem } from './task-scanner.ts';
 import type { DayBucket, DayKey, TaskEntry } from '../types.ts';
 
 const SCAN_CHUNK = 32;
-const SCAN_SLICE_MS = 8;
 const EMIT_DEBOUNCE_MS = 300;
 const SOURCE_CHECK_DEBOUNCE_MS = 250;
 
@@ -32,6 +31,23 @@ interface RunwayTaskSource {
   isReady(): boolean;
   allTasks(): RunwayTaskDTO[];
   subscribe(listener: () => void): () => void;
+}
+
+/**
+ * One macrotask turn via MessageChannel: unlike setTimeout it is not
+ * throttled when the window is hidden.
+ */
+function yieldTask(): Promise<void> {
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      // Node closes both ports on port1.close(), Chromium does not.
+      channel.port1.close();
+      channel.port2.close();
+      resolve();
+    };
+    channel.port2.postMessage(null);
+  });
 }
 
 function isMarkdownFile(file: TAbstractFile): file is TFile {
@@ -228,19 +244,14 @@ export class DayIndexService {
   private async initialScan(useRunway: boolean): Promise<void> {
     const generation = ++this.scanGeneration;
     // Yield first so the scan never runs inside onload or the layout-ready frame.
-    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    await yieldTask();
     if (generation !== this.scanGeneration) return;
+    // The metadata pass is synchronous: readers never see a partly refilled index.
     this.core.clear();
     this.notes.clear();
     const taskFiles: TFile[] = [];
 
-    let sliceStart = performance.now();
     for (const file of this.app.vault.getMarkdownFiles()) {
-      if (performance.now() - sliceStart > SCAN_SLICE_MS) {
-        await new Promise((resolve) => window.setTimeout(resolve, 0));
-        if (generation !== this.scanGeneration) return;
-        sliceStart = performance.now();
-      }
       const cache = this.app.metadataCache.getFileCache(file);
       if (!cache) continue;
       const note = this.noteFor(file.path, cache);
