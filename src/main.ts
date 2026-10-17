@@ -288,11 +288,12 @@ export default class HorizonPlugin extends Plugin {
     if (this.exportTimer !== null) return;
     this.exportTimer = window.setTimeout(() => {
       this.exportTimer = null;
-      void this.writeAgendaExport();
+      void this.writeAgendaExport(true);
     }, 5 * 60 * 1000);
   }
 
-  private async writeAgendaExport(): Promise<string> {
+  /** `onlyIfChanged` skips the write when nothing but `generatedAt` would differ. */
+  private async writeAgendaExport(onlyIfChanged = false): Promise<string> {
     const path = this.settings.agentExport.path;
     const today = todayKey();
     const data = this.dayIndex.buildExport({
@@ -306,6 +307,16 @@ export default class HorizonPlugin extends Plugin {
       const folder = path.slice(0, slash);
       if (!(await this.app.vault.adapter.exists(folder))) {
         await this.app.vault.adapter.mkdir(folder);
+      }
+    }
+    if (onlyIfChanged && (await this.app.vault.adapter.exists(path))) {
+      try {
+        const previous = JSON.parse(await this.app.vault.adapter.read(path)) as typeof data;
+        if (JSON.stringify({ ...previous, generatedAt: '' }) === JSON.stringify({ ...data, generatedAt: '' })) {
+          return path;
+        }
+      } catch {
+        // Unreadable or malformed previous export: rewrite it.
       }
     }
     await this.app.vault.adapter.write(path, JSON.stringify(data, null, 2));
