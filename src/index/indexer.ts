@@ -103,6 +103,11 @@ export class DayIndexService {
   private scanGeneration = 0;
   private readonly notes = new Map<string, FileContribution['note']>();
   private sharedTasks = new Map<string, TaskEntry[]>();
+  /** A debounced flush owes index subscribers a notify. */
+  private indexDirty = false;
+  /** Notes edited without touching the index, owed to content subscribers. */
+  private readonly contentPaths = new Set<string>();
+  private readonly contentListeners = new Set<(paths: ReadonlySet<string>) => void>();
 
   constructor(
     app: App,
@@ -128,6 +133,18 @@ export class DayIndexService {
     return this.core.subscribe(listener);
   }
 
+  /**
+   * Notes whose metadata changed without changing the index: a note with no
+   * date and no tasks, such as a periodic note's body. Index subscribers are
+   * not woken for these; a view that renders a note's own content listens
+   * here. A flush that notifies index subscribers skips this channel, since
+   * they re-render everything anyway.
+   */
+  subscribeContent(listener: (paths: ReadonlySet<string>) => void): () => void {
+    this.contentListeners.add(listener);
+    return () => this.contentListeners.delete(listener);
+  }
+
   start(plugin: Plugin): void {
     plugin.registerEvent(
       this.app.metadataCache.on('changed', (file, data, cache) => {
@@ -136,8 +153,11 @@ export class DayIndexService {
         const tasks = this.runwaySource
           ? (this.sharedTasks.get(file.path) ?? [])
           : this.tasksFor(file.path, data, cache);
-        this.core.setFile(file.path, { tasks, note });
-        this.queueNotify();
+        const changed = this.core.setFile(file.path, { tasks, note });
+        // A contributing note still redraws on a body edit: its rich card
+        // excerpt is rendered from the note content, not from the index.
+        if (changed || note !== null || tasks.length > 0) this.queueNotify();
+        else this.queueContentChange(file.path);
       }),
     );
     plugin.registerEvent(
@@ -301,20 +321,41 @@ export class DayIndexService {
 
     const affected = new Set([...this.sharedTasks.keys(), ...next.keys()]);
     this.sharedTasks = next;
+    let changed = false;
     for (const path of affected) {
-      this.core.setFile(path, {
+      const fileChanged = this.core.setFile(path, {
         tasks: next.get(path) ?? [],
         note: this.notes.get(path) ?? null,
       });
+      changed = fileChanged || changed;
     }
-    if (notify) this.queueNotify();
+    if (notify && changed) this.queueNotify();
   }
 
   private queueNotify(): void {
+    this.indexDirty = true;
+    this.queueFlush();
+  }
+
+  private queueContentChange(path: string): void {
+    this.contentPaths.add(path);
+    this.queueFlush();
+  }
+
+  private queueFlush(): void {
     if (this.timer !== null) window.clearTimeout(this.timer);
     this.timer = window.setTimeout(() => {
       this.timer = null;
-      this.core.notify();
+      if (this.indexDirty) {
+        this.indexDirty = false;
+        this.contentPaths.clear();
+        this.core.notify();
+        return;
+      }
+      if (this.contentPaths.size === 0) return;
+      const paths = new Set(this.contentPaths);
+      this.contentPaths.clear();
+      for (const listener of this.contentListeners) listener(paths);
     }, EMIT_DEBOUNCE_MS);
   }
 }

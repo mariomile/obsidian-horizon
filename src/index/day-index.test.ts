@@ -171,6 +171,27 @@ describe('DayIndexCore', () => {
     assert.deepEqual(core.openDueBefore('2026-07-02'), []);
   });
 
+  it('setFile reports whether the contribution changed and keeps buckets when not', () => {
+    const core = new DayIndexCore();
+    assert.equal(core.setFile('a.md', { tasks: [], note: null }), false);
+    const due = () => [task({ path: 'a.md', line: 0, due: '2026-07-10' })];
+    assert.equal(core.setFile('a.md', { tasks: due(), note: null }), true);
+    const bucket = core.getBucket('2026-07-10');
+    assert.equal(core.setFile('a.md', { tasks: due(), note: null }), false);
+    assert.equal(core.getBucket('2026-07-10'), bucket); // not rebuilt
+    assert.equal(
+      core.setFile('a.md', { tasks: [task({ path: 'a.md', line: 0, due: '2026-07-11' })], note: null }),
+      true,
+    );
+    const note = { path: 'a.md', title: 'a', date: '2026-07-11', time: undefined, eventId: undefined };
+    assert.equal(core.setFile('a.md', { tasks: [], note }), true);
+    assert.equal(core.setFile('a.md', { tasks: [], note: { ...note } }), false);
+    assert.equal(core.setFile('a.md', { tasks: [], note: { ...note, time: '09:00' } }), true);
+    assert.equal(core.setFile('a.md', { tasks: [], note: null }), true);
+    assert.equal(core.getBucket('2026-07-11'), null);
+    assert.equal(core.setFile('a.md', { tasks: [], note: null }), false);
+  });
+
   it('notifies subscribers only when notify() is called', () => {
     const core = new DayIndexCore();
     let calls = 0;
