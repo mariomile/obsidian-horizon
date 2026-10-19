@@ -41,6 +41,8 @@ export class PeriodPreviewPanel extends Component {
   private readonly containerEl: HTMLElement;
   private readonly config: PeriodPreviewPanelConfig;
   private renderer: Component | null = null;
+  /** Path of the periodic note currently previewed, if any. */
+  private shownPath: string | null = null;
 
   constructor(ctx: HorizonContext, containerEl: HTMLElement, config: PeriodPreviewPanelConfig) {
     super();
@@ -53,6 +55,13 @@ export class PeriodPreviewPanel extends Component {
     this.containerEl.addClass('horizon-period-panel', `horizon-period-panel--${this.config.period}`);
     this.register(this.ctx.uiState.subscribe(() => this.render()));
     this.register(this.ctx.dayIndex.subscribe(() => this.render()));
+    // The index ignores edits to a note with no date or tasks, which is what
+    // most periodic notes are, so their body changes arrive on this channel.
+    this.register(
+      this.ctx.dayIndex.subscribeContent((paths) => {
+        if (this.shownPath !== null && paths.has(this.shownPath)) this.render();
+      }),
+    );
     this.register(() => {
       this.containerEl.empty();
       this.containerEl.removeClass('horizon-period-panel', `horizon-period-panel--${this.config.period}`);
@@ -63,6 +72,7 @@ export class PeriodPreviewPanel extends Component {
   render(): void {
     const el = this.containerEl;
     el.empty();
+    this.shownPath = null;
     if (this.renderer) {
       this.removeChild(this.renderer);
       this.renderer = null;
@@ -90,6 +100,7 @@ export class PeriodPreviewPanel extends Component {
 
     const note = this.ctx.periodic.noteFor(period, key);
     if (note) {
+      this.shownPath = note.path;
       const card = el.createDiv({ cls: 'horizon-chip horizon-chip--card' });
       makeButtonLike(card, `Open ${note.basename}`);
       card.addEventListener('click', openThis);

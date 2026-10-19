@@ -21,6 +21,22 @@ function byTimeThenTitle(a: NoteEntry, b: NoteEntry): number {
   return a.title === b.title ? (a.path < b.path ? -1 : 1) : a.title < b.title ? -1 : 1;
 }
 
+/** Shallow equality for the flat, primitive-valued task and note records. */
+function sameRecord(a: object, b: object): boolean {
+  const ra = a as Record<string, unknown>;
+  const rb = b as Record<string, unknown>;
+  const keys = Object.keys(ra);
+  if (keys.length !== Object.keys(rb).length) return false;
+  return keys.every((key) => Object.is(ra[key], rb[key]));
+}
+
+function sameContribution(a: FileContribution, b: FileContribution): boolean {
+  if (a.tasks.length !== b.tasks.length) return false;
+  if (!a.tasks.every((task, i) => sameRecord(task, b.tasks[i] as TaskEntry))) return false;
+  if (a.note === null || b.note === null) return a.note === b.note;
+  return sameRecord(a.note, b.note);
+}
+
 /**
  * Pure per-day index. Mutations are silent; callers decide when to notify —
  * the service layer batches the initial scan and debounces vault events.
@@ -30,13 +46,21 @@ export class DayIndexCore {
   private byDay: Map<DayKey, DayBucket> | null = null;
   private readonly listeners = new Set<() => void>();
 
-  setFile(path: string, contribution: FileContribution): void {
+  /**
+   * Store a file's contribution. Returns false, and keeps the day buckets, when
+   * the contribution is equal to the stored one (including empty to empty).
+   */
+  setFile(path: string, contribution: FileContribution): boolean {
+    const previous = this.perFile.get(path);
     if (contribution.tasks.length === 0 && contribution.note === null) {
+      if (!previous) return false;
       this.perFile.delete(path);
     } else {
+      if (previous && sameContribution(previous, contribution)) return false;
       this.perFile.set(path, contribution);
     }
     this.byDay = null;
+    return true;
   }
 
   removeFile(path: string): void {
